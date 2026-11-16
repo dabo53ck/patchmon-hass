@@ -1,0 +1,104 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Mit PatchMon verbinden",
+        "description": "Lege in PatchMon ein eigenes API-Token für Home Assistant an (Settings → Integrations → Scoped Credentials), nur mit der Berechtigung `host:get`. Vergib nie `host:delete`: Diese Integration liest nur Daten.",
+        "data": {
+          "url": "Serveradresse",
+          "token_key": "Token-Key",
+          "token_secret": "Token-Secret",
+          "verify_ssl": "SSL-Zertifikat prüfen"
+        },
+        "data_description": {
+          "url": "Adresse der PatchMon-Weboberfläche, zum Beispiel http://192.168.1.10:3000",
+          "token_key": "Der Key des API-Tokens",
+          "token_secret": "Das Secret des API-Tokens. PatchMon zeigt es nur einmal beim Anlegen.",
+          "verify_ssl": "Nur bei einem Server mit selbstsigniertem Zertifikat ausschalten"
+        }
+      },
+      "reauth_confirm": {
+        "title": "PatchMon-Token erneuern",
+        "description": "PatchMon unter {url} hat das API-Token abgelehnt. Gib einen gültigen Token-Key und ein Token-Secret mit der Berechtigung `host:get` ein.",
+        "data": {
+          "token_key": "Token-Key",
+          "token_secret": "Token-Secret"
+        },
+        "data_description": {
+          "token_key": "Der Key des API-Tokens",
+          "token_secret": "Das Secret des API-Tokens"
+        }
+      },
+      "reconfigure": {
+        "title": "PatchMon-Verbindung ändern",
+        "description": "Geräte und Entitäten bleiben erhalten. Gib das Token-Secret erneut ein.",
+        "data": {
+          "url": "Serveradresse",
+          "token_key": "Token-Key",
+          "token_secret": "Token-Secret",
+          "verify_ssl": "SSL-Zertifikat prüfen"
+        },
+        "data_description": {
+          "url": "Adresse der PatchMon-Weboberfläche, zum Beispiel http://192.168.1.10:3000",
+          "token_key": "Der Key des API-Tokens",
+          "token_secret": "Das Secret des API-Tokens",
+          "verify_ssl": "Nur bei einem Server mit selbstsigniertem Zertifikat ausschalten"
+        }
+      }
+    },
+    "error": {
+      "invalid_url": "Gib eine vollständige Adresse ein, die mit http:// oder https:// beginnt.",
+      "cannot_connect": "Der PatchMon-Server ist nicht erreichbar. Prüfe die Adresse und ob der Server läuft.",
+      "ssl_error": "Das SSL-Zertifikat konnte nicht geprüft werden. Bei einem selbstsignierten Zertifikat die Zertifikatsprüfung ausschalten.",
+      "invalid_credentials": "PatchMon hat Token-Key oder Token-Secret abgelehnt.",
+      "token_disabled": "Dieses API-Token ist in PatchMon deaktiviert.",
+      "token_expired": "Dieses API-Token ist in PatchMon abgelaufen.",
+      "ip_not_allowed": "Dieses API-Token ist für die IP-Adresse von Home Assistant nicht freigegeben. Prüfe die IP-Beschränkung des Tokens in PatchMon.",
+      "missing_permission": "Diesem API-Token fehlt die Berechtigung `host:get`.",
+      "unsupported": "Der Server antwortet nicht wie ein PatchMon-2.x-Server. Prüfe die Adresse.",
+      "unknown": "Unerwarteter Fehler. Details stehen im Log."
+    },
+    "abort": {
+      "already_configured": "Dieser PatchMon-Server ist bereits eingerichtet.",
+      "reauth_successful": "Das Token wurde aktualisiert.",
+      "reconfigure_successful": "Die Verbindung wurde aktualisiert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "PatchMon-Optionen",
+        "data": {
+          "scan_interval": "Abfrage-Intervall",
+          "host_groups": "Hostgruppen"
+        },
+        "data_description": {
+          "scan_interval": "Wie oft Home Assistant die Host-Liste aus PatchMon liest. Die Agenten melden dadurch nicht häufiger.",
+          "host_groups": "Nur Hosts aus diesen Gruppen einbeziehen. Leer lassen für alle Hosts."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Der PatchMon-Server ist nicht erreichbar, daher konnten die Hostgruppen nicht geladen werden.",
+      "ssl_error": "Das SSL-Zertifikat konnte nicht geprüft werden, daher konnten die Hostgruppen nicht geladen werden.",
+      "invalid_credentials": "PatchMon hat das Token abgelehnt, daher konnten die Hostgruppen nicht geladen werden.",
+      "token_disabled": "Dieses API-Token ist in PatchMon deaktiviert.",
+      "token_expired": "Dieses API-Token ist in PatchMon abgelaufen.",
+      "ip_not_allowed": "Dieses API-Token ist für die IP-Adresse von Home Assistant nicht freigegeben.",
+      "missing_permission": "Diesem API-Token fehlt die Berechtigung `host:get`.",
+      "unsupported": "Der Server antwortet nicht wie ein PatchMon-2.x-Server.",
+      "unknown": "Unerwarteter Fehler. Details stehen im Log."
+    }
+  },
+  "exceptions": {
+    "auth_failed": {
+      "message": "PatchMon hat das API-Token abgelehnt: {error}"
+    },
+    "cannot_connect": {
+      "message": "Der PatchMon-Server ist nicht erreichbar: {error}"
+    },
+    "unsupported": {
+      "message": "Unerwartete Antwort vom PatchMon-Server: {error}"
+    }
+  }
+}

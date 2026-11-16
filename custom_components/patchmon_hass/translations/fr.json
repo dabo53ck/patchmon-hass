@@ -1,0 +1,104 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Se connecter à PatchMon",
+        "description": "Créez dans PatchMon un jeton d'API dédié à Home Assistant (Settings → Integrations → Scoped Credentials), avec uniquement l'autorisation `host:get`. N'accordez jamais `host:delete` : cette intégration ne fait que lire des données.",
+        "data": {
+          "url": "Adresse du serveur",
+          "token_key": "Clé du jeton",
+          "token_secret": "Secret du jeton",
+          "verify_ssl": "Vérifier le certificat SSL"
+        },
+        "data_description": {
+          "url": "Adresse de l'interface web de PatchMon, par exemple http://192.168.1.10:3000",
+          "token_key": "La clé du jeton d'API",
+          "token_secret": "Le secret du jeton d'API. PatchMon ne l'affiche qu'une seule fois, à la création du jeton.",
+          "verify_ssl": "À désactiver uniquement pour un serveur avec un certificat auto-signé"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Renouveler le jeton PatchMon",
+        "description": "PatchMon à l'adresse {url} a refusé le jeton d'API. Saisissez une clé et un secret valides avec l'autorisation `host:get`.",
+        "data": {
+          "token_key": "Clé du jeton",
+          "token_secret": "Secret du jeton"
+        },
+        "data_description": {
+          "token_key": "La clé du jeton d'API",
+          "token_secret": "Le secret du jeton d'API"
+        }
+      },
+      "reconfigure": {
+        "title": "Modifier la connexion à PatchMon",
+        "description": "Les appareils et les entités sont conservés. Saisissez à nouveau le secret du jeton.",
+        "data": {
+          "url": "Adresse du serveur",
+          "token_key": "Clé du jeton",
+          "token_secret": "Secret du jeton",
+          "verify_ssl": "Vérifier le certificat SSL"
+        },
+        "data_description": {
+          "url": "Adresse de l'interface web de PatchMon, par exemple http://192.168.1.10:3000",
+          "token_key": "La clé du jeton d'API",
+          "token_secret": "Le secret du jeton d'API",
+          "verify_ssl": "À désactiver uniquement pour un serveur avec un certificat auto-signé"
+        }
+      }
+    },
+    "error": {
+      "invalid_url": "Saisissez une adresse complète commençant par http:// ou https://.",
+      "cannot_connect": "Impossible de joindre le serveur PatchMon. Vérifiez l'adresse et que le serveur fonctionne.",
+      "ssl_error": "Le certificat SSL n'a pas pu être vérifié. Pour un certificat auto-signé, désactivez la vérification.",
+      "invalid_credentials": "PatchMon a refusé la clé ou le secret du jeton.",
+      "token_disabled": "Ce jeton d'API est désactivé dans PatchMon.",
+      "token_expired": "Ce jeton d'API a expiré dans PatchMon.",
+      "ip_not_allowed": "Ce jeton d'API n'est pas autorisé depuis l'adresse IP de Home Assistant. Vérifiez la restriction d'IP du jeton dans PatchMon.",
+      "missing_permission": "Il manque l'autorisation `host:get` à ce jeton d'API.",
+      "unsupported": "Le serveur ne répond pas comme un serveur PatchMon 2.x. Vérifiez l'adresse.",
+      "unknown": "Erreur inattendue. Consultez le journal pour plus de détails."
+    },
+    "abort": {
+      "already_configured": "Ce serveur PatchMon est déjà configuré.",
+      "reauth_successful": "Le jeton a été mis à jour.",
+      "reconfigure_successful": "La connexion a été mise à jour."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options de PatchMon",
+        "data": {
+          "scan_interval": "Intervalle d'interrogation",
+          "host_groups": "Groupes d'hôtes"
+        },
+        "data_description": {
+          "scan_interval": "Fréquence à laquelle Home Assistant lit la liste des hôtes dans PatchMon. Les agents ne remontent pas leurs données plus souvent pour autant.",
+          "host_groups": "N'inclure que les hôtes de ces groupes. Laisser vide pour tous les hôtes."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Impossible de joindre le serveur PatchMon, les groupes d'hôtes n'ont donc pas pu être chargés.",
+      "ssl_error": "Le certificat SSL n'a pas pu être vérifié, les groupes d'hôtes n'ont donc pas pu être chargés.",
+      "invalid_credentials": "PatchMon a refusé le jeton, les groupes d'hôtes n'ont donc pas pu être chargés.",
+      "token_disabled": "Ce jeton d'API est désactivé dans PatchMon.",
+      "token_expired": "Ce jeton d'API a expiré dans PatchMon.",
+      "ip_not_allowed": "Ce jeton d'API n'est pas autorisé depuis l'adresse IP de Home Assistant.",
+      "missing_permission": "Il manque l'autorisation `host:get` à ce jeton d'API.",
+      "unsupported": "Le serveur ne répond pas comme un serveur PatchMon 2.x.",
+      "unknown": "Erreur inattendue. Consultez le journal pour plus de détails."
+    }
+  },
+  "exceptions": {
+    "auth_failed": {
+      "message": "PatchMon a refusé le jeton d'API : {error}"
+    },
+    "cannot_connect": {
+      "message": "Impossible de joindre le serveur PatchMon : {error}"
+    },
+    "unsupported": {
+      "message": "Réponse inattendue du serveur PatchMon : {error}"
+    }
+  }
+}

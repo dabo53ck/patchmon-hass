@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="8 12 240 240" role="img" aria-label="patchmon-hass">
+  <path d="M128 30 L232 120 H212 V218 a8 8 0 0 1 -8 8 H52 a8 8 0 0 1 -8 -8 V120 H24 Z" fill="#33507A" stroke="#33507A" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M134 146 L169.24 116.43 A46 46 0 1 0 169.24 175.57 Z" fill="#18BCF2"/>
+  <circle cx="144" cy="119" r="10" fill="#FF751F"/>
+</svg>

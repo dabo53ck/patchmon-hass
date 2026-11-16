@@ -1,0 +1,17 @@
+{
+  "agent_version": "2.1.8",
+  "config_version": "2.1.8",
+  "friendly_name": "Host 02",
+  "host_groups": [
+    {
+      "id": "00000000-0000-4000-8000-b00000000002",
+      "name": "security-only"
+    }
+  ],
+  "hostname": "host-02",
+  "id": "00000000-0000-4000-8000-a00000000002",
+  "ip": "192.0.2.12",
+  "machine_id": "00000000000000000000000000000002",
+  "os_type": "Ubuntu",
+  "os_version": "26.04.1 LTS (Resolute Raccoon)"
+}

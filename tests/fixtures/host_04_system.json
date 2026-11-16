@@ -1,0 +1,23 @@
+{
+  "architecture": "x86_64",
+  "boot_time": "2026-11-14T04:30:08Z",
+  "cpu_cores": 4,
+  "cpu_model": "Intel(R) Core(TM) i7-10700T CPU @ 2.00GHz",
+  "disk_details": [
+    {
+      "mountpoint": "/",
+      "name": "/dev/sda1",
+      "size": "29.89GB (6.86GB used, 23.02GB free, 23.0% used)"
+    }
+  ],
+  "id": "00000000-0000-4000-8000-a00000000004",
+  "installed_kernel_version": "7.0.0-43-generic",
+  "kernel_version": "7.0.0-43-generic",
+  "load_average": {},
+  "needs_reboot": false,
+  "ram_installed": 15.613269805908203,
+  "reboot_reason": "",
+  "selinux_status": "disabled",
+  "swap_size": 0,
+  "system_uptime": "2 days, 14 hours, 0 minutes"
+}

@@ -1,0 +1,87 @@
+{
+  "host": {
+    "friendly_name": "Host 03",
+    "hostname": "host-03",
+    "id": "00000000-0000-4000-8000-a00000000003"
+  },
+  "packages": [
+    {
+      "available_version": "2026f-0+deb13u1",
+      "category": "",
+      "current_version": "2026c-0+deb13u1",
+      "description": "time zone and daylight-saving time data\nThis package contains data required for the implementation of\nstandard local time for many representative locations around the\nglobe. It is updated periodically to reflect changes made by\npolitical bodies to time zone boundaries, UTC offsets, and\ndaylight-saving rules.",
+      "id": "00000000-0000-4000-8000-c00000003001",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:53:25Z",
+      "name": "tzdata",
+      "needs_update": true
+    },
+    {
+      "available_version": "5.7.1-1~debian.13~trixie",
+      "category": "",
+      "current_version": "5.6.0-1~debian.13~trixie",
+      "description": "Docker Compose (V2) plugin for the Docker CLI.\n.\nThis plugin provides the 'docker compose' subcommand.\n.\nThe binary can also be run standalone as a direct replacement for\nDocker Compose V1 ('docker-compose').",
+      "id": "00000000-0000-4000-8000-c00000003002",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:53:25Z",
+      "name": "docker-compose-plugin",
+      "needs_update": true
+    },
+    {
+      "available_version": "0.39.0-1~debian.13~trixie",
+      "category": "",
+      "current_version": "0.38.0-1~debian.13~trixie",
+      "description": "Docker Buildx plugin extends build capabilities with BuildKit.",
+      "id": "00000000-0000-4000-8000-c00000003003",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:53:25Z",
+      "name": "docker-buildx-plugin",
+      "needs_update": true
+    },
+    {
+      "available_version": "2.4.2-4~debian.13~trixie",
+      "category": "",
+      "current_version": "2.4.1-2~debian.13~trixie",
+      "description": "An open and reliable container runtime",
+      "id": "00000000-0000-4000-8000-c00000003004",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:53:25Z",
+      "name": "containerd.io",
+      "needs_update": true
+    },
+    {
+      "available_version": "5:29.10.0-1~debian.13~trixie",
+      "category": "",
+      "current_version": "5:29.9.0-1~debian.13~trixie",
+      "description": "Docker CLI: the open-source application container engine\nDocker is a product for you to build, ship and run any application as a\nlightweight container\n.\nDocker containers are both hardware-agnostic and platform-agnostic. This means\nthey can run anywhere, from your laptop to the largest cloud compute instance\nand everything in between - and they don't require you to use a particular\nlanguage, framework or packaging system. That makes them great building blocks\nfor deploying and scaling web apps, databases, and backend services without\ndepending on a particular stack or provider.",
+      "id": "00000000-0000-4000-8000-c00000003005",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:53:25Z",
+      "name": "docker-ce-cli",
+      "needs_update": true
+    },
+    {
+      "available_version": "5:29.10.0-1~debian.13~trixie",
+      "category": "",
+      "current_version": "5:29.9.0-1~debian.13~trixie",
+      "description": "Rootless support for Docker.\nUse dockerd-rootless.sh to run the daemon.\nUse dockerd-rootless-setuptool.sh to setup systemd for dockerd-rootless.sh.",
+      "id": "00000000-0000-4000-8000-c00000003006",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:53:25Z",
+      "name": "docker-ce-rootless-extras",
+      "needs_update": true
+    },
+    {
+      "available_version": "5:29.10.0-1~debian.13~trixie",
+      "category": "",
+      "current_version": "5:29.9.0-1~debian.13~trixie",
+      "description": "Docker: the open-source application container engine\nDocker is a product for you to build, ship and run any application as a\nlightweight container\n.\nDocker containers are both hardware-agnostic and platform-agnostic. This means\nthey can run anywhere, from your laptop to the largest cloud compute instance\nand everything in between - and they don't require you to use a particular\nlanguage, framework or packaging system. That makes them great building blocks\nfor deploying and scaling web apps, databases, and backend services without\ndepending on a particular stack or provider.",
+      "id": "00000000-0000-4000-8000-c00000003007",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:53:25Z",
+      "name": "docker-ce",
+      "needs_update": true
+    }
+  ],
+  "total": 7
+}

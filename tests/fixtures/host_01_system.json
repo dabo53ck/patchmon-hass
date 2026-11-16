@@ -1,0 +1,23 @@
+{
+  "architecture": "x86_64",
+  "boot_time": "2026-11-16T00:45:01.904536Z",
+  "cpu_cores": 12,
+  "cpu_model": "12th Gen Intel(R) Core(TM) i5-12500",
+  "disk_details": [
+    {
+      "mountpoint": "/",
+      "name": "/dev/sda1",
+      "size": "444.26GB (4.26GB used, 439.99GB free, 1.0% used)"
+    }
+  ],
+  "id": "00000000-0000-4000-8000-a00000000001",
+  "installed_kernel_version": "7.0.14-29-pve",
+  "kernel_version": "6.12.15-production+truenas",
+  "load_average": {},
+  "needs_reboot": true,
+  "ram_installed": 62.54370880126953,
+  "reboot_reason": "Kernel version mismatch | Running kernel: 6.12.15-production+truenas, Installed kernel: 7.0.14-29-pve",
+  "selinux_status": "disabled",
+  "swap_size": 0,
+  "system_uptime": "18 hours, 0 minutes"
+}

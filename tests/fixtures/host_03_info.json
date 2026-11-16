@@ -1,0 +1,17 @@
+{
+  "agent_version": "2.1.8",
+  "config_version": "2.1.8",
+  "friendly_name": "Host 03",
+  "host_groups": [
+    {
+      "id": "00000000-0000-4000-8000-b00000000002",
+      "name": "security-only"
+    }
+  ],
+  "hostname": "host-03",
+  "id": "00000000-0000-4000-8000-a00000000003",
+  "ip": "192.0.2.13",
+  "machine_id": "00000000000000000000000000000003",
+  "os_type": "Debian GNU/Linux",
+  "os_version": "13 (trixie)"
+}

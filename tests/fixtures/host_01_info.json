@@ -1,0 +1,17 @@
+{
+  "agent_version": "2.1.8",
+  "config_version": "2.1.8",
+  "friendly_name": "Host 01",
+  "host_groups": [
+    {
+      "id": "00000000-0000-4000-8000-b00000000001",
+      "name": "auto-updates"
+    }
+  ],
+  "hostname": "host-01",
+  "id": "00000000-0000-4000-8000-a00000000001",
+  "ip": "192.0.2.11",
+  "machine_id": "00000000000000000000000000000001",
+  "os_type": "Debian GNU/Linux",
+  "os_version": "13 (trixie)"
+}

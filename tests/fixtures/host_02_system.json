@@ -1,0 +1,17 @@
+{
+  "architecture": "x86_64",
+  "boot_time": "2026-11-07T13:16:50Z",
+  "cpu_cores": 10,
+  "cpu_model": "Intel(R) Core(TM) Ultra 5 225",
+  "disk_details": null,
+  "id": "00000000-0000-4000-8000-a00000000002",
+  "installed_kernel_version": "7.0.0-43-generic",
+  "kernel_version": "7.0.0-42-generic",
+  "load_average": {},
+  "needs_reboot": true,
+  "ram_installed": 61.256229400634766,
+  "reboot_reason": "Reboot flag file exists (/var/run/reboot-required) | Running kernel: 7.0.0-42-generic, Installed kernel: 7.0.0-43-generic",
+  "selinux_status": "disabled",
+  "swap_size": 0,
+  "system_uptime": "9 days, 5 hours, 0 minutes"
+}

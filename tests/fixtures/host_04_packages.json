@@ -1,0 +1,21 @@
+{
+  "host": {
+    "friendly_name": "Host 04",
+    "hostname": "host-04",
+    "id": "00000000-0000-4000-8000-a00000000004"
+  },
+  "packages": [
+    {
+      "available_version": "4.11.2-0ubuntu0.2",
+      "category": "",
+      "current_version": "4.11.2-0ubuntu0.1",
+      "description": "Set of tools to gather troubleshooting data from a system\nSos is a set of tools that gathers information about system\nhardware and configuration. The information can then be used for\ndiagnostic purposes and debugging. Sos is commonly used to help\nsupport technicians and developers.",
+      "id": "00000000-0000-4000-8000-c00000004001",
+      "is_security_update": true,
+      "last_checked": "2026-11-16T10:30:19Z",
+      "name": "sos",
+      "needs_update": true
+    }
+  ],
+  "total": 1
+}

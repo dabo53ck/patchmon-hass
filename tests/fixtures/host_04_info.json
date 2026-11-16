@@ -1,0 +1,17 @@
+{
+  "agent_version": "2.1.8",
+  "config_version": "2.1.8",
+  "friendly_name": "Host 04",
+  "host_groups": [
+    {
+      "id": "00000000-0000-4000-8000-b00000000001",
+      "name": "auto-updates"
+    }
+  ],
+  "hostname": "host-04",
+  "id": "00000000-0000-4000-8000-a00000000004",
+  "ip": "192.0.2.14",
+  "machine_id": "00000000000000000000000000000004",
+  "os_type": "Ubuntu",
+  "os_version": "26.04.1 LTS (Resolute Raccoon)"
+}

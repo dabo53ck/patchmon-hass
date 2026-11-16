@@ -1,0 +1,186 @@
+{
+  "host": {
+    "friendly_name": "Host 02",
+    "hostname": "host-02",
+    "id": "00000000-0000-4000-8000-a00000000002"
+  },
+  "packages": [
+    {
+      "available_version": "4.11.2-0ubuntu0.2",
+      "category": "",
+      "current_version": "4.11.2-0ubuntu0.1",
+      "description": "Set of tools to gather troubleshooting data from a system\nSos is a set of tools that gathers information about system\nhardware and configuration. The information can then be used for\ndiagnostic purposes and debugging. Sos is commonly used to help\nsupport technicians and developers.",
+      "id": "00000000-0000-4000-8000-c00000002001",
+      "is_security_update": true,
+      "last_checked": "2026-11-16T18:17:20Z",
+      "name": "sos",
+      "needs_update": true
+    },
+    {
+      "available_version": "1.15ubuntu0.1",
+      "category": "",
+      "current_version": "1.15",
+      "description": "provides information about the distributions' releases\nInformation about all releases of Debian and Ubuntu. The distro-info script\nwill give you the codename for e.g. the latest stable release of your\ndistribution. To get information about a specific distribution there are the\ndebian-distro-info and the ubuntu-distro-info scripts.",
+      "id": "00000000-0000-4000-8000-c00000002002",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:17:20Z",
+      "name": "distro-info",
+      "needs_update": true
+    },
+    {
+      "available_version": "2:9.1.2141-1ubuntu4.10",
+      "category": "",
+      "current_version": "2:9.1.2141-1ubuntu4.9",
+      "description": "tool to make (or reverse) a hex dump\nxxd creates a hex dump of a given file or standard input.  It can also convert\na hex dump back to its original binary form.",
+      "id": "00000000-0000-4000-8000-c00000002003",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:17:20Z",
+      "name": "xxd",
+      "needs_update": true
+    },
+    {
+      "available_version": "14ubuntu6.3",
+      "category": "",
+      "current_version": "14ubuntu6.2",
+      "description": "Configuration for motd-news shipped in base-files\nThis package contains the configuration read by the motd-news script\nshipped in the base-files package.\n.\nInstall this package if you want motd-news to be enabled.",
+      "id": "00000000-0000-4000-8000-c00000002004",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:17:20Z",
+      "name": "motd-news-config",
+      "needs_update": true
+    },
+    {
+      "available_version": "5.7.1-1~ubuntu.26.04~resolute",
+      "category": "",
+      "current_version": "5.7.0-1~ubuntu.26.04~resolute",
+      "description": "Docker Compose (V2) plugin for the Docker CLI.\n.\nThis plugin provides the 'docker compose' subcommand.\n.\nThe binary can also be run standalone as a direct replacement for\nDocker Compose V1 ('docker-compose').",
+      "id": "00000000-0000-4000-8000-c00000002005",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:17:20Z",
+      "name": "docker-compose-plugin",
+      "needs_update": true
+    },
+    {
+      "available_version": "14ubuntu6.3",
+      "category": "",
+      "current_version": "14ubuntu6.2",
+      "description": "Debian base system miscellaneous files\nThis package contains the basic filesystem hierarchy of a Debian system, and\nseveral important miscellaneous files, such as /etc/debian_version,\n/etc/host.conf, /etc/issue, /etc/motd, /etc/profile, and others,\nand the text of several common licenses in use on Debian systems.",
+      "id": "00000000-0000-4000-8000-c00000002006",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:17:20Z",
+      "name": "base-files",
+      "needs_update": true
+    },
+    {
+      "available_version": "2:9.1.2141-1ubuntu4.10",
+      "category": "",
+      "current_version": "2:9.1.2141-1ubuntu4.9",
+      "description": "Vi IMproved - enhanced vi editor\nVim is an almost compatible version of the UNIX editor Vi.\n.\nMany new features have been added: multi level undo, syntax\nhighlighting, command line history, on-line help, filename\ncompletion, block operations, folding, Unicode support, etc.\n.\nThis package contains a version of vim compiled with a rather\nstandard set of features.  This package does not provide a GUI\nversion of Vim.  See the other vim-* packages if you need more\n(or less).",
+      "id": "00000000-0000-4000-8000-c00000002007",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:17:20Z",
+      "name": "vim",
+      "needs_update": true
+    },
+    {
+      "available_version": "0.39.0-1~ubuntu.26.04~resolute",
+      "category": "",
+      "current_version": "0.38.1-1~ubuntu.26.04~resolute",
+      "description": "Docker Buildx plugin extends build capabilities with BuildKit.",
+      "id": "00000000-0000-4000-8000-c00000002008",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:17:20Z",
+      "name": "docker-buildx-plugin",
+      "needs_update": true
+    },
+    {
+      "available_version": "2:9.1.2141-1ubuntu4.10",
+      "category": "",
+      "current_version": "2:9.1.2141-1ubuntu4.9",
+      "description": "Vi IMproved - Runtime files\nVim is an almost compatible version of the UNIX editor Vi.\n.\nThis package contains vimtutor and the architecture independent runtime\nfiles, used, if available, by all vim variants available in Debian.\nExample of such runtime files are: online documentation, rules for\nlanguage-specific syntax highlighting and indentation, color schemes,\nand standard plugins.",
+      "id": "00000000-0000-4000-8000-c00000002009",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:17:20Z",
+      "name": "vim-runtime",
+      "needs_update": true
+    },
+    {
+      "available_version": "2:9.1.2141-1ubuntu4.10",
+      "category": "",
+      "current_version": "2:9.1.2141-1ubuntu4.9",
+      "description": "Vi IMproved - enhanced vi editor - compact version\nVim is an almost compatible version of the UNIX editor Vi.\n.\nThis package contains a minimal version of Vim compiled with no GUI and\na small subset of features. This package's sole purpose is to provide\nthe vi binary for base installations.\n.\nIf a vim binary is wanted, try one of the following more featureful\npackages: vim, vim-nox, vim-motif, or vim-gtk3.",
+      "id": "00000000-0000-4000-8000-c00000002010",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:17:20Z",
+      "name": "vim-tiny",
+      "needs_update": true
+    },
+    {
+      "available_version": "5:29.10.0-1~ubuntu.26.04~resolute",
+      "category": "",
+      "current_version": "5:29.9.2-1~ubuntu.26.04~resolute",
+      "description": "Docker: the open-source application container engine\nDocker is a product for you to build, ship and run any application as a\nlightweight container\n.\nDocker containers are both hardware-agnostic and platform-agnostic. This means\nthey can run anywhere, from your laptop to the largest cloud compute instance\nand everything in between - and they don't require you to use a particular\nlanguage, framework or packaging system. That makes them great building blocks\nfor deploying and scaling web apps, databases, and backend services without\ndepending on a particular stack or provider.",
+      "id": "00000000-0000-4000-8000-c00000002011",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:17:20Z",
+      "name": "docker-ce",
+      "needs_update": true
+    },
+    {
+      "available_version": "2:9.1.2141-1ubuntu4.10",
+      "category": "",
+      "current_version": "2:9.1.2141-1ubuntu4.9",
+      "description": "Vi IMproved - Common files\nVim is an almost compatible version of the UNIX editor Vi.\n.\nThis package contains files shared by all non GUI-enabled vim variants\navailable in Debian.  Examples of such shared files are: manpages and\nconfiguration files.",
+      "id": "00000000-0000-4000-8000-c00000002012",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:17:20Z",
+      "name": "vim-common",
+      "needs_update": true
+    },
+    {
+      "available_version": "5:29.10.0-1~ubuntu.26.04~resolute",
+      "category": "",
+      "current_version": "5:29.9.2-1~ubuntu.26.04~resolute",
+      "description": "Docker CLI: the open-source application container engine\nDocker is a product for you to build, ship and run any application as a\nlightweight container\n.\nDocker containers are both hardware-agnostic and platform-agnostic. This means\nthey can run anywhere, from your laptop to the largest cloud compute instance\nand everything in between - and they don't require you to use a particular\nlanguage, framework or packaging system. That makes them great building blocks\nfor deploying and scaling web apps, databases, and backend services without\ndepending on a particular stack or provider.",
+      "id": "00000000-0000-4000-8000-c00000002013",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:17:20Z",
+      "name": "docker-ce-cli",
+      "needs_update": true
+    },
+    {
+      "available_version": "1.15ubuntu0.1",
+      "category": "",
+      "current_version": "1.15",
+      "description": "information about distributions' releases (Python 3 module)\nInformation about all releases of Debian and Ubuntu.\n.\nThis package contains a Python 3 module for parsing the data in\ndistro-info-data. There is also a command line interface in the distro-info\npackage.",
+      "id": "00000000-0000-4000-8000-c00000002014",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:17:20Z",
+      "name": "python3-distro-info",
+      "needs_update": true
+    },
+    {
+      "available_version": "5:29.10.0-1~ubuntu.26.04~resolute",
+      "category": "",
+      "current_version": "5:29.9.2-1~ubuntu.26.04~resolute",
+      "description": "Rootless support for Docker.\nUse dockerd-rootless.sh to run the daemon.\nUse dockerd-rootless-setuptool.sh to setup systemd for dockerd-rootless.sh.",
+      "id": "00000000-0000-4000-8000-c00000002015",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:17:20Z",
+      "name": "docker-ce-rootless-extras",
+      "needs_update": true
+    },
+    {
+      "available_version": "2.4.2-4~ubuntu.26.04~resolute",
+      "category": "",
+      "current_version": "2.4.2-3~ubuntu.26.04~resolute",
+      "description": "An open and reliable container runtime",
+      "id": "00000000-0000-4000-8000-c00000002016",
+      "is_security_update": false,
+      "last_checked": "2026-11-16T18:17:20Z",
+      "name": "containerd.io",
+      "needs_update": true
+    }
+  ],
+  "total": 16
+}

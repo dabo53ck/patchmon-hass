@@ -1,0 +1,97 @@
+{
+  "hosts": [
+    {
+      "effective_status": "active",
+      "friendly_name": "Host 01",
+      "host_groups": [
+        {
+          "id": "00000000-0000-4000-8000-b00000000001",
+          "name": "auto-updates"
+        }
+      ],
+      "hostname": "host-01",
+      "id": "00000000-0000-4000-8000-a00000000001",
+      "ip": "192.0.2.11",
+      "last_update": "2026-11-16T18:45:22Z",
+      "needs_reboot": true,
+      "os_type": "Debian GNU/Linux",
+      "os_version": "13 (trixie)",
+      "reporting_state": "reporting",
+      "security_updates_count": 0,
+      "status": "active",
+      "total_packages": 429,
+      "update_state": "up_to_date",
+      "updates_count": 0
+    },
+    {
+      "effective_status": "active",
+      "friendly_name": "Host 02",
+      "host_groups": [
+        {
+          "id": "00000000-0000-4000-8000-b00000000002",
+          "name": "security-only"
+        }
+      ],
+      "hostname": "host-02",
+      "id": "00000000-0000-4000-8000-a00000000002",
+      "ip": "192.0.2.12",
+      "last_update": "2026-11-16T18:17:20Z",
+      "needs_reboot": true,
+      "os_type": "Ubuntu",
+      "os_version": "26.04.1 LTS (Resolute Raccoon)",
+      "reporting_state": "reporting",
+      "security_updates_count": 1,
+      "status": "active",
+      "total_packages": 761,
+      "update_state": "security_required",
+      "updates_count": 16
+    },
+    {
+      "effective_status": "active",
+      "friendly_name": "Host 03",
+      "host_groups": [
+        {
+          "id": "00000000-0000-4000-8000-b00000000002",
+          "name": "security-only"
+        }
+      ],
+      "hostname": "host-03",
+      "id": "00000000-0000-4000-8000-a00000000003",
+      "ip": "192.0.2.13",
+      "last_update": "2026-11-16T18:53:25Z",
+      "needs_reboot": false,
+      "os_type": "Debian GNU/Linux",
+      "os_version": "13 (trixie)",
+      "reporting_state": "reporting",
+      "security_updates_count": 0,
+      "status": "active",
+      "total_packages": 374,
+      "update_state": "updates_pending",
+      "updates_count": 7
+    },
+    {
+      "effective_status": "active",
+      "friendly_name": "Host 04",
+      "host_groups": [
+        {
+          "id": "00000000-0000-4000-8000-b00000000001",
+          "name": "auto-updates"
+        }
+      ],
+      "hostname": "host-04",
+      "id": "00000000-0000-4000-8000-a00000000004",
+      "ip": "192.0.2.14",
+      "last_update": "2026-11-16T18:30:18Z",
+      "needs_reboot": false,
+      "os_type": "Ubuntu",
+      "os_version": "26.04.1 LTS (Resolute Raccoon)",
+      "reporting_state": "reporting",
+      "security_updates_count": 1,
+      "status": "active",
+      "total_packages": 1309,
+      "update_state": "security_required",
+      "updates_count": 1
+    }
+  ],
+  "total": 4
+}

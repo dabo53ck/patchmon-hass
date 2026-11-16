@@ -1,0 +1,53 @@
+name: Bug report
+description: Something is not working as expected
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: component
+    attributes:
+      label: Which part is affected?
+      options:
+        - Setup (config flow, re-authentication, options)
+        - Entities (sensors, binary sensors, update entities)
+        - Actions (get_hosts, get_packages, refresh)
+        - Documentation
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: input
+    id: ha_version
+    attributes:
+      label: Home Assistant version
+    validations:
+      required: true
+  - type: input
+    id: integration_version
+    attributes:
+      label: Integration version (HACS)
+    validations:
+      required: true
+  - type: input
+    id: patchmon_version
+    attributes:
+      label: PatchMon server version
+      description: Shown in the PatchMon web interface (Settings → About).
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Settings → System → Logs, filtered to `patchmon_hass`.
+      render: text
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: Download from the integration or device page and paste or attach (tokens, addresses and host names are redacted).
