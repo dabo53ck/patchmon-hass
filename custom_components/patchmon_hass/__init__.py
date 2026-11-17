@@ -121,9 +121,9 @@ def _async_sync_devices(
         if not any(
             domain == DOMAIN and ident in keep for domain, ident in device.identifiers
         ):
-            registry.async_update_device(
-                device.id, remove_config_entry_id=entry.entry_id
-            )
+            # A device belongs to this entry only; removing it also removes
+            # its entities.
+            registry.async_remove_device(device.id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: PatchMonConfigEntry) -> bool:
