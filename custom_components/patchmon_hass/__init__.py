@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import Any
 
@@ -24,6 +25,8 @@ from .coordinator import (
 from .entity import async_entities_for_option
 from .helpers import create_client
 from .services import async_setup_services
+
+_LOGGER = logging.getLogger(__name__)
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.UPDATE]
 
@@ -111,6 +114,8 @@ def _async_get_or_create_device(
     entry_device = registry.async_get_or_create(
         config_entry_id=entry.entry_id, **device
     )
+    if is_new:
+        _LOGGER.debug("Added device %s", entry_device.name)
     area_id = entry.options.get(CONF_AREA)
     if (
         is_new
@@ -151,6 +156,7 @@ def _async_sync_devices(
             configuration_url=f"{url}/hosts/{host.id}",
         )
     if not data.complete:
+        _LOGGER.debug("Host list may be incomplete; no device is removed")
         return
     keep = {entry.entry_id, *data.hosts}
     for device in dr.async_entries_for_config_entry(registry, entry.entry_id):
@@ -159,6 +165,9 @@ def _async_sync_devices(
         ):
             # A device belongs to this entry only; removing it also removes
             # its entities.
+            _LOGGER.debug(
+                "Removing device %s: PatchMon no longer lists it", device.name
+            )
             registry.async_remove_device(device.id)
 
 

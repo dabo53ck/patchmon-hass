@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+
 import pytest
 from homeassistant.config_entries import SOURCE_REAUTH, ConfigEntryState
 from homeassistant.core import HomeAssistant
@@ -161,8 +163,10 @@ async def test_devices_follow_patchmon(
     mock_config_entry: MockConfigEntry,
     mock_hosts: AiohttpClientMocker,
     device_registry: dr.DeviceRegistry,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Renames are taken over, user names kept, deleted hosts removed."""
+    caplog.set_level(logging.DEBUG, logger="custom_components.patchmon_hass")
     mock_config_entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(mock_config_entry.entry_id)
     await hass.async_block_till_done()
@@ -189,6 +193,8 @@ async def test_devices_follow_patchmon(
     assert host_2.name_by_user == "My server"
     assert _device(device_registry, mock_config_entry, host_id(4)) is None
     assert _device(device_registry, mock_config_entry, mock_config_entry.entry_id)
+    assert "Added device PatchMon" in caplog.text
+    assert "PatchMon no longer lists it" in caplog.text
 
 
 async def _refresh_with(

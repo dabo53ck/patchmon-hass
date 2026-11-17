@@ -195,7 +195,10 @@ sequence:
   machine IDs are removed from the file.
 - **Debug logging:** enable it on the integration entry, or add
   `custom_components.patchmon_hass: debug` under `logger:` → `logs:` in
-  `configuration.yaml`.
+  `configuration.yaml`. The log then shows every request to PatchMon (path,
+  HTTP status, duration), how many hosts were listed and how many had their
+  details read again, and which devices were added or removed. Host names
+  appear in it, the server address and the token do not; check before sharing.
 
 ## Known limitations
 
