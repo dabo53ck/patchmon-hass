@@ -78,7 +78,8 @@ themselves, hosts deleted in PatchMon are removed together with their entities.
 | Pending updates | Sensor | |
 | Security updates | Sensor | |
 | Update status | Sensor | Up to date, updates pending, security update required |
-| Restart required | Binary sensor | Reason as attribute, when PatchMon reports one |
+| Restart required | Binary sensor | |
+| Restart reason | Sensor | Diagnostic; PatchMon's reason while a restart is needed, otherwise unknown |
 | Reporting | Binary sensor | Off when the agent is overdue or stale (PatchMon's own limits); attribute `reporting_state` |
 | Last check-in | Sensor | Diagnostic |
 | Agent version | Sensor | Diagnostic |

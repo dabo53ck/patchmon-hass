@@ -30,6 +30,8 @@ from .entity import (
 PARALLEL_UPDATES = 0
 
 UPDATE_STATES = ["up_to_date", "updates_pending", "security_required"]
+# Longest state Home Assistant accepts.
+MAX_STATE_LENGTH = 255
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -41,9 +43,9 @@ class HostSensorDescription(SensorEntityDescription):
 
 @dataclass(frozen=True, kw_only=True)
 class DetailSensorDescription(SensorEntityDescription):
-    """A sensor fed from ``/system`` or ``/info``."""
+    """A sensor fed from ``/system`` or ``/info`` (and the host list)."""
 
-    value_fn: Callable[[HostDetails], StateType | datetime]
+    value_fn: Callable[[Host, HostDetails], StateType | datetime]
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -92,33 +94,50 @@ HOST_SENSORS: tuple[HostSensorDescription, ...] = (
     ),
 )
 
+
+def _restart_reason(host: Host, details: HostDetails) -> str | None:
+    """PatchMon's reason while a restart is needed; unknown otherwise.
+
+    The flag comes from the host list, which is newer than the details.
+    """
+    if not host.needs_reboot or not (reason := details.system.reboot_reason):
+        return None
+    return reason[:MAX_STATE_LENGTH]
+
+
 DETAIL_SENSORS: tuple[DetailSensorDescription, ...] = (
+    DetailSensorDescription(
+        key="restart_reason",
+        translation_key="restart_reason",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=_restart_reason,
+    ),
     DetailSensorDescription(
         key="agent_version",
         translation_key="agent_version",
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda details: details.info.agent_version,
+        value_fn=lambda _, details: details.info.agent_version,
     ),
     DetailSensorDescription(
         key="last_boot",
         translation_key="last_boot",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda details: details.system.boot_time,
+        value_fn=lambda _, details: details.system.boot_time,
     ),
     DetailSensorDescription(
         key="running_kernel",
         translation_key="running_kernel",
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda details: details.system.kernel_version,
+        value_fn=lambda _, details: details.system.kernel_version,
     ),
     DetailSensorDescription(
         key="installed_kernel",
         translation_key="installed_kernel",
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
-        value_fn=lambda details: details.system.installed_kernel_version,
+        value_fn=lambda _, details: details.system.installed_kernel_version,
     ),
 )
 
@@ -238,7 +257,7 @@ class PatchMonDetailSensor(PatchMonHostDetailEntity, SensorEntity):
     @property
     def native_value(self) -> StateType | datetime:
         """Value from the host details."""
-        return self.entity_description.value_fn(self.details)
+        return self.entity_description.value_fn(self.host, self.details)
 
 
 class PatchMonServerSensor(PatchMonServerEntity, SensorEntity):

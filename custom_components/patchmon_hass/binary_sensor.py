@@ -38,7 +38,10 @@ async def async_setup_entry(
 
 
 class RestartRequiredSensor(PatchMonHostEntity, BinarySensorEntity):
-    """On while PatchMon reports that the host needs a restart."""
+    """On while PatchMon reports that the host needs a restart.
+
+    The reason is a sensor of its own (``restart_reason``).
+    """
 
     def __init__(self, coordinator: PatchMonCoordinator, host_id: str) -> None:
         """Bind to a host."""
@@ -48,16 +51,6 @@ class RestartRequiredSensor(PatchMonHostEntity, BinarySensorEntity):
     def is_on(self) -> bool | None:
         """Restart flag from the host list."""
         return self.host.needs_reboot
-
-    @property
-    def extra_state_attributes(self) -> dict[str, Any] | None:
-        """Why the host needs a restart (from ``/system``, when known)."""
-        details = self.coordinator.data.details.get(self.host_id)
-        if not self.host.needs_reboot or details is None:
-            return None
-        if reason := details.system.reboot_reason:
-            return {"reason": reason}
-        return None
 
 
 class ReportingSensor(PatchMonHostEntity, BinarySensorEntity):

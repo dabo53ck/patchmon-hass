@@ -29,6 +29,9 @@
       "installed_packages": {
         "default": "mdi:package-variant-closed"
       },
+      "restart_reason": {
+        "default": "mdi:restart-alert"
+      },
       "agent_version": {
         "default": "mdi:tag-outline"
       },

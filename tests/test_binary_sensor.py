@@ -17,7 +17,7 @@ async def test_binary_sensors(
     mock_hosts: AiohttpClientMocker,
     snapshot: SnapshotAssertion,
 ) -> None:
-    """Restart flag with reason, and the reporting state of every host."""
+    """Restart flag and the reporting state of every host."""
     await setup_entry(hass, mock_config_entry)
 
     assert platform_snapshot(hass, mock_config_entry, "binary_sensor") == snapshot

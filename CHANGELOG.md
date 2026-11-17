@@ -16,9 +16,9 @@ pre-release identifiers included (`0.1.0-rc.1`, …).
 - A device for the PatchMon server and one per host, linked to the host page
   in PatchMon. New hosts appear by themselves, deleted hosts are removed.
 - Sensors per host: pending updates, security updates, update status, last
-  check-in, agent version, last boot, running and installed kernel,
-  installed packages.
-- Binary sensors per host: restart required (with the reason) and reporting.
+  check-in, restart reason, agent version, last boot, running and installed
+  kernel, installed packages.
+- Binary sensors per host: restart required and reporting.
 - Update entity per host (disabled by default) with the package list as
   release notes.
 - Totals on the server device: hosts, hosts with (security) updates, hosts

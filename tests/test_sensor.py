@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import pytest
-from homeassistant.const import STATE_UNAVAILABLE
+from homeassistant.const import STATE_UNAVAILABLE, STATE_UNKNOWN
 from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
@@ -113,3 +113,25 @@ async def test_host_missing_while_incomplete(
 
     state = hass.states.get("sensor.host_01_pending_updates")
     assert state.state == STATE_UNAVAILABLE
+
+
+async def test_restart_reason(
+    hass: HomeAssistant,
+    mock_config_entry: MockConfigEntry,
+    aioclient_mock: AiohttpClientMocker,
+) -> None:
+    """The reason shows only while a restart is needed, cut to 255 characters."""
+    long_reason = load_fixture("host_01_system.json")
+    long_reason["reboot_reason"] = "x" * 300
+    no_reason = load_fixture("host_02_system.json")
+    no_reason["reboot_reason"] = None
+    aioclient_mock.get(f"{API}/hosts", json=load_fixture("hosts.json"))
+    aioclient_mock.get(f"{API}/hosts/{host_id(1)}/system", json=long_reason)
+    aioclient_mock.get(f"{API}/hosts/{host_id(2)}/system", json=no_reason)
+    mock_details(aioclient_mock)
+
+    await setup_entry(hass, mock_config_entry)
+
+    assert hass.states.get("sensor.host_01_restart_reason").state == "x" * 255
+    assert hass.states.get("sensor.host_02_restart_reason").state == STATE_UNKNOWN
+    assert hass.states.get("sensor.host_03_restart_reason").state == STATE_UNKNOWN

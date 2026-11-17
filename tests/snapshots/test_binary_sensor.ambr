@@ -17,7 +17,6 @@
     'binary_sensor.host_01_restart_required': dict({
       'attributes': dict({
         'friendly_name': 'Host 01 Restart required',
-        'reason': 'Kernel version mismatch | Running kernel: 6.12.15-production+truenas, Installed kernel: 7.0.14-29-pve',
       }),
       'device_class': None,
       'disabled_by': None,
@@ -42,7 +41,6 @@
     'binary_sensor.host_02_restart_required': dict({
       'attributes': dict({
         'friendly_name': 'Host 02 Restart required',
-        'reason': 'Reboot flag file exists (/var/run/reboot-required) | Running kernel: 7.0.0-42-generic, Installed kernel: 7.0.0-43-generic',
       }),
       'device_class': None,
       'disabled_by': None,

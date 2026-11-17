@@ -71,6 +71,17 @@
       'translation_key': 'updates',
       'unique_id': '00000000-0000-4000-8000-a00000000001_updates',
     }),
+    'sensor.host_01_restart_reason': dict({
+      'attributes': dict({
+        'friendly_name': 'Host 01 Restart reason',
+      }),
+      'device_class': None,
+      'disabled_by': None,
+      'entity_category': <EntityCategory.DIAGNOSTIC: 'diagnostic'>,
+      'state': 'Kernel version mismatch | Running kernel: 6.12.15-production+truenas, Installed kernel: 7.0.14-29-pve',
+      'translation_key': 'restart_reason',
+      'unique_id': '00000000-0000-4000-8000-a00000000001_restart_reason',
+    }),
     'sensor.host_01_running_kernel': dict({
       'attributes': dict({
         'friendly_name': 'Host 01 Running kernel',
@@ -180,6 +191,17 @@
       'state': '16',
       'translation_key': 'updates',
       'unique_id': '00000000-0000-4000-8000-a00000000002_updates',
+    }),
+    'sensor.host_02_restart_reason': dict({
+      'attributes': dict({
+        'friendly_name': 'Host 02 Restart reason',
+      }),
+      'device_class': None,
+      'disabled_by': None,
+      'entity_category': <EntityCategory.DIAGNOSTIC: 'diagnostic'>,
+      'state': 'Reboot flag file exists (/var/run/reboot-required) | Running kernel: 7.0.0-42-generic, Installed kernel: 7.0.0-43-generic',
+      'translation_key': 'restart_reason',
+      'unique_id': '00000000-0000-4000-8000-a00000000002_restart_reason',
     }),
     'sensor.host_02_running_kernel': dict({
       'attributes': dict({
@@ -291,6 +313,17 @@
       'translation_key': 'updates',
       'unique_id': '00000000-0000-4000-8000-a00000000003_updates',
     }),
+    'sensor.host_03_restart_reason': dict({
+      'attributes': dict({
+        'friendly_name': 'Host 03 Restart reason',
+      }),
+      'device_class': None,
+      'disabled_by': None,
+      'entity_category': <EntityCategory.DIAGNOSTIC: 'diagnostic'>,
+      'state': 'unknown',
+      'translation_key': 'restart_reason',
+      'unique_id': '00000000-0000-4000-8000-a00000000003_restart_reason',
+    }),
     'sensor.host_03_running_kernel': dict({
       'attributes': dict({
         'friendly_name': 'Host 03 Running kernel',
@@ -400,6 +433,17 @@
       'state': '1',
       'translation_key': 'updates',
       'unique_id': '00000000-0000-4000-8000-a00000000004_updates',
+    }),
+    'sensor.host_04_restart_reason': dict({
+      'attributes': dict({
+        'friendly_name': 'Host 04 Restart reason',
+      }),
+      'device_class': None,
+      'disabled_by': None,
+      'entity_category': <EntityCategory.DIAGNOSTIC: 'diagnostic'>,
+      'state': 'unknown',
+      'translation_key': 'restart_reason',
+      'unique_id': '00000000-0000-4000-8000-a00000000004_restart_reason',
     }),
     'sensor.host_04_running_kernel': dict({
       'attributes': dict({

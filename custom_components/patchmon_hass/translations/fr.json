@@ -101,11 +101,6 @@
         "state": {
           "on": "Oui",
           "off": "Non"
-        },
-        "state_attributes": {
-          "reason": {
-            "name": "Raison"
-          }
         }
       },
       "reporting": {
@@ -142,6 +137,9 @@
       },
       "installed_packages": {
         "name": "Paquets installés"
+      },
+      "restart_reason": {
+        "name": "Raison du redémarrage"
       },
       "agent_version": {
         "name": "Version de l'agent"
