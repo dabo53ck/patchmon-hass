@@ -5,7 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.const import CONF_URL
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import issue_registry as ir
 
 from .const import DOMAIN
@@ -32,12 +34,76 @@ async def async_setup_entry(hass: HomeAssistant, entry: PatchMonConfigEntry) -> 
 
     # Options changes reload the entry by themselves (OptionsFlowWithReload).
     entry.runtime_data = PatchMonRuntimeData(coordinator=coordinator)
+
+    server = dr.async_get(hass).async_get_or_create(
+        config_entry_id=entry.entry_id,
+        identifiers={(DOMAIN, entry.entry_id)},
+        name=entry.title,
+        manufacturer="PatchMon",
+        entry_type=dr.DeviceEntryType.SERVICE,
+        configuration_url=entry.data[CONF_URL],
+    )
+
+    @callback
+    def _async_sync() -> None:
+        _async_sync_devices(hass, entry, coordinator, server.id)
+
+    _async_sync()
+    entry.async_on_unload(coordinator.async_add_listener(_async_sync))
     return True
+
+
+@callback
+def _async_sync_devices(
+    hass: HomeAssistant,
+    entry: PatchMonConfigEntry,
+    coordinator: PatchMonCoordinator,
+    server_device_id: str,
+) -> None:
+    """Create or update a device per host; remove devices of deleted hosts.
+
+    Names set by the user stay (``name_by_user`` wins over ``name``).
+    Nothing is removed while the host list may be incomplete.
+    """
+    registry = dr.async_get(hass)
+    data = coordinator.data
+    url = entry.data[CONF_URL]
+    for host in data.hosts.values():
+        registry.async_get_or_create(
+            config_entry_id=entry.entry_id,
+            identifiers={(DOMAIN, host.id)},
+            name=host.friendly_name,
+            model=host.os_type,
+            sw_version=host.os_version,
+            via_device_id=server_device_id,
+            configuration_url=f"{url}/hosts/{host.id}",
+        )
+    if not data.complete:
+        return
+    keep = {entry.entry_id, *data.hosts}
+    for device in dr.async_entries_for_config_entry(registry, entry.entry_id):
+        if not any(
+            domain == DOMAIN and ident in keep for domain, ident in device.identifiers
+        ):
+            registry.async_update_device(
+                device.id, remove_config_entry_id=entry.entry_id
+            )
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: PatchMonConfigEntry) -> bool:
     """Unload a config entry (no platforms yet)."""
     return True
+
+
+async def async_remove_config_entry_device(
+    hass: HomeAssistant, entry: PatchMonConfigEntry, device: dr.DeviceEntry
+) -> bool:
+    """Allow deleting a host device only while PatchMon does not list it."""
+    hosts = entry.runtime_data.coordinator.data.hosts
+    return not any(
+        domain == DOMAIN and (ident == entry.entry_id or ident in hosts)
+        for domain, ident in device.identifiers
+    )
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: PatchMonConfigEntry) -> None:
