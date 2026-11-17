@@ -3,18 +3,20 @@
     "step": {
       "user": {
         "title": "Se connecter à PatchMon",
-        "description": "Créez dans PatchMon un jeton d'API dédié à Home Assistant (Settings → Integrations → Scoped Credentials), avec uniquement l'autorisation `host:get`. N'accordez jamais `host:delete` : cette intégration ne fait que lire des données.",
+        "description": "Créez dans PatchMon un jeton d'API dédié à Home Assistant (Settings → Integrations → Scoped Credentials), avec uniquement l'autorisation `host:get`.",
         "data": {
           "url": "Adresse du serveur",
           "token_key": "Clé du jeton",
           "token_secret": "Secret du jeton",
-          "verify_ssl": "Vérifier le certificat SSL"
+          "verify_ssl": "Vérifier le certificat SSL",
+          "area": "Pièce"
         },
         "data_description": {
-          "url": "Adresse de l'interface web de PatchMon, par exemple http://192.168.1.10:3000",
+          "url": "Adresse de l'interface web de PatchMon, par exemple http://192.168.1.10:3000 ou https://patchmon.example.com",
           "token_key": "La clé du jeton d'API",
           "token_secret": "Le secret du jeton d'API. PatchMon ne l'affiche qu'une seule fois, à la création du jeton.",
-          "verify_ssl": "À désactiver uniquement pour un serveur avec un certificat auto-signé"
+          "verify_ssl": "Ne s'applique qu'aux adresses https. À désactiver si le serveur utilise un certificat auto-signé.",
+          "area": "Les nouveaux hôtes et le serveur PatchMon sont placés dans cette pièce lors de leur ajout. Les appareils déplacés ensuite restent où vous les avez mis."
         }
       },
       "reauth_confirm": {
@@ -39,10 +41,10 @@
           "verify_ssl": "Vérifier le certificat SSL"
         },
         "data_description": {
-          "url": "Adresse de l'interface web de PatchMon, par exemple http://192.168.1.10:3000",
+          "url": "Adresse de l'interface web de PatchMon, par exemple http://192.168.1.10:3000 ou https://patchmon.example.com",
           "token_key": "La clé du jeton d'API",
           "token_secret": "Laissez vide pour conserver le secret actuel.",
-          "verify_ssl": "À désactiver uniquement pour un serveur avec un certificat auto-signé"
+          "verify_ssl": "Ne s'applique qu'aux adresses https. À désactiver si le serveur utilise un certificat auto-signé."
         }
       }
     },
@@ -70,11 +72,13 @@
         "title": "Options de PatchMon",
         "data": {
           "scan_interval": "Intervalle d'interrogation",
-          "host_groups": "Groupes d'hôtes"
+          "host_groups": "Groupes d'hôtes",
+          "area": "Pièce"
         },
         "data_description": {
           "scan_interval": "Fréquence à laquelle Home Assistant lit la liste des hôtes dans PatchMon. Les agents ne remontent pas leurs données plus souvent pour autant.",
-          "host_groups": "N'inclure que les hôtes de ces groupes. Laisser vide pour tous les hôtes."
+          "host_groups": "N'inclure que les hôtes de ces groupes. Laisser vide pour tous les hôtes.",
+          "area": "Les nouveaux hôtes et le serveur PatchMon sont placés dans cette pièce lors de leur ajout. Les appareils déplacés ensuite restent où vous les avez mis."
         }
       }
     },

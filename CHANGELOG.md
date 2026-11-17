@@ -11,8 +11,8 @@ pre-release identifiers included (`0.1.0-rc.1`, …).
 - Project skeleton, CI (hassfest, HACS, Ruff, mypy, pytest) and brand assets.
 - Read-only PatchMon API client for the Integration API (`host:get` scope).
 - Config flow with connection test, re-authentication, reconfiguration and
-  options (polling interval, host group filter). When reconfiguring, an
-  empty token secret keeps the stored one.
+  options (polling interval, host group filter, area for new devices). When
+  reconfiguring, an empty token secret keeps the stored one.
 - A device for the PatchMon server and one per host, linked to the host page
   in PatchMon. New hosts appear by themselves, deleted hosts are removed.
 - Sensors per host: pending updates, security updates, update status, last

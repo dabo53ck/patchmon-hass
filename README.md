@@ -52,14 +52,18 @@ repository:
 
 | Field | Example |
 | --- | --- |
-| Server address | `http://192.168.1.10:3000` |
+| Server address | `http://192.168.1.10:3000` or `https://patchmon.example.com` |
 | Token key / secret | from the token you created above |
-| Verify SSL certificate | turn off only for a self-signed certificate |
+| Verify SSL certificate | only applies to https; turn off for a self-signed certificate |
+| Area | optional: new hosts and the server device are placed in this area |
 
-Options (polling interval, host group filter) are under **Configure** on the
-integration entry. If the token is changed or expires, Home Assistant asks for
-a new one; **Reconfigure** changes the address or token without losing
-anything (leave the secret empty to keep the current one).
+The area only applies when a device is added, so devices you move later stay
+where you put them.
+
+Options (polling interval, host group filter, area) are under **Configure**
+on the integration entry. If the token is changed or expires, Home Assistant
+asks for a new one; **Reconfigure** changes the address or token without
+losing anything (leave the secret empty to keep the current one).
 
 ## Devices and entities
 

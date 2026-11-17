@@ -3,18 +3,20 @@
     "step": {
       "user": {
         "title": "Mit PatchMon verbinden",
-        "description": "Lege in PatchMon ein eigenes API-Token für Home Assistant an (Settings → Integrations → Scoped Credentials), nur mit der Berechtigung `host:get`. Vergib nie `host:delete`: Diese Integration liest nur Daten.",
+        "description": "Lege in PatchMon ein eigenes API-Token für Home Assistant an (Settings → Integrations → Scoped Credentials), nur mit der Berechtigung `host:get`.",
         "data": {
           "url": "Serveradresse",
           "token_key": "Token-Key",
           "token_secret": "Token-Secret",
-          "verify_ssl": "SSL-Zertifikat prüfen"
+          "verify_ssl": "SSL-Zertifikat prüfen",
+          "area": "Bereich"
         },
         "data_description": {
-          "url": "Adresse der PatchMon-Weboberfläche, zum Beispiel http://192.168.1.10:3000",
+          "url": "Adresse der PatchMon-Weboberfläche, zum Beispiel http://192.168.1.10:3000 oder https://patchmon.example.com",
           "token_key": "Der Key des API-Tokens",
           "token_secret": "Das Secret des API-Tokens. PatchMon zeigt es nur einmal beim Anlegen.",
-          "verify_ssl": "Nur bei einem Server mit selbstsigniertem Zertifikat ausschalten"
+          "verify_ssl": "Gilt nur für https-Adressen. Ausschalten, wenn der Server ein selbstsigniertes Zertifikat nutzt.",
+          "area": "Neue Hosts und der PatchMon-Server kommen beim Anlegen in diesen Bereich. Später von Hand verschobene Geräte bleiben, wo sie sind."
         }
       },
       "reauth_confirm": {
@@ -39,10 +41,10 @@
           "verify_ssl": "SSL-Zertifikat prüfen"
         },
         "data_description": {
-          "url": "Adresse der PatchMon-Weboberfläche, zum Beispiel http://192.168.1.10:3000",
+          "url": "Adresse der PatchMon-Weboberfläche, zum Beispiel http://192.168.1.10:3000 oder https://patchmon.example.com",
           "token_key": "Der Key des API-Tokens",
           "token_secret": "Leer lassen, um das bisherige Secret zu behalten.",
-          "verify_ssl": "Nur bei einem Server mit selbstsigniertem Zertifikat ausschalten"
+          "verify_ssl": "Gilt nur für https-Adressen. Ausschalten, wenn der Server ein selbstsigniertes Zertifikat nutzt."
         }
       }
     },
@@ -70,11 +72,13 @@
         "title": "PatchMon-Optionen",
         "data": {
           "scan_interval": "Abfrage-Intervall",
-          "host_groups": "Hostgruppen"
+          "host_groups": "Hostgruppen",
+          "area": "Bereich"
         },
         "data_description": {
           "scan_interval": "Wie oft Home Assistant die Host-Liste aus PatchMon liest. Die Agenten melden dadurch nicht häufiger.",
-          "host_groups": "Nur Hosts aus diesen Gruppen einbeziehen. Leer lassen für alle Hosts."
+          "host_groups": "Nur Hosts aus diesen Gruppen einbeziehen. Leer lassen für alle Hosts.",
+          "area": "Neue Hosts und der PatchMon-Server kommen beim Anlegen in diesen Bereich. Später von Hand verschobene Geräte bleiben, wo sie sind."
         }
       }
     },

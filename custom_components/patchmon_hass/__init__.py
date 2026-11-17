@@ -3,14 +3,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_URL, Platform
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import area_registry as ar
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import issue_registry as ir
 
-from .const import DOMAIN
+from .const import CONF_AREA, DOMAIN
 from .coordinator import ISSUE_GROUPS_WITHOUT_HOSTS, PatchMonCoordinator
 from .helpers import create_client
 
@@ -37,8 +39,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: PatchMonConfigEntry) -> 
     # Options changes reload the entry by themselves (OptionsFlowWithReload).
     entry.runtime_data = PatchMonRuntimeData(coordinator=coordinator)
 
-    server = dr.async_get(hass).async_get_or_create(
-        config_entry_id=entry.entry_id,
+    server = _async_get_or_create_device(
+        hass,
+        entry,
         identifiers={(DOMAIN, entry.entry_id)},
         name=entry.title,
         manufacturer="PatchMon",
@@ -58,6 +61,33 @@ async def async_setup_entry(hass: HomeAssistant, entry: PatchMonConfigEntry) -> 
 
 
 @callback
+def _async_get_or_create_device(
+    hass: HomeAssistant, entry: PatchMonConfigEntry, **device: Any
+) -> dr.DeviceEntry:
+    """Create or update a device; a new one goes to the area from the options.
+
+    Only devices without an area get it, so devices the user moved, or
+    restored devices that had an area, stay where they are.
+    """
+    registry = dr.async_get(hass)
+    is_new = registry.async_get_device(identifiers=device["identifiers"]) is None
+    entry_device = registry.async_get_or_create(
+        config_entry_id=entry.entry_id, **device
+    )
+    area_id = entry.options.get(CONF_AREA)
+    if (
+        is_new
+        and area_id
+        and entry_device.area_id is None
+        and ar.async_get(hass).async_get_area(area_id) is not None
+    ):
+        return registry.async_update_device(entry_device.id, area_id=area_id) or (
+            entry_device
+        )
+    return entry_device
+
+
+@callback
 def _async_sync_devices(
     hass: HomeAssistant,
     entry: PatchMonConfigEntry,
@@ -73,8 +103,9 @@ def _async_sync_devices(
     data = coordinator.data
     url = entry.data[CONF_URL]
     for host in data.hosts.values():
-        registry.async_get_or_create(
-            config_entry_id=entry.entry_id,
+        _async_get_or_create_device(
+            hass,
+            entry,
             identifiers={(DOMAIN, host.id)},
             name=host.friendly_name,
             model=host.os_type,

@@ -16,6 +16,7 @@ from homeassistant.config_entries import (
 from homeassistant.const import CONF_URL, CONF_VERIFY_SSL
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.selector import (
+    AreaSelector,
     BooleanSelector,
     NumberSelector,
     NumberSelectorConfig,
@@ -39,6 +40,7 @@ from .api import (
     normalize_url,
 )
 from .const import (
+    CONF_AREA,
     CONF_HOST_GROUPS,
     CONF_SCAN_INTERVAL,
     CONF_TOKEN_KEY,
@@ -119,8 +121,13 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
                 await self.async_set_unique_id(url)
                 self._abort_if_unique_id_configured()
                 data = {**user_input, CONF_URL: url}
+                options = {}
+                if area := data.pop(CONF_AREA, None):
+                    options[CONF_AREA] = area
                 if not (error := await _async_test(self.hass, data)):
-                    return self.async_create_entry(title=_title(url), data=data)
+                    return self.async_create_entry(
+                        title=_title(url), data=data, options=options
+                    )
                 errors["base"] = error
 
         return self.async_show_form(
@@ -131,6 +138,7 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
                         vol.Required(CONF_URL): _URL_SELECTOR,
                         **_credentials_schema(),
                         vol.Required(CONF_VERIFY_SSL, default=True): BooleanSelector(),
+                        vol.Optional(CONF_AREA): AreaSelector(),
                     }
                 ),
                 user_input,
@@ -223,12 +231,13 @@ class PatchMonOptionsFlow(OptionsFlowWithReload):
     ) -> ConfigFlowResult:
         """Show and store the options; the entry reloads afterwards."""
         if user_input is not None:
-            return self.async_create_entry(
-                data={
-                    CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL]),
-                    CONF_HOST_GROUPS: user_input.get(CONF_HOST_GROUPS, []),
-                }
-            )
+            options = {
+                CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL]),
+                CONF_HOST_GROUPS: user_input.get(CONF_HOST_GROUPS, []),
+            }
+            if area := user_input.get(CONF_AREA):
+                options[CONF_AREA] = area
+            return self.async_create_entry(data=options)
 
         errors: dict[str, str] = {}
         current: list[str] = list(self.config_entry.options.get(CONF_HOST_GROUPS, []))
@@ -275,6 +284,12 @@ class PatchMonOptionsFlow(OptionsFlowWithReload):
                         mode=SelectSelectorMode.DROPDOWN,
                     )
                 ),
+                vol.Optional(
+                    CONF_AREA,
+                    description={
+                        "suggested_value": self.config_entry.options.get(CONF_AREA)
+                    },
+                ): AreaSelector(),
             }
         )
         return self.async_show_form(step_id="init", data_schema=schema, errors=errors)

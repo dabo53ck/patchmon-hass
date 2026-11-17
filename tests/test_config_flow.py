@@ -12,11 +12,13 @@ from homeassistant.config_entries import SOURCE_USER
 from homeassistant.const import CONF_URL, CONF_VERIFY_SSL
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
+from homeassistant.helpers import area_registry as ar
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
 
 from custom_components.patchmon_hass.api import PatchMonSSLError
 from custom_components.patchmon_hass.const import (
+    CONF_AREA,
     CONF_HOST_GROUPS,
     CONF_SCAN_INTERVAL,
     CONF_TOKEN_KEY,
@@ -69,7 +71,26 @@ async def test_user_flow(hass: HomeAssistant, mock_hosts: AiohttpClientMocker) -
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "PatchMon (patchmon.example)"
     assert result["data"] == ENTRY_DATA
+    assert result["options"] == {}
     assert result["result"].unique_id == URL
+
+
+async def test_user_flow_with_area(
+    hass: HomeAssistant,
+    mock_hosts: AiohttpClientMocker,
+    area_registry: ar.AreaRegistry,
+) -> None:
+    """The chosen area is stored as an option, not with the credentials."""
+    area = area_registry.async_create("Server room")
+    result = await _start_user_flow(hass)
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {**USER_INPUT, CONF_AREA: area.id}
+    )
+
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["data"] == ENTRY_DATA
+    assert result["options"] == {CONF_AREA: area.id}
 
 
 @pytest.mark.parametrize(("mock_kwargs", "error"), ERROR_CASES)
@@ -316,8 +337,10 @@ async def test_options_flow(
     hass: HomeAssistant,
     mock_config_entry: MockConfigEntry,
     mock_hosts: AiohttpClientMocker,
+    area_registry: ar.AreaRegistry,
 ) -> None:
     """Groups come from PatchMon; saving stores the options and reloads."""
+    area = area_registry.async_create("Server room")
     mock_config_entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(mock_config_entry.entry_id)
     await hass.async_block_till_done()
@@ -337,6 +360,7 @@ async def test_options_flow(
         {
             CONF_SCAN_INTERVAL: 10.0,
             CONF_HOST_GROUPS: ["00000000-0000-4000-8000-b00000000001"],
+            CONF_AREA: area.id,
         },
     )
     await hass.async_block_till_done()
@@ -345,6 +369,7 @@ async def test_options_flow(
     assert mock_config_entry.options == {
         CONF_SCAN_INTERVAL: 10,
         CONF_HOST_GROUPS: ["00000000-0000-4000-8000-b00000000001"],
+        CONF_AREA: area.id,
     }
     # Reloaded with the new filter
     lists = _host_list_calls(mock_hosts)
