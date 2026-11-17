@@ -25,8 +25,11 @@ async def test_setup_and_unload(
     await hass.async_block_till_done()
 
     assert mock_config_entry.state is ConfigEntryState.LOADED
-    assert mock_config_entry.runtime_data.client is not None
-    assert mock_hosts.call_count == 1
+    coordinator = mock_config_entry.runtime_data.coordinator
+    assert len(coordinator.data.hosts) == 4
+    assert len(coordinator.data.details) == 4
+    # Host list plus /system and /info of every host
+    assert mock_hosts.call_count == 1 + 4 * 2
 
     assert await hass.config_entries.async_unload(mock_config_entry.entry_id)
     assert mock_config_entry.state is ConfigEntryState.NOT_LOADED

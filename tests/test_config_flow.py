@@ -7,6 +7,7 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
+import yarl
 from homeassistant.config_entries import SOURCE_USER
 from homeassistant.const import CONF_URL, CONF_VERIFY_SSL
 from homeassistant.core import HomeAssistant
@@ -306,6 +307,11 @@ async def test_reconfigure_to_other_configured_server(
     assert result["reason"] == "already_configured"
 
 
+def _host_list_calls(mock: AiohttpClientMocker) -> list[yarl.URL]:
+    """URLs of all GET /hosts requests (not the per-host details)."""
+    return [url for _, url, _, _ in mock.mock_calls if url.path.endswith("/hosts")]
+
+
 async def test_options_flow(
     hass: HomeAssistant,
     mock_config_entry: MockConfigEntry,
@@ -325,7 +331,7 @@ async def test_options_flow(
         "security-only",
     ]
 
-    calls_before = mock_hosts.call_count
+    lists_before = len(_host_list_calls(mock_hosts))
     result = await hass.config_entries.options.async_configure(
         result["flow_id"],
         {
@@ -341,9 +347,9 @@ async def test_options_flow(
         CONF_HOST_GROUPS: ["00000000-0000-4000-8000-b00000000001"],
     }
     # Reloaded with the new filter
-    assert mock_hosts.call_count == calls_before + 1
-    _, url, _, _ = mock_hosts.mock_calls[-1]
-    assert url.query["hostgroup"] == "00000000-0000-4000-8000-b00000000001"
+    lists = _host_list_calls(mock_hosts)
+    assert len(lists) == lists_before + 1
+    assert lists[-1].query["hostgroup"] == "00000000-0000-4000-8000-b00000000001"
 
 
 async def test_options_flow_server_unreachable(

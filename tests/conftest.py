@@ -56,8 +56,24 @@ def mock_config_entry() -> MockConfigEntry:
     )
 
 
+def host_id(number: int) -> str:
+    """ID of host ``number`` (1-4) in the fixtures."""
+    return f"00000000-0000-4000-8000-a0000000000{number}"
+
+
+def mock_details(aioclient_mock: AiohttpClientMocker) -> None:
+    """Answer /system and /info of the four fixture hosts."""
+    for number in range(1, 5):
+        for part in ("system", "info"):
+            aioclient_mock.get(
+                f"{API}/hosts/{host_id(number)}/{part}",
+                json=load_fixture(f"host_0{number}_{part}.json"),
+            )
+
+
 @pytest.fixture
 def mock_hosts(aioclient_mock: AiohttpClientMocker) -> AiohttpClientMocker:
-    """Answer GET /hosts with the host list fixture."""
+    """Answer GET /hosts with the host list fixture, plus the host details."""
     aioclient_mock.get(f"{API}/hosts", json=load_fixture("hosts.json"))
+    mock_details(aioclient_mock)
     return aioclient_mock

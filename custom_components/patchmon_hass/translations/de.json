@@ -100,5 +100,11 @@
     "unsupported": {
       "message": "Unerwartete Antwort vom PatchMon-Server: {error}"
     }
+  },
+  "issues": {
+    "host_groups_without_hosts": {
+      "title": "Hostgruppen-Filter von {title} trifft keinen Host",
+      "description": "Der Hostgruppen-Filter von {title} enthält Gruppen ohne Host in PatchMon: {groups}. Die Gruppen wurden gelöscht oder sind leer. Ihre Hosts bleiben in Home Assistant erhalten, sind aber nicht verfügbar. Öffne beim Integrationseintrag **Konfigurieren** und passe den Hostgruppen-Filter an."
+    }
   }
 }

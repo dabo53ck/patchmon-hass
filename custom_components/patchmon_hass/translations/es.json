@@ -100,5 +100,11 @@
     "unsupported": {
       "message": "Respuesta inesperada del servidor de PatchMon: {error}"
     }
+  },
+  "issues": {
+    "host_groups_without_hosts": {
+      "title": "El filtro de grupos de hosts de {title} no coincide con ningún host",
+      "description": "El filtro de grupos de hosts de {title} contiene grupos sin ningún host en PatchMon: {groups}. Los grupos se eliminaron o están vacíos. Sus hosts se conservan en Home Assistant, pero no están disponibles. Abre **Configurar** en la entrada de la integración y actualiza el filtro de grupos de hosts."
+    }
   }
 }

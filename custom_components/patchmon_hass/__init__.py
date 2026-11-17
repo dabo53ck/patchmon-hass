@@ -6,15 +6,10 @@ from dataclasses import dataclass
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
+from homeassistant.helpers import issue_registry as ir
 
-from .api import (
-    PatchMonAuthError,
-    PatchMonClient,
-    PatchMonConnectionError,
-    PatchMonUnsupportedError,
-)
-from .const import CONF_HOST_GROUPS, DOMAIN
+from .const import DOMAIN
+from .coordinator import ISSUE_GROUPS_WITHOUT_HOSTS, PatchMonCoordinator
 from .helpers import create_client
 
 
@@ -22,7 +17,7 @@ from .helpers import create_client
 class PatchMonRuntimeData:
     """Objects that live as long as the config entry is loaded."""
 
-    client: PatchMonClient
+    coordinator: PatchMonCoordinator
 
 
 type PatchMonConfigEntry = ConfigEntry[PatchMonRuntimeData]
@@ -30,35 +25,23 @@ type PatchMonConfigEntry = ConfigEntry[PatchMonRuntimeData]
 
 async def async_setup_entry(hass: HomeAssistant, entry: PatchMonConfigEntry) -> bool:
     """Set up PatchMon from a config entry."""
-    client = create_client(hass, entry.data)
-    try:
-        # Probe once so a bad token starts re-authentication right away and an
-        # unreachable server is retried by Home Assistant.
-        await client.get_hosts(entry.options.get(CONF_HOST_GROUPS))
-    except PatchMonAuthError as err:
-        raise ConfigEntryAuthFailed(
-            translation_domain=DOMAIN,
-            translation_key="auth_failed",
-            translation_placeholders={"error": err.message},
-        ) from err
-    except PatchMonConnectionError as err:
-        raise ConfigEntryNotReady(
-            translation_domain=DOMAIN,
-            translation_key="cannot_connect",
-            translation_placeholders={"error": str(err)},
-        ) from err
-    except PatchMonUnsupportedError as err:
-        raise ConfigEntryNotReady(
-            translation_domain=DOMAIN,
-            translation_key="unsupported",
-            translation_placeholders={"error": str(err)},
-        ) from err
+    coordinator = PatchMonCoordinator(hass, entry, create_client(hass, entry.data))
+    # A bad token starts re-authentication right away; an unreachable server
+    # or an odd answer is retried by Home Assistant.
+    await coordinator.async_config_entry_first_refresh()
 
     # Options changes reload the entry by themselves (OptionsFlowWithReload).
-    entry.runtime_data = PatchMonRuntimeData(client=client)
+    entry.runtime_data = PatchMonRuntimeData(coordinator=coordinator)
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: PatchMonConfigEntry) -> bool:
     """Unload a config entry (no platforms yet)."""
     return True
+
+
+async def async_remove_entry(hass: HomeAssistant, entry: PatchMonConfigEntry) -> None:
+    """Drop the repair issue of a removed entry."""
+    ir.async_delete_issue(
+        hass, DOMAIN, f"{ISSUE_GROUPS_WITHOUT_HOSTS}_{entry.entry_id}"
+    )
