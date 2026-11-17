@@ -172,7 +172,15 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
                 "PatchMon returned no hosts; keeping the known devices for now"
             )
 
+        forced = self._force_all_details or bool(self._force_details)
         details, unsupported = await self._async_update_details(by_id)
+        _LOGGER.debug(
+            "%d hosts listed, details available for %d%s%s",
+            len(by_id),
+            len(details),
+            " (refresh action)" if forced else "",
+            f"; filter groups without hosts: {', '.join(missing)}" if missing else "",
+        )
         self._unsupported_issue(unsupported)
         return PatchMonData(
             hosts=by_id,
@@ -256,6 +264,13 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
             else:
                 stale.append(host)
 
+        if stale:
+            _LOGGER.debug(
+                "Reading details of %d hosts (new, reported again, older than %s "
+                "or asked for)",
+                len(stale),
+                DETAILS_MAX_AGE,
+            )
         results = await asyncio.gather(
             *(self._async_fetch_details(host, now) for host in stale),
             return_exceptions=True,
@@ -272,6 +287,7 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
                 ) from result
             elif isinstance(result, PatchMonNotFoundError):
                 # Deleted between the list and the details request.
+                _LOGGER.debug("%s was deleted during the update", host.friendly_name)
                 del hosts[host.id]
             elif isinstance(result, PatchMonError):
                 if isinstance(result, PatchMonUnsupportedError):

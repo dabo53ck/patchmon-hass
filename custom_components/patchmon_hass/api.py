@@ -15,6 +15,8 @@ from __future__ import annotations
 import asyncio
 import base64
 import json
+import logging
+import time
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -23,6 +25,8 @@ from typing import Any
 from urllib.parse import urlsplit, urlunsplit
 
 import aiohttp
+
+_LOGGER = logging.getLogger(__name__)
 
 API_PATH = "/api/v1/api"
 DEFAULT_TIMEOUT = 15
@@ -297,7 +301,12 @@ class PatchMonClient:
         self._semaphore = asyncio.Semaphore(MAX_PARALLEL_REQUESTS)
 
     async def _get(self, path: str, params: Mapping[str, str] | None = None) -> Any:
-        """GET ``path`` and return the decoded JSON body."""
+        """GET ``path`` and return the decoded JSON body.
+
+        Logs path, status and duration at debug level; never the server
+        address or the token.
+        """
+        start = time.monotonic()
         try:
             async with (
                 self._semaphore,
@@ -317,7 +326,16 @@ class PatchMonClient:
         except aiohttp.ClientSSLError as err:
             raise PatchMonSSLError(str(err)) from err
         except (TimeoutError, aiohttp.ClientError) as err:
+            _LOGGER.debug(
+                "GET %s failed after %.2f s: %s",
+                path,
+                time.monotonic() - start,
+                type(err).__name__,
+            )
             raise PatchMonConnectionError(str(err) or type(err).__name__) from err
+        _LOGGER.debug(
+            "GET %s: HTTP %s in %.2f s", path, status, time.monotonic() - start
+        )
 
         body: Any
         try:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import timedelta
 from typing import Any
 from unittest.mock import patch
@@ -74,8 +75,10 @@ async def test_details_only_after_new_report(
     hass: HomeAssistant,
     mock_config_entry: MockConfigEntry,
     mock_hosts: AiohttpClientMocker,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Details are re-read only for hosts whose agent reported again."""
+    caplog.set_level(logging.DEBUG, logger="custom_components.patchmon_hass")
     coordinator = await _setup(hass, mock_config_entry)
     hosts = load_fixture("hosts.json")
 
@@ -91,6 +94,14 @@ async def test_details_only_after_new_report(
         f"{host_id(1)}/info",
         f"{host_id(1)}/system",
     ]
+    assert "Reading details of 1 hosts" in caplog.text
+    assert "4 hosts listed, details available for 4" in caplog.text
+    assert "(refresh action)" not in caplog.text
+
+    _remock(mock_hosts, hosts)
+    await coordinator.async_refresh_now()
+    assert len(_detail_calls(mock_hosts)) == 8
+    assert "details available for 4 (refresh action)" in caplog.text
 
 
 async def test_details_reread_after_max_age(
@@ -133,8 +144,10 @@ async def test_host_deleted_during_update(
     hass: HomeAssistant,
     mock_config_entry: MockConfigEntry,
     aioclient_mock: AiohttpClientMocker,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     """A host whose details answer 404 was deleted and is dropped."""
+    caplog.set_level(logging.DEBUG, logger="custom_components.patchmon_hass")
     aioclient_mock.get(f"{API}/hosts", json=load_fixture("hosts.json"))
     aioclient_mock.get(
         f"{API}/hosts/{host_id(3)}/system",
@@ -147,6 +160,7 @@ async def test_host_deleted_during_update(
 
     assert host_id(3) not in coordinator.data.hosts
     assert len(coordinator.data.hosts) == 3
+    assert "was deleted during the update" in caplog.text
 
 
 async def test_details_auth_error_starts_reauth(
@@ -205,8 +219,10 @@ async def test_filter_group_without_hosts(
     hass: HomeAssistant,
     issue_registry: ir.IssueRegistry,
     aioclient_mock: AiohttpClientMocker,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     """A deleted or empty filter group raises a repair and blocks removals."""
+    caplog.set_level(logging.DEBUG, logger="custom_components.patchmon_hass")
     entry = MockConfigEntry(
         domain=DOMAIN,
         title="PatchMon (patchmon.example)",
@@ -224,6 +240,8 @@ async def test_filter_group_without_hosts(
 
     assert coordinator.data.groups_without_hosts == (GROUP_GONE,)
     assert not coordinator.data.complete
+    assert f"filter groups without hosts: {GROUP_GONE}" in caplog.text
+    assert "no device is removed" in caplog.text
     assert len(coordinator.data.hosts) == 2
     issue = issue_registry.async_get_issue(
         DOMAIN, f"{ISSUE_GROUPS_WITHOUT_HOSTS}_{entry.entry_id}"

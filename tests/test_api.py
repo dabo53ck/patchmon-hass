@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
@@ -252,6 +253,27 @@ async def test_connection_errors(
         await client.get_hosts()
     assert not isinstance(err.value, PatchMonSSLError)
     assert str(err.value)
+
+
+async def test_requests_logged_without_secrets(
+    client: PatchMonClient,
+    aioclient_mock: AiohttpClientMocker,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Each request is logged with path, status and duration, nothing secret."""
+    caplog.set_level(logging.DEBUG, logger="custom_components.patchmon_hass")
+    aioclient_mock.get(f"{API}/hosts", json=load_fixture("hosts.json"))
+    await client.get_hosts()
+    aioclient_mock.clear_requests()
+    aioclient_mock.get(f"{API}/hosts", exc=aiohttp.ClientConnectionError("down"))
+    with pytest.raises(PatchMonConnectionError):
+        await client.get_hosts()
+
+    assert "GET /hosts: HTTP 200 in" in caplog.text
+    assert "GET /hosts failed after" in caplog.text
+    assert "ClientConnectionError" in caplog.text
+    assert "patchmon.example" not in caplog.text
+    assert "Basic" not in caplog.text
 
 
 async def test_ssl_error(
