@@ -54,6 +54,7 @@ from .const import (
     MAX_SCAN_INTERVAL,
     MIN_SCAN_INTERVAL,
 )
+from .entity import async_entities_for_option
 from .helpers import create_client
 
 _LOGGER = logging.getLogger(__name__)
@@ -68,6 +69,27 @@ def _credentials_schema() -> dict[vol.Marker, Any]:
         vol.Required(CONF_TOKEN_KEY): _TEXT_SELECTOR,
         vol.Required(CONF_TOKEN_SECRET): _SECRET_SELECTOR,
     }
+
+
+def _optional_entities_section(options: Mapping[str, Any]) -> section:
+    """One switch per optional host entity, preset from ``options``."""
+    return section(
+        vol.Schema(
+            {
+                vol.Required(option, default=bool(options.get(option, False))): (
+                    BooleanSelector()
+                )
+                for option in ENABLE_OPTIONS
+            }
+        ),
+        {"collapsed": False},
+    )
+
+
+def _switches(user_input: Mapping[str, Any]) -> dict[str, bool]:
+    """The switches of the form as flat options."""
+    switches = user_input.get(CONF_OPTIONAL_ENTITIES, {})
+    return {option: bool(switches.get(option, False)) for option in ENABLE_OPTIONS}
 
 
 def _error_key(err: Exception) -> str:
@@ -125,7 +147,8 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
                 await self.async_set_unique_id(url)
                 self._abort_if_unique_id_configured()
                 data = {**user_input, CONF_URL: url}
-                options = {}
+                options: dict[str, Any] = _switches(data)
+                data.pop(CONF_OPTIONAL_ENTITIES, None)
                 if area := data.pop(CONF_AREA, None):
                     options[CONF_AREA] = area
                 if not (error := await _async_test(self.hass, data)):
@@ -143,6 +166,11 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
                         **_credentials_schema(),
                         vol.Required(CONF_VERIFY_SSL, default=True): BooleanSelector(),
                         vol.Optional(CONF_AREA): AreaSelector(),
+                        vol.Required(
+                            CONF_OPTIONAL_ENTITIES
+                        ): _optional_entities_section(
+                            (user_input or {}).get(CONF_OPTIONAL_ENTITIES, {})
+                        ),
                     }
                 ),
                 user_input,
@@ -236,11 +264,8 @@ def _async_apply_enable_option(
     Runs only when the option is switched, so single entities switched by
     hand stay as they are while other options are saved.
     """
-    platform, key = ENABLE_OPTIONS[option]
     registry = er.async_get(hass)
-    for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
-        if entity.domain != platform or not entity.unique_id.endswith(f"_{key}"):
-            continue
+    for entity in async_entities_for_option(hass, entry, option):
         if enabled and entity.disabled_by in (
             er.RegistryEntryDisabler.INTEGRATION,
             er.RegistryEntryDisabler.USER,
@@ -267,9 +292,7 @@ class PatchMonOptionsFlow(OptionsFlowWithReload):
             }
             if area := user_input.get(CONF_AREA):
                 options[CONF_AREA] = area
-            switches = user_input.get(CONF_OPTIONAL_ENTITIES, {})
-            for option in ENABLE_OPTIONS:
-                enabled = bool(switches.get(option, False))
+            for option, enabled in _switches(user_input).items():
                 options[option] = enabled
                 if enabled != self.config_entry.options.get(option, False):
                     _async_apply_enable_option(
@@ -328,17 +351,8 @@ class PatchMonOptionsFlow(OptionsFlowWithReload):
                         "suggested_value": self.config_entry.options.get(CONF_AREA)
                     },
                 ): AreaSelector(),
-                vol.Required(CONF_OPTIONAL_ENTITIES): section(
-                    vol.Schema(
-                        {
-                            vol.Required(
-                                option,
-                                default=self.config_entry.options.get(option, False),
-                            ): BooleanSelector()
-                            for option in ENABLE_OPTIONS
-                        }
-                    ),
-                    {"collapsed": False},
+                vol.Required(CONF_OPTIONAL_ENTITIES): _optional_entities_section(
+                    self.config_entry.options
                 ),
             }
         )

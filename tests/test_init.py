@@ -7,6 +7,7 @@ from homeassistant.config_entries import SOURCE_REAUTH, ConfigEntryState
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import area_registry as ar
 from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import entity_registry as er
 from homeassistant.setup import async_setup_component
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
@@ -331,3 +332,37 @@ async def test_remove_device(
     assert not await async_remove_config_entry_device(hass, mock_config_entry, server)
     assert not await async_remove_config_entry_device(hass, mock_config_entry, listed)
     assert await async_remove_config_entry_device(hass, mock_config_entry, stale)
+
+
+async def test_restored_entities_follow_switch(
+    hass: HomeAssistant,
+    mock_config_entry: MockConfigEntry,
+    mock_hosts: AiohttpClientMocker,
+    entity_registry: er.EntityRegistry,
+) -> None:
+    """Entities restored on a new setup are enabled when the switch is on."""
+    mock_config_entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(mock_config_entry.entry_id)
+    await hass.async_block_till_done()
+    unique_id = f"{host_id(1)}_updates"
+    entity_id = entity_registry.async_get_entity_id("update", DOMAIN, unique_id)
+    assert entity_id is not None
+    # Rename it, so a restore is recognisable by the entity ID.
+    entity_registry.async_update_entity(entity_id, new_entity_id="update.restored")
+    await hass.config_entries.async_remove(mock_config_entry.entry_id)
+    await hass.async_block_till_done()
+    assert entity_registry.async_get("update.restored") is None
+
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=URL,
+        data=dict(ENTRY_DATA),
+        options={"enable_update_entity": True},
+    )
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    restored = entity_registry.async_get("update.restored")
+    assert restored is not None
+    assert restored.disabled_by is None

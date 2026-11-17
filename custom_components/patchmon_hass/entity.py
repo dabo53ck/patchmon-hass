@@ -5,7 +5,8 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING
 
-from homeassistant.core import callback
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
@@ -108,3 +109,18 @@ def async_add_host_entities(
 
     _async_add_new()
     entry.async_on_unload(coordinator.async_add_listener(_async_add_new))
+
+
+@callback
+def async_entities_for_option(
+    hass: HomeAssistant, entry: PatchMonConfigEntry, option: str
+) -> list[er.RegistryEntry]:
+    """Registry entries of the optional entity behind ``option``, all hosts."""
+    platform, key = ENABLE_OPTIONS[option]
+    return [
+        entity
+        for entity in er.async_entries_for_config_entry(
+            er.async_get(hass), entry.entry_id
+        )
+        if entity.domain == platform and entity.unique_id.endswith(f"_{key}")
+    ]

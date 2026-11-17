@@ -36,6 +36,8 @@ USER_INPUT = {
     CONF_TOKEN_KEY: "patchmon_test_key",
     CONF_TOKEN_SECRET: "test-secret",
     CONF_VERIFY_SSL: True,
+    # The frontend always sends every switch of the section.
+    CONF_OPTIONAL_ENTITIES: dict.fromkeys(ENABLE_OPTIONS, False),
 }
 
 # (mock kwargs for GET /hosts, expected error key)
@@ -74,7 +76,7 @@ async def test_user_flow(hass: HomeAssistant, mock_hosts: AiohttpClientMocker) -
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "PatchMon (patchmon.example)"
     assert result["data"] == ENTRY_DATA
-    assert result["options"] == {}
+    assert result["options"] == dict.fromkeys(ENABLE_OPTIONS, False)
     assert result["result"].unique_id == URL
 
 
@@ -93,7 +95,10 @@ async def test_user_flow_with_area(
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["data"] == ENTRY_DATA
-    assert result["options"] == {CONF_AREA: area.id}
+    assert result["options"] == {
+        **dict.fromkeys(ENABLE_OPTIONS, False),
+        CONF_AREA: area.id,
+    }
 
 
 @pytest.mark.parametrize(("mock_kwargs", "error"), ERROR_CASES)
@@ -505,3 +510,30 @@ async def test_new_hosts_follow_switch(
 
     assert _disabled(entity_registry, "sensor", "installed_packages") == [False] * 4
     assert _disabled(entity_registry, "sensor", "installed_kernel") == [True] * 4
+
+
+async def test_user_flow_with_optional_entities(
+    hass: HomeAssistant,
+    mock_hosts: AiohttpClientMocker,
+    entity_registry: er.EntityRegistry,
+) -> None:
+    """Switches chosen at setup are stored and create the entities enabled."""
+    result = await _start_user_flow(hass)
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {
+            **USER_INPUT,
+            CONF_OPTIONAL_ENTITIES: {
+                **dict.fromkeys(ENABLE_OPTIONS, False),
+                "enable_update_entity": True,
+            },
+        },
+    )
+    await hass.async_block_till_done()
+
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["data"] == ENTRY_DATA
+    assert result["options"]["enable_update_entity"] is True
+    assert _disabled(entity_registry, "update", "updates") == [False] * 4
+    assert _disabled(entity_registry, "sensor", "running_kernel") == [True] * 4

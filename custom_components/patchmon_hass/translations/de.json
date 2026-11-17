@@ -17,6 +17,18 @@
           "token_secret": "Das Secret des API-Tokens. PatchMon zeigt es nur einmal beim Anlegen.",
           "verify_ssl": "Gilt nur für https-Adressen. Ausschalten, wenn der Server ein selbstsigniertes Zertifikat nutzt.",
           "area": "Neue Hosts und der PatchMon-Server kommen beim Anlegen in diesen Bereich. Später von Hand verschobene Geräte bleiben, wo sie sind."
+        },
+        "sections": {
+          "optional_entities": {
+            "name": "Optionale Entitäten",
+            "description": "Aktiviert die Entität bei allen Hosts. Später unter Konfigurieren änderbar.",
+            "data": {
+              "enable_update_entity": "Updates (Update-Entität mit Paketliste)",
+              "enable_running_kernel": "Laufender Kernel",
+              "enable_installed_kernel": "Installierter Kernel",
+              "enable_installed_packages": "Installierte Pakete"
+            }
+          }
         }
       },
       "reauth_confirm": {

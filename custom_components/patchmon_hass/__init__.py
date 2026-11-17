@@ -10,10 +10,12 @@ from homeassistant.const import CONF_URL, Platform
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import area_registry as ar
 from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import issue_registry as ir
 
-from .const import CONF_AREA, DOMAIN
+from .const import CONF_AREA, DOMAIN, ENABLE_OPTIONS
 from .coordinator import ISSUE_GROUPS_WITHOUT_HOSTS, PatchMonCoordinator
+from .entity import async_entities_for_option
 from .helpers import create_client
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.UPDATE]
@@ -57,7 +59,26 @@ async def async_setup_entry(hass: HomeAssistant, entry: PatchMonConfigEntry) -> 
     entry.async_on_unload(coordinator.async_add_listener(_async_sync))
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    _async_enable_switched_on(hass, entry)
     return True
+
+
+@callback
+def _async_enable_switched_on(hass: HomeAssistant, entry: PatchMonConfigEntry) -> None:
+    """Enable optional entities that the integration disabled, if switched on.
+
+    Home Assistant restores entities of a removed entry (kept 30 days) with
+    their old disabled state, which can contradict the switches chosen when
+    the entry is set up again. Entities disabled by the user stay disabled.
+    Home Assistant reloads the entry by itself after enabling.
+    """
+    registry = er.async_get(hass)
+    for option in ENABLE_OPTIONS:
+        if not entry.options.get(option, False):
+            continue
+        for entity in async_entities_for_option(hass, entry, option):
+            if entity.disabled_by is er.RegistryEntryDisabler.INTEGRATION:
+                registry.async_update_entity(entity.entity_id, disabled_by=None)
 
 
 @callback

@@ -17,6 +17,18 @@
           "token_secret": "Le secret du jeton d'API. PatchMon ne l'affiche qu'une seule fois, à la création du jeton.",
           "verify_ssl": "Ne s'applique qu'aux adresses https. À désactiver si le serveur utilise un certificat auto-signé.",
           "area": "Les nouveaux hôtes et le serveur PatchMon sont placés dans cette pièce lors de leur ajout. Les appareils déplacés ensuite restent où vous les avez mis."
+        },
+        "sections": {
+          "optional_entities": {
+            "name": "Entités facultatives",
+            "description": "Active l'entité sur tous les hôtes. Modifiable plus tard sous Configurer.",
+            "data": {
+              "enable_update_entity": "Mises à jour (entité de mise à jour avec la liste des paquets)",
+              "enable_running_kernel": "Noyau en cours d'exécution",
+              "enable_installed_kernel": "Noyau installé",
+              "enable_installed_packages": "Paquets installés"
+            }
+          }
         }
       },
       "reauth_confirm": {

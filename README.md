@@ -56,6 +56,7 @@ repository:
 | Token key / secret | from the token you created above |
 | Verify SSL certificate | only applies to https; turn off for a self-signed certificate |
 | Area | optional: new hosts and the server device are placed in this area |
+| Optional entities | one switch each for updates, running kernel, installed kernel and installed packages on every host |
 
 The area only applies when a device is added, so devices you move later stay
 where you put them.
