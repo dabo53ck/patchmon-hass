@@ -19,6 +19,7 @@ from homeassistant.helpers.typing import StateType
 
 from . import PatchMonConfigEntry
 from .api import Host
+from .const import UPDATE_STATES
 from .coordinator import HostDetails, PatchMonCoordinator, PatchMonData
 from .entity import (
     PatchMonHostDetailEntity,
@@ -29,7 +30,6 @@ from .entity import (
 
 PARALLEL_UPDATES = 0
 
-UPDATE_STATES = ["up_to_date", "updates_pending", "security_required"]
 # Longest state Home Assistant accepts.
 MAX_STATE_LENGTH = 255
 

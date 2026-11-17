@@ -217,12 +217,103 @@
     },
     "packages_failed": {
       "message": "Could not load the package list: {error}"
+    },
+    "not_loaded": {
+      "message": "No PatchMon entry is loaded."
+    },
+    "entry_not_found": {
+      "message": "{entry_id} is not a PatchMon entry."
+    },
+    "device_not_found": {
+      "message": "{device_id} is not a PatchMon device."
+    },
+    "not_a_host": {
+      "message": "Select a host, not the PatchMon server."
+    },
+    "host_not_found": {
+      "message": "PatchMon does not know this host any more."
+    },
+    "refresh_failed": {
+      "message": "Could not refresh PatchMon: {error}"
     }
   },
   "issues": {
     "host_groups_without_hosts": {
       "title": "Host group filter of {title} matches no host",
       "description": "The host group filter of {title} contains groups without any host in PatchMon: {groups}. The groups were deleted or are empty. Their hosts are kept in Home Assistant but are unavailable. Open **Configure** on the integration entry and update the host group filter."
+    },
+    "unsupported_answer": {
+      "title": "{title}: answer from PatchMon not understood",
+      "description": "The PatchMon server of {title} answers in a way this version of the integration does not understand ({error}). Usually the PatchMon version is not supported yet, or the server address points to something else, for example the web interface behind a proxy. Check that the server runs PatchMon 2.x and that the integration is up to date; use **Reconfigure** to fix the address. This message goes away by itself once an answer is understood again."
+    }
+  },
+  "selector": {
+    "update_status": {
+      "options": {
+        "up_to_date": "Up to date",
+        "updates_pending": "Updates pending",
+        "security_required": "Security update required"
+      }
+    }
+  },
+  "services": {
+    "get_hosts": {
+      "name": "Get hosts",
+      "description": "Returns the hosts of the last update with their patch status. Reads nothing from PatchMon; all filters given must match.",
+      "fields": {
+        "config_entry_id": {
+          "name": "PatchMon server",
+          "description": "Only hosts of this server. Leave empty for all."
+        },
+        "update_status": {
+          "name": "Update status",
+          "description": "Only hosts with one of these update statuses."
+        },
+        "restart_required": {
+          "name": "Restart required",
+          "description": "Only hosts that need a restart (on) or do not (off)."
+        },
+        "reporting": {
+          "name": "Reporting",
+          "description": "Only hosts whose agent reports in time (on) or is overdue or stale (off)."
+        }
+      }
+    },
+    "get_packages": {
+      "name": "Get packages",
+      "description": "Reads the packages of one host from PatchMon and returns them, security updates first.",
+      "fields": {
+        "device_id": {
+          "name": "Host",
+          "description": "The host device."
+        },
+        "updates_only": {
+          "name": "Only with updates",
+          "description": "Only packages with a pending update."
+        },
+        "security_only": {
+          "name": "Only security updates",
+          "description": "Only packages with a security update."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "At most this many packages."
+        },
+        "include_descriptions": {
+          "name": "Include descriptions",
+          "description": "Add the package descriptions; makes the answer much longer."
+        }
+      }
+    },
+    "refresh": {
+      "name": "Refresh",
+      "description": "Reads the host list and host details from PatchMon now. The agents are not asked to report: values only change after their next check-in.",
+      "fields": {
+        "device_id": {
+          "name": "Devices",
+          "description": "Hosts whose details are read again; the PatchMon server device means all of its hosts. Leave empty for all."
+        }
+      }
     }
   }
 }

@@ -9,16 +9,25 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_URL, Platform
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import area_registry as ar
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import issue_registry as ir
+from homeassistant.helpers.typing import ConfigType
 
 from .const import CONF_AREA, DOMAIN, ENABLE_OPTIONS
-from .coordinator import ISSUE_GROUPS_WITHOUT_HOSTS, PatchMonCoordinator
+from .coordinator import (
+    ISSUE_GROUPS_WITHOUT_HOSTS,
+    ISSUE_UNSUPPORTED,
+    PatchMonCoordinator,
+)
 from .entity import async_entities_for_option
 from .helpers import create_client
+from .services import async_setup_services
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.UPDATE]
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 
 @dataclass(slots=True)
@@ -29,6 +38,12 @@ class PatchMonRuntimeData:
 
 
 type PatchMonConfigEntry = ConfigEntry[PatchMonRuntimeData]
+
+
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+    """Register the actions; they report clearly when no entry is loaded."""
+    async_setup_services(hass)
+    return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: PatchMonConfigEntry) -> bool:
@@ -164,7 +179,6 @@ async def async_remove_config_entry_device(
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: PatchMonConfigEntry) -> None:
-    """Drop the repair issue of a removed entry."""
-    ir.async_delete_issue(
-        hass, DOMAIN, f"{ISSUE_GROUPS_WITHOUT_HOSTS}_{entry.entry_id}"
-    )
+    """Drop the repair issues of a removed entry."""
+    for issue in (ISSUE_GROUPS_WITHOUT_HOSTS, ISSUE_UNSUPPORTED):
+        ir.async_delete_issue(hass, DOMAIN, f"{issue}_{entry.entry_id}")

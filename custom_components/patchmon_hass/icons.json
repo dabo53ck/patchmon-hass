@@ -66,5 +66,16 @@
         "default": "mdi:shield-alert-outline"
       }
     }
+  },
+  "services": {
+    "get_hosts": {
+      "service": "mdi:server-network"
+    },
+    "get_packages": {
+      "service": "mdi:package-variant"
+    },
+    "refresh": {
+      "service": "mdi:refresh"
+    }
   }
 }

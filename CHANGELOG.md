@@ -26,3 +26,12 @@ pre-release identifiers included (`0.1.0-rc.1`, …).
   requiring a restart, hosts not reporting, pending and security updates.
 - Repair issue when a group of the host group filter has no hosts any more;
   devices are kept then instead of being removed.
+- Actions `get_hosts` (hosts with their patch status, filterable),
+  `get_packages` (packages of one host) and `refresh` (read PatchMon now).
+- Diagnostics for the entry and every device; the server address, token,
+  host names, IP addresses and machine IDs are removed.
+- Repair issue when PatchMon answers in a way the integration does not
+  understand; it goes away by itself once an answer is understood again.
+- Marketplace category "Computers & network › Monitoring" and connectivity
+  "Local network" for the Marketplace in Home Assistant 2026.11.
+- Quality scale checklist (`quality_scale.yaml`).

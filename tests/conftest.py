@@ -27,6 +27,7 @@ FIXTURES = Path(__file__).parent / "fixtures"
 URL = "http://patchmon.example:3000"
 API = f"{URL}/api/v1/api"
 HOST_01 = "00000000-0000-4000-8000-a00000000001"
+ENTRY_ID = "01JPATCHMONTESTENTRY000000"
 
 ENTRY_DATA = {
     CONF_URL: URL,
@@ -57,7 +58,7 @@ def mock_config_entry() -> MockConfigEntry:
         title="PatchMon (patchmon.example)",
         unique_id=URL,
         data=dict(ENTRY_DATA),
-        entry_id="01JPATCHMONTESTENTRY000000",
+        entry_id=ENTRY_ID,
     )
 
 

@@ -217,12 +217,103 @@
     },
     "packages_failed": {
       "message": "Impossible de charger la liste des paquets : {error}"
+    },
+    "not_loaded": {
+      "message": "Aucune entrée PatchMon n’est chargée."
+    },
+    "entry_not_found": {
+      "message": "{entry_id} n’est pas une entrée PatchMon."
+    },
+    "device_not_found": {
+      "message": "{device_id} n’est pas un appareil PatchMon."
+    },
+    "not_a_host": {
+      "message": "Sélectionnez un hôte, pas le serveur PatchMon."
+    },
+    "host_not_found": {
+      "message": "PatchMon ne connaît plus cet hôte."
+    },
+    "refresh_failed": {
+      "message": "Impossible d’actualiser PatchMon : {error}"
     }
   },
   "issues": {
     "host_groups_without_hosts": {
       "title": "Le filtre de groupes d'hôtes de {title} ne correspond à aucun hôte",
       "description": "Le filtre de groupes d'hôtes de {title} contient des groupes sans aucun hôte dans PatchMon : {groups}. Les groupes ont été supprimés ou sont vides. Leurs hôtes sont conservés dans Home Assistant mais indisponibles. Ouvrez **Configurer** sur l'entrée de l'intégration et mettez à jour le filtre de groupes d'hôtes."
+    },
+    "unsupported_answer": {
+      "title": "{title} : réponse de PatchMon non comprise",
+      "description": "Le serveur PatchMon de {title} répond d’une manière que cette version de l’intégration ne comprend pas ({error}). En général, la version de PatchMon n’est pas encore prise en charge, ou l’adresse du serveur pointe vers autre chose, par exemple l’interface web derrière un proxy. Vérifiez que le serveur utilise PatchMon 2.x et que l’intégration est à jour ; corrigez l’adresse avec **Reconfigurer**. Ce message disparaît de lui-même dès qu’une réponse est de nouveau comprise."
+    }
+  },
+  "selector": {
+    "update_status": {
+      "options": {
+        "up_to_date": "À jour",
+        "updates_pending": "Mises à jour en attente",
+        "security_required": "Mise à jour de sécurité requise"
+      }
+    }
+  },
+  "services": {
+    "get_hosts": {
+      "name": "Obtenir les hôtes",
+      "description": "Renvoie les hôtes de la dernière mise à jour avec leur état des correctifs. N’interroge pas PatchMon ; tous les filtres indiqués doivent correspondre.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Serveur PatchMon",
+          "description": "Seulement les hôtes de ce serveur. Laisser vide pour tous."
+        },
+        "update_status": {
+          "name": "État des mises à jour",
+          "description": "Seulement les hôtes ayant l’un de ces états."
+        },
+        "restart_required": {
+          "name": "Redémarrage requis",
+          "description": "Seulement les hôtes qui doivent redémarrer (activé) ou non (désactivé)."
+        },
+        "reporting": {
+          "name": "Rapporte",
+          "description": "Seulement les hôtes dont l’agent rapporte à temps (activé) ou est en retard ou obsolète (désactivé)."
+        }
+      }
+    },
+    "get_packages": {
+      "name": "Obtenir les paquets",
+      "description": "Lit les paquets d’un hôte dans PatchMon et les renvoie, mises à jour de sécurité en premier.",
+      "fields": {
+        "device_id": {
+          "name": "Hôte",
+          "description": "L’appareil de l’hôte."
+        },
+        "updates_only": {
+          "name": "Seulement avec mises à jour",
+          "description": "Seulement les paquets avec une mise à jour en attente."
+        },
+        "security_only": {
+          "name": "Seulement les mises à jour de sécurité",
+          "description": "Seulement les paquets avec une mise à jour de sécurité."
+        },
+        "limit": {
+          "name": "Limite",
+          "description": "Au plus ce nombre de paquets."
+        },
+        "include_descriptions": {
+          "name": "Inclure les descriptions",
+          "description": "Ajoute les descriptions des paquets ; la réponse devient beaucoup plus longue."
+        }
+      }
+    },
+    "refresh": {
+      "name": "Actualiser",
+      "description": "Lit maintenant la liste des hôtes et leurs détails dans PatchMon. Les agents ne sont pas invités à rapporter : les valeurs ne changent qu’après leur prochain rapport.",
+      "fields": {
+        "device_id": {
+          "name": "Appareils",
+          "description": "Hôtes dont les détails sont relus ; l’appareil du serveur PatchMon vaut pour tous ses hôtes. Laisser vide pour tous."
+        }
+      }
     }
   }
 }
