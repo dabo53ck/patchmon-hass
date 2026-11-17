@@ -79,6 +79,18 @@
           "scan_interval": "Con qué frecuencia Home Assistant lee la lista de hosts de PatchMon. Esto no hace que los agentes informen más a menudo.",
           "host_groups": "Incluir solo los hosts de estos grupos. Déjalo vacío para todos los hosts.",
           "area": "Los hosts nuevos y el servidor PatchMon se asignan a esta área al añadirse. Los dispositivos que muevas después se quedan donde los pongas."
+        },
+        "sections": {
+          "optional_entities": {
+            "name": "Entidades opcionales",
+            "description": "Al cambiarlo, activa o desactiva la entidad en todos los hosts. Después puedes seguir cambiando entidades sueltas a mano.",
+            "data": {
+              "enable_update_entity": "Actualizaciones (entidad de actualización con la lista de paquetes)",
+              "enable_running_kernel": "Kernel en ejecución",
+              "enable_installed_kernel": "Kernel instalado",
+              "enable_installed_packages": "Paquetes instalados"
+            }
+          }
         }
       }
     },

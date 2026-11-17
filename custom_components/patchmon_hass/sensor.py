@@ -12,7 +12,7 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import EntityCategory
+from homeassistant.const import EntityCategory, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.typing import StateType
@@ -232,6 +232,7 @@ class PatchMonHostSensor(PatchMonHostEntity, SensorEntity):
         """Bind the description to a host."""
         super().__init__(coordinator, host_id, description.key)
         self.entity_description = description
+        self._enable_by_option(Platform.SENSOR, description.key)
 
     @property
     def native_value(self) -> StateType | datetime:
@@ -253,6 +254,7 @@ class PatchMonDetailSensor(PatchMonHostDetailEntity, SensorEntity):
         """Bind the description to a host."""
         super().__init__(coordinator, host_id, description.key)
         self.entity_description = description
+        self._enable_by_option(Platform.SENSOR, description.key)
 
     @property
     def native_value(self) -> StateType | datetime:

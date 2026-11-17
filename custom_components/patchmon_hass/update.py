@@ -9,6 +9,7 @@ The package list is shown as release notes; nothing can be installed.
 from __future__ import annotations
 
 from homeassistant.components.update import UpdateEntity, UpdateEntityFeature
+from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
@@ -73,6 +74,7 @@ class PatchMonUpdate(PatchMonHostEntity, UpdateEntity):
     def __init__(self, coordinator: PatchMonCoordinator, host_id: str) -> None:
         """Bind to a host."""
         super().__init__(coordinator, host_id, "updates")
+        self._enable_by_option(Platform.UPDATE, "updates")
 
     @property
     def latest_version(self) -> str | None:

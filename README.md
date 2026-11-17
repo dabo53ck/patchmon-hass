@@ -60,8 +60,12 @@ repository:
 The area only applies when a device is added, so devices you move later stay
 where you put them.
 
-Options (polling interval, host group filter, area) are under **Configure**
-on the integration entry. If the token is changed or expires, Home Assistant
+Options (polling interval, host group filter, area, optional entities) are
+under **Configure** on the integration entry. The four entities that are
+disabled by default (updates, running kernel, installed kernel, installed
+packages) each have a switch there: switching it enables or disables that
+entity on every host, and new hosts get it as the switch says. Single
+entities can still be switched by hand afterwards. If the token is changed or expires, Home Assistant
 asks for a new one; **Reconfigure** changes the address or token without
 losing anything (leave the secret empty to keep the current one).
 

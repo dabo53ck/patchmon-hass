@@ -15,6 +15,8 @@ from homeassistant.config_entries import (
 )
 from homeassistant.const import CONF_URL, CONF_VERIFY_SSL
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.data_entry_flow import section
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.selector import (
     AreaSelector,
     BooleanSelector,
@@ -42,11 +44,13 @@ from .api import (
 from .const import (
     CONF_AREA,
     CONF_HOST_GROUPS,
+    CONF_OPTIONAL_ENTITIES,
     CONF_SCAN_INTERVAL,
     CONF_TOKEN_KEY,
     CONF_TOKEN_SECRET,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
+    ENABLE_OPTIONS,
     MAX_SCAN_INTERVAL,
     MIN_SCAN_INTERVAL,
 )
@@ -223,8 +227,34 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
 
+@callback
+def _async_apply_enable_option(
+    hass: HomeAssistant, entry: PatchMonConfigEntry, option: str, enabled: bool
+) -> None:
+    """Enable or disable the entity of ``option`` on every host.
+
+    Runs only when the option is switched, so single entities switched by
+    hand stay as they are while other options are saved.
+    """
+    platform, key = ENABLE_OPTIONS[option]
+    registry = er.async_get(hass)
+    for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
+        if entity.domain != platform or not entity.unique_id.endswith(f"_{key}"):
+            continue
+        if enabled and entity.disabled_by in (
+            er.RegistryEntryDisabler.INTEGRATION,
+            er.RegistryEntryDisabler.USER,
+        ):
+            registry.async_update_entity(entity.entity_id, disabled_by=None)
+        elif not enabled and entity.disabled_by is None:
+            registry.async_update_entity(
+                entity.entity_id,
+                disabled_by=er.RegistryEntryDisabler.INTEGRATION,
+            )
+
+
 class PatchMonOptionsFlow(OptionsFlowWithReload):
-    """Polling interval and host group filter."""
+    """Polling interval, host group filter, area and optional entities."""
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -237,6 +267,14 @@ class PatchMonOptionsFlow(OptionsFlowWithReload):
             }
             if area := user_input.get(CONF_AREA):
                 options[CONF_AREA] = area
+            switches = user_input.get(CONF_OPTIONAL_ENTITIES, {})
+            for option in ENABLE_OPTIONS:
+                enabled = bool(switches.get(option, False))
+                options[option] = enabled
+                if enabled != self.config_entry.options.get(option, False):
+                    _async_apply_enable_option(
+                        self.hass, self.config_entry, option, enabled
+                    )
             return self.async_create_entry(data=options)
 
         errors: dict[str, str] = {}
@@ -290,6 +328,18 @@ class PatchMonOptionsFlow(OptionsFlowWithReload):
                         "suggested_value": self.config_entry.options.get(CONF_AREA)
                     },
                 ): AreaSelector(),
+                vol.Required(CONF_OPTIONAL_ENTITIES): section(
+                    vol.Schema(
+                        {
+                            vol.Required(
+                                option,
+                                default=self.config_entry.options.get(option, False),
+                            ): BooleanSelector()
+                            for option in ENABLE_OPTIONS
+                        }
+                    ),
+                    {"collapsed": False},
+                ),
             }
         )
         return self.async_show_form(step_id="init", data_schema=schema, errors=errors)

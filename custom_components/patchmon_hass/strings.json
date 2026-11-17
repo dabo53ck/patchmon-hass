@@ -79,6 +79,18 @@
           "scan_interval": "How often Home Assistant reads the host list from PatchMon. This does not make the agents report more often.",
           "host_groups": "Only include hosts in these groups. Leave empty for all hosts.",
           "area": "New hosts and the PatchMon server are placed in this area when they are added. Devices you move later stay where you put them."
+        },
+        "sections": {
+          "optional_entities": {
+            "name": "Optional entities",
+            "description": "Enables or disables the entity on every host when switched. Single entities can still be switched by hand afterwards.",
+            "data": {
+              "enable_update_entity": "Updates (update entity with the package list)",
+              "enable_running_kernel": "Running kernel",
+              "enable_installed_kernel": "Installed kernel",
+              "enable_installed_packages": "Installed packages"
+            }
+          }
         }
       }
     },

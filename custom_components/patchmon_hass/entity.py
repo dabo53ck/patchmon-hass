@@ -12,7 +12,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .api import Host
-from .const import DOMAIN
+from .const import DOMAIN, ENABLE_OPTIONS
 from .coordinator import HostDetails, PatchMonCoordinator
 
 if TYPE_CHECKING:
@@ -33,6 +33,15 @@ class PatchMonHostEntity(CoordinatorEntity[PatchMonCoordinator]):
         self._attr_translation_key = key
         self._attr_unique_id = f"{host_id}_{key}"
         self._attr_device_info = DeviceInfo(identifiers={(DOMAIN, host_id)})
+
+    def _enable_by_option(self, platform: str, key: str) -> None:
+        """Take the enabled default from the options, for optional entities."""
+        for option, target in ENABLE_OPTIONS.items():
+            if target == (platform, key):
+                options = self.coordinator.config_entry.options
+                self._attr_entity_registry_enabled_default = bool(
+                    options.get(option, False)
+                )
 
     @property
     def available(self) -> bool:

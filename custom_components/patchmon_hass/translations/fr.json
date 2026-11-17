@@ -79,6 +79,18 @@
           "scan_interval": "Fréquence à laquelle Home Assistant lit la liste des hôtes dans PatchMon. Les agents ne remontent pas leurs données plus souvent pour autant.",
           "host_groups": "N'inclure que les hôtes de ces groupes. Laisser vide pour tous les hôtes.",
           "area": "Les nouveaux hôtes et le serveur PatchMon sont placés dans cette pièce lors de leur ajout. Les appareils déplacés ensuite restent où vous les avez mis."
+        },
+        "sections": {
+          "optional_entities": {
+            "name": "Entités facultatives",
+            "description": "Active ou désactive l'entité sur tous les hôtes lors du changement. Vous pouvez ensuite toujours modifier des entités isolées à la main.",
+            "data": {
+              "enable_update_entity": "Mises à jour (entité de mise à jour avec la liste des paquets)",
+              "enable_running_kernel": "Noyau en cours d'exécution",
+              "enable_installed_kernel": "Noyau installé",
+              "enable_installed_packages": "Paquets installés"
+            }
+          }
         }
       }
     },
