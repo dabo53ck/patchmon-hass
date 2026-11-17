@@ -441,9 +441,9 @@
       'translation_key': 'update_status',
       'unique_id': '00000000-0000-4000-8000-a00000000004_update_status',
     }),
-    'sensor.patchmon_patchmon_example_hosts': dict({
+    'sensor.patchmon_hosts': dict({
       'attributes': dict({
-        'friendly_name': 'PatchMon (patchmon.example) Hosts',
+        'friendly_name': 'PatchMon Hosts',
         'state_class': 'measurement',
       }),
       'device_class': None,
@@ -453,9 +453,9 @@
       'translation_key': 'hosts',
       'unique_id': '01JPATCHMONTESTENTRY000000_hosts',
     }),
-    'sensor.patchmon_patchmon_example_hosts_not_reporting': dict({
+    'sensor.patchmon_hosts_not_reporting': dict({
       'attributes': dict({
-        'friendly_name': 'PatchMon (patchmon.example) Hosts not reporting',
+        'friendly_name': 'PatchMon Hosts not reporting',
         'state_class': 'measurement',
       }),
       'device_class': None,
@@ -465,9 +465,9 @@
       'translation_key': 'hosts_not_reporting',
       'unique_id': '01JPATCHMONTESTENTRY000000_hosts_not_reporting',
     }),
-    'sensor.patchmon_patchmon_example_hosts_requiring_restart': dict({
+    'sensor.patchmon_hosts_requiring_restart': dict({
       'attributes': dict({
-        'friendly_name': 'PatchMon (patchmon.example) Hosts requiring restart',
+        'friendly_name': 'PatchMon Hosts requiring restart',
         'state_class': 'measurement',
       }),
       'device_class': None,
@@ -477,9 +477,9 @@
       'translation_key': 'hosts_requiring_restart',
       'unique_id': '01JPATCHMONTESTENTRY000000_hosts_requiring_restart',
     }),
-    'sensor.patchmon_patchmon_example_hosts_with_security_updates': dict({
+    'sensor.patchmon_hosts_with_security_updates': dict({
       'attributes': dict({
-        'friendly_name': 'PatchMon (patchmon.example) Hosts with security updates',
+        'friendly_name': 'PatchMon Hosts with security updates',
         'state_class': 'measurement',
       }),
       'device_class': None,
@@ -489,9 +489,9 @@
       'translation_key': 'hosts_with_security_updates',
       'unique_id': '01JPATCHMONTESTENTRY000000_hosts_with_security_updates',
     }),
-    'sensor.patchmon_patchmon_example_hosts_with_updates': dict({
+    'sensor.patchmon_hosts_with_updates': dict({
       'attributes': dict({
-        'friendly_name': 'PatchMon (patchmon.example) Hosts with updates',
+        'friendly_name': 'PatchMon Hosts with updates',
         'state_class': 'measurement',
       }),
       'device_class': None,
@@ -501,9 +501,9 @@
       'translation_key': 'hosts_with_updates',
       'unique_id': '01JPATCHMONTESTENTRY000000_hosts_with_updates',
     }),
-    'sensor.patchmon_patchmon_example_total_pending_updates': dict({
+    'sensor.patchmon_total_pending_updates': dict({
       'attributes': dict({
-        'friendly_name': 'PatchMon (patchmon.example) Total pending updates',
+        'friendly_name': 'PatchMon Total pending updates',
         'state_class': 'measurement',
       }),
       'device_class': None,
@@ -513,9 +513,9 @@
       'translation_key': 'total_updates',
       'unique_id': '01JPATCHMONTESTENTRY000000_total_updates',
     }),
-    'sensor.patchmon_patchmon_example_total_security_updates': dict({
+    'sensor.patchmon_total_security_updates': dict({
       'attributes': dict({
-        'friendly_name': 'PatchMon (patchmon.example) Total security updates',
+        'friendly_name': 'PatchMon Total security updates',
         'state_class': 'measurement',
       }),
       'device_class': None,

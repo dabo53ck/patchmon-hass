@@ -12,7 +12,7 @@
           "area": "Área"
         },
         "data_description": {
-          "url": "Dirección de la interfaz web de PatchMon, por ejemplo http://192.168.1.10:3000 o https://patchmon.example.com",
+          "url": "Dirección de la interfaz web de PatchMon, por ejemplo http://192.168.1.10:3000. También funcionan direcciones https.",
           "token_key": "La clave del token de API",
           "token_secret": "El secreto del token de API. PatchMon solo lo muestra una vez, al crear el token.",
           "verify_ssl": "Solo se aplica a direcciones https. Desactívalo si el servidor usa un certificado autofirmado.",
@@ -41,7 +41,7 @@
           "verify_ssl": "Verificar el certificado SSL"
         },
         "data_description": {
-          "url": "Dirección de la interfaz web de PatchMon, por ejemplo http://192.168.1.10:3000 o https://patchmon.example.com",
+          "url": "Dirección de la interfaz web de PatchMon, por ejemplo http://192.168.1.10:3000. También funcionan direcciones https.",
           "token_key": "La clave del token de API",
           "token_secret": "Déjalo vacío para conservar el secreto actual.",
           "verify_ssl": "Solo se aplica a direcciones https. Desactívalo si el servidor usa un certificado autofirmado."

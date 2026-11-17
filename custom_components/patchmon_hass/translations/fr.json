@@ -12,7 +12,7 @@
           "area": "Pièce"
         },
         "data_description": {
-          "url": "Adresse de l'interface web de PatchMon, par exemple http://192.168.1.10:3000 ou https://patchmon.example.com",
+          "url": "Adresse de l'interface web de PatchMon, par exemple http://192.168.1.10:3000. Les adresses https fonctionnent aussi.",
           "token_key": "La clé du jeton d'API",
           "token_secret": "Le secret du jeton d'API. PatchMon ne l'affiche qu'une seule fois, à la création du jeton.",
           "verify_ssl": "Ne s'applique qu'aux adresses https. À désactiver si le serveur utilise un certificat auto-signé.",
@@ -41,7 +41,7 @@
           "verify_ssl": "Vérifier le certificat SSL"
         },
         "data_description": {
-          "url": "Adresse de l'interface web de PatchMon, par exemple http://192.168.1.10:3000 ou https://patchmon.example.com",
+          "url": "Adresse de l'interface web de PatchMon, par exemple http://192.168.1.10:3000. Les adresses https fonctionnent aussi.",
           "token_key": "La clé du jeton d'API",
           "token_secret": "Laissez vide pour conserver le secret actuel.",
           "verify_ssl": "Ne s'applique qu'aux adresses https. À désactiver si le serveur utilise un certificat auto-signé."

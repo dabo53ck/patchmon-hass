@@ -134,7 +134,7 @@ async def test_devices(
 
     server = _device(device_registry, mock_config_entry, mock_config_entry.entry_id)
     assert server is not None
-    assert server.name == "PatchMon (patchmon.example)"
+    assert server.name == "PatchMon"
     assert server.entry_type is dr.DeviceEntryType.SERVICE
     assert server.configuration_url == URL
 

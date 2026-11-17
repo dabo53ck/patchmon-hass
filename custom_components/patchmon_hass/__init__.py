@@ -43,7 +43,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: PatchMonConfigEntry) -> 
         hass,
         entry,
         identifiers={(DOMAIN, entry.entry_id)},
-        name=entry.title,
+        name="PatchMon",
         manufacturer="PatchMon",
         entry_type=dr.DeviceEntryType.SERVICE,
         configuration_url=entry.data[CONF_URL],
@@ -70,7 +70,8 @@ def _async_get_or_create_device(
     restored devices that had an area, stay where they are.
     """
     registry = dr.async_get(hass)
-    is_new = registry.async_get_device(identifiers=device["identifiers"]) is None
+    (identifier,) = device["identifiers"]
+    is_new = registry.async_get_device_by_identifier(identifier, entry.entry_id) is None
     entry_device = registry.async_get_or_create(
         config_entry_id=entry.entry_id, **device
     )

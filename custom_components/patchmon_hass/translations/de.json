@@ -12,7 +12,7 @@
           "area": "Bereich"
         },
         "data_description": {
-          "url": "Adresse der PatchMon-Weboberfläche, zum Beispiel http://192.168.1.10:3000 oder https://patchmon.example.com",
+          "url": "Adresse der PatchMon-Weboberfläche, zum Beispiel http://192.168.1.10:3000. https-Adressen gehen ebenso.",
           "token_key": "Der Key des API-Tokens",
           "token_secret": "Das Secret des API-Tokens. PatchMon zeigt es nur einmal beim Anlegen.",
           "verify_ssl": "Gilt nur für https-Adressen. Ausschalten, wenn der Server ein selbstsigniertes Zertifikat nutzt.",
@@ -41,7 +41,7 @@
           "verify_ssl": "SSL-Zertifikat prüfen"
         },
         "data_description": {
-          "url": "Adresse der PatchMon-Weboberfläche, zum Beispiel http://192.168.1.10:3000 oder https://patchmon.example.com",
+          "url": "Adresse der PatchMon-Weboberfläche, zum Beispiel http://192.168.1.10:3000. https-Adressen gehen ebenso.",
           "token_key": "Der Key des API-Tokens",
           "token_secret": "Leer lassen, um das bisherige Secret zu behalten.",
           "verify_ssl": "Gilt nur für https-Adressen. Ausschalten, wenn der Server ein selbstsigniertes Zertifikat nutzt."
