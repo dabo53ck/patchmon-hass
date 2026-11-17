@@ -140,16 +140,17 @@ def _resolve_device(
 ) -> tuple[PatchMonConfigEntry, str | None]:
     """Entry and host ID of a PatchMon device; the host ID is None for the server."""
     device = dr.async_get(hass).async_get(device_id)
-    if device is not None:
-        for entry_id in device.config_entries:
-            entry = hass.config_entries.async_get_entry(entry_id)
-            if entry is None or entry.domain != DOMAIN:
-                continue
-            if entry.state is not ConfigEntryState.LOADED:
-                raise _not_loaded()
-            for domain, ident in device.identifiers:
-                if domain == DOMAIN:
-                    return entry, None if ident == entry.entry_id else ident
+    entry = (
+        hass.config_entries.async_get_entry(device.config_entry_id)
+        if device is not None
+        else None
+    )
+    if device is not None and entry is not None and entry.domain == DOMAIN:
+        if entry.state is not ConfigEntryState.LOADED:
+            raise _not_loaded()
+        for domain, ident in device.identifiers:
+            if domain == DOMAIN:
+                return entry, None if ident == entry.entry_id else ident
     raise ServiceValidationError(
         translation_domain=DOMAIN,
         translation_key="device_not_found",
