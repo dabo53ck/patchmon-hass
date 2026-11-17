@@ -31,7 +31,7 @@
       },
       "reconfigure": {
         "title": "Modifier la connexion à PatchMon",
-        "description": "Les appareils et les entités sont conservés. Saisissez à nouveau le secret du jeton.",
+        "description": "Les appareils et les entités sont conservés.",
         "data": {
           "url": "Adresse du serveur",
           "token_key": "Clé du jeton",
@@ -41,7 +41,7 @@
         "data_description": {
           "url": "Adresse de l'interface web de PatchMon, par exemple http://192.168.1.10:3000",
           "token_key": "La clé du jeton d'API",
-          "token_secret": "Le secret du jeton d'API",
+          "token_secret": "Laissez vide pour conserver le secret actuel.",
           "verify_ssl": "À désactiver uniquement pour un serveur avec un certificat auto-signé"
         }
       }

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 from typing import Any
 from unittest.mock import patch
 
@@ -238,6 +239,30 @@ async def test_reconfigure_same_address(
 
     assert result["reason"] == "reconfigure_successful"
     assert mock_config_entry.data[CONF_TOKEN_SECRET] == "rotated"
+
+
+async def test_reconfigure_keeps_secret_when_empty(
+    hass: HomeAssistant,
+    mock_config_entry: MockConfigEntry,
+    aioclient_mock: AiohttpClientMocker,
+) -> None:
+    """An empty secret field keeps the stored secret."""
+    mock_config_entry.add_to_hass(hass)
+    result = await mock_config_entry.start_reconfigure_flow(hass)
+    aioclient_mock.get(f"{API}/hosts", json=load_fixture("hosts.json"))
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {**ENTRY_DATA, CONF_TOKEN_KEY: "new-key", CONF_TOKEN_SECRET: ""},
+    )
+
+    assert result["reason"] == "reconfigure_successful"
+    assert mock_config_entry.data[CONF_TOKEN_KEY] == "new-key"
+    assert mock_config_entry.data[CONF_TOKEN_SECRET] == ENTRY_DATA[CONF_TOKEN_SECRET]
+    # The stored secret was sent to PatchMon for the test request.
+    _, _, _, headers = aioclient_mock.mock_calls[0]
+    expected = base64.b64encode(f"new-key:{ENTRY_DATA[CONF_TOKEN_SECRET]}".encode())
+    assert headers["Authorization"] == f"Basic {expected.decode()}"
 
 
 async def test_reconfigure_errors(

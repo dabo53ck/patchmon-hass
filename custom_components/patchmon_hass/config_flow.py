@@ -180,6 +180,11 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
                     for other in self._async_current_entries(include_ignore=False)
                 ):
                     return self.async_abort(reason="already_configured")
+                if not user_input.get(CONF_TOKEN_SECRET):
+                    # Empty secret field: keep the stored one.
+                    user_input = {
+                        k: v for k, v in user_input.items() if k != CONF_TOKEN_SECRET
+                    }
                 data = {**entry.data, **user_input, CONF_URL: url}
                 if not (error := await _async_test(self.hass, data)):
                     return self.async_update_reload_and_abort(
@@ -199,7 +204,8 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
                 vol.Schema(
                     {
                         vol.Required(CONF_URL): _URL_SELECTOR,
-                        **_credentials_schema(),
+                        vol.Required(CONF_TOKEN_KEY): _TEXT_SELECTOR,
+                        vol.Optional(CONF_TOKEN_SECRET): _SECRET_SELECTOR,
                         vol.Required(CONF_VERIFY_SSL): BooleanSelector(),
                     }
                 ),

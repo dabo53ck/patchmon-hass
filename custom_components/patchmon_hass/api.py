@@ -17,7 +17,7 @@ import base64
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any
 from urllib.parse import urlsplit, urlunsplit
@@ -105,9 +105,11 @@ def _parse_datetime(value: Any) -> datetime | None:
     if not isinstance(value, str) or not value:
         return None
     try:
-        return datetime.fromisoformat(value)
+        parsed = datetime.fromisoformat(value)
     except ValueError:
         return None
+    # Timestamp sensors need an aware datetime; PatchMon sends UTC.
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=UTC)
 
 
 def _opt_str(data: Mapping[str, Any], key: str) -> str | None:
@@ -309,6 +311,9 @@ class PatchMonClient:
             ):
                 text = await resp.text()
                 status = resp.status
+        except UnicodeDecodeError as err:
+            # Binary or wrongly encoded body, e.g. from a proxy.
+            raise PatchMonUnsupportedError("Answer is not valid text") from err
         except aiohttp.ClientSSLError as err:
             raise PatchMonSSLError(str(err)) from err
         except (TimeoutError, aiohttp.ClientError) as err:

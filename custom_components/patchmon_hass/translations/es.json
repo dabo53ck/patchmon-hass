@@ -31,7 +31,7 @@
       },
       "reconfigure": {
         "title": "Cambiar la conexión con PatchMon",
-        "description": "Los dispositivos y las entidades se conservan. Vuelve a introducir el secreto del token.",
+        "description": "Los dispositivos y las entidades se conservan.",
         "data": {
           "url": "Dirección del servidor",
           "token_key": "Clave del token",
@@ -41,7 +41,7 @@
         "data_description": {
           "url": "Dirección de la interfaz web de PatchMon, por ejemplo http://192.168.1.10:3000",
           "token_key": "La clave del token de API",
-          "token_secret": "El secreto del token de API",
+          "token_secret": "Déjalo vacío para conservar el secreto actual.",
           "verify_ssl": "Desactívalo solo para un servidor con certificado autofirmado"
         }
       }

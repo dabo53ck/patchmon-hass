@@ -31,7 +31,7 @@
       },
       "reconfigure": {
         "title": "PatchMon-Verbindung ändern",
-        "description": "Geräte und Entitäten bleiben erhalten. Gib das Token-Secret erneut ein.",
+        "description": "Geräte und Entitäten bleiben erhalten.",
         "data": {
           "url": "Serveradresse",
           "token_key": "Token-Key",
@@ -41,7 +41,7 @@
         "data_description": {
           "url": "Adresse der PatchMon-Weboberfläche, zum Beispiel http://192.168.1.10:3000",
           "token_key": "Der Key des API-Tokens",
-          "token_secret": "Das Secret des API-Tokens",
+          "token_secret": "Leer lassen, um das bisherige Secret zu behalten.",
           "verify_ssl": "Nur bei einem Server mit selbstsigniertem Zertifikat ausschalten"
         }
       }

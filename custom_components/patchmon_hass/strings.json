@@ -31,7 +31,7 @@
       },
       "reconfigure": {
         "title": "Change the PatchMon connection",
-        "description": "Devices and entities are kept. Enter the token secret again.",
+        "description": "Devices and entities are kept.",
         "data": {
           "url": "Server address",
           "token_key": "Token key",
@@ -41,7 +41,7 @@
         "data_description": {
           "url": "Address of the PatchMon web interface, for example http://192.168.1.10:3000",
           "token_key": "The key of the API token",
-          "token_secret": "The secret of the API token",
+          "token_secret": "Leave empty to keep the current secret.",
           "verify_ssl": "Turn off only for a server with a self-signed certificate"
         }
       }

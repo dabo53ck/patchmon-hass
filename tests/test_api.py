@@ -127,6 +127,20 @@ async def test_get_hosts_old_server_fields_missing(
     assert second.host_groups == ()
 
 
+async def test_naive_timestamp_is_utc(
+    client: PatchMonClient, aioclient_mock: AiohttpClientMocker
+) -> None:
+    """A timestamp without time zone is taken as UTC."""
+    aioclient_mock.get(
+        f"{API}/hosts",
+        json={"hosts": [{"id": "x", "last_update": "2026-11-16T18:45:22"}]},
+    )
+
+    (host,) = await client.get_hosts()
+
+    assert host.last_update == datetime(2026, 11, 16, 18, 45, 22, tzinfo=UTC)
+
+
 async def test_get_host_details(
     client: PatchMonClient, aioclient_mock: AiohttpClientMocker
 ) -> None:
@@ -279,6 +293,16 @@ async def test_unexpected_answers(
 ) -> None:
     """HTML, empty bodies, redirects and other codes are not supported."""
     aioclient_mock.get(f"{API}/hosts", status=status, text=text)
+
+    with pytest.raises(PatchMonUnsupportedError):
+        await client.get_hosts()
+
+
+async def test_undecodable_answer(
+    client: PatchMonClient, aioclient_mock: AiohttpClientMocker
+) -> None:
+    """A body that is not valid text is not supported."""
+    aioclient_mock.get(f"{API}/hosts", content=b"\x89PNG\xff\xfe")
 
     with pytest.raises(PatchMonUnsupportedError):
         await client.get_hosts()
