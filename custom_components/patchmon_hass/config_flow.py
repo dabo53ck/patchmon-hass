@@ -15,7 +15,10 @@ from homeassistant.config_entries import (
 )
 from homeassistant.const import CONF_URL, CONF_VERIFY_SSL
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.data_entry_flow import section
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.selector import (
+    AreaSelector,
     BooleanSelector,
     NumberSelector,
     NumberSelectorConfig,
@@ -39,15 +42,19 @@ from .api import (
     normalize_url,
 )
 from .const import (
+    CONF_AREA,
     CONF_HOST_GROUPS,
+    CONF_OPTIONAL_ENTITIES,
     CONF_SCAN_INTERVAL,
     CONF_TOKEN_KEY,
     CONF_TOKEN_SECRET,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
+    ENABLE_OPTIONS,
     MAX_SCAN_INTERVAL,
     MIN_SCAN_INTERVAL,
 )
+from .entity import async_entities_for_option
 from .helpers import create_client
 
 _LOGGER = logging.getLogger(__name__)
@@ -62,6 +69,27 @@ def _credentials_schema() -> dict[vol.Marker, Any]:
         vol.Required(CONF_TOKEN_KEY): _TEXT_SELECTOR,
         vol.Required(CONF_TOKEN_SECRET): _SECRET_SELECTOR,
     }
+
+
+def _optional_entities_section(options: Mapping[str, Any]) -> section:
+    """One switch per optional host entity, preset from ``options``."""
+    return section(
+        vol.Schema(
+            {
+                vol.Required(option, default=bool(options.get(option, False))): (
+                    BooleanSelector()
+                )
+                for option in ENABLE_OPTIONS
+            }
+        ),
+        {"collapsed": False},
+    )
+
+
+def _switches(user_input: Mapping[str, Any]) -> dict[str, bool]:
+    """The switches of the form as flat options."""
+    switches = user_input.get(CONF_OPTIONAL_ENTITIES, {})
+    return {option: bool(switches.get(option, False)) for option in ENABLE_OPTIONS}
 
 
 def _error_key(err: Exception) -> str:
@@ -119,8 +147,14 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
                 await self.async_set_unique_id(url)
                 self._abort_if_unique_id_configured()
                 data = {**user_input, CONF_URL: url}
+                options: dict[str, Any] = _switches(data)
+                data.pop(CONF_OPTIONAL_ENTITIES, None)
+                if area := data.pop(CONF_AREA, None):
+                    options[CONF_AREA] = area
                 if not (error := await _async_test(self.hass, data)):
-                    return self.async_create_entry(title=_title(url), data=data)
+                    return self.async_create_entry(
+                        title=_title(url), data=data, options=options
+                    )
                 errors["base"] = error
 
         return self.async_show_form(
@@ -131,6 +165,12 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
                         vol.Required(CONF_URL): _URL_SELECTOR,
                         **_credentials_schema(),
                         vol.Required(CONF_VERIFY_SSL, default=True): BooleanSelector(),
+                        vol.Optional(CONF_AREA): AreaSelector(),
+                        vol.Required(
+                            CONF_OPTIONAL_ENTITIES
+                        ): _optional_entities_section(
+                            (user_input or {}).get(CONF_OPTIONAL_ENTITIES, {})
+                        ),
                     }
                 ),
                 user_input,
@@ -180,6 +220,11 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
                     for other in self._async_current_entries(include_ignore=False)
                 ):
                     return self.async_abort(reason="already_configured")
+                if not user_input.get(CONF_TOKEN_SECRET):
+                    # Empty secret field: keep the stored one.
+                    user_input = {
+                        k: v for k, v in user_input.items() if k != CONF_TOKEN_SECRET
+                    }
                 data = {**entry.data, **user_input, CONF_URL: url}
                 if not (error := await _async_test(self.hass, data)):
                     return self.async_update_reload_and_abort(
@@ -199,7 +244,8 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
                 vol.Schema(
                     {
                         vol.Required(CONF_URL): _URL_SELECTOR,
-                        **_credentials_schema(),
+                        vol.Required(CONF_TOKEN_KEY): _TEXT_SELECTOR,
+                        vol.Optional(CONF_TOKEN_SECRET): _SECRET_SELECTOR,
                         vol.Required(CONF_VERIFY_SSL): BooleanSelector(),
                     }
                 ),
@@ -209,20 +255,50 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
 
+@callback
+def _async_apply_enable_option(
+    hass: HomeAssistant, entry: PatchMonConfigEntry, option: str, enabled: bool
+) -> None:
+    """Enable or disable the entity of ``option`` on every host.
+
+    Runs only when the option is switched, so single entities switched by
+    hand stay as they are while other options are saved.
+    """
+    registry = er.async_get(hass)
+    for entity in async_entities_for_option(hass, entry, option):
+        if enabled and entity.disabled_by in (
+            er.RegistryEntryDisabler.INTEGRATION,
+            er.RegistryEntryDisabler.USER,
+        ):
+            registry.async_update_entity(entity.entity_id, disabled_by=None)
+        elif not enabled and entity.disabled_by is None:
+            registry.async_update_entity(
+                entity.entity_id,
+                disabled_by=er.RegistryEntryDisabler.INTEGRATION,
+            )
+
+
 class PatchMonOptionsFlow(OptionsFlowWithReload):
-    """Polling interval and host group filter."""
+    """Polling interval, host group filter, area and optional entities."""
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Show and store the options; the entry reloads afterwards."""
         if user_input is not None:
-            return self.async_create_entry(
-                data={
-                    CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL]),
-                    CONF_HOST_GROUPS: user_input.get(CONF_HOST_GROUPS, []),
-                }
-            )
+            options = {
+                CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL]),
+                CONF_HOST_GROUPS: user_input.get(CONF_HOST_GROUPS, []),
+            }
+            if area := user_input.get(CONF_AREA):
+                options[CONF_AREA] = area
+            for option, enabled in _switches(user_input).items():
+                options[option] = enabled
+                if enabled != self.config_entry.options.get(option, False):
+                    _async_apply_enable_option(
+                        self.hass, self.config_entry, option, enabled
+                    )
+            return self.async_create_entry(data=options)
 
         errors: dict[str, str] = {}
         current: list[str] = list(self.config_entry.options.get(CONF_HOST_GROUPS, []))
@@ -268,6 +344,15 @@ class PatchMonOptionsFlow(OptionsFlowWithReload):
                         multiple=True,
                         mode=SelectSelectorMode.DROPDOWN,
                     )
+                ),
+                vol.Optional(
+                    CONF_AREA,
+                    description={
+                        "suggested_value": self.config_entry.options.get(CONF_AREA)
+                    },
+                ): AreaSelector(),
+                vol.Required(CONF_OPTIONAL_ENTITIES): _optional_entities_section(
+                    self.config_entry.options
                 ),
             }
         )

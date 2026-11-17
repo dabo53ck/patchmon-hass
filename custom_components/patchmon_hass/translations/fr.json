@@ -3,18 +3,32 @@
     "step": {
       "user": {
         "title": "Se connecter à PatchMon",
-        "description": "Créez dans PatchMon un jeton d'API dédié à Home Assistant (Settings → Integrations → Scoped Credentials), avec uniquement l'autorisation `host:get`. N'accordez jamais `host:delete` : cette intégration ne fait que lire des données.",
+        "description": "Créez dans PatchMon un jeton d'API dédié à Home Assistant (Settings → Integrations → Scoped Credentials), avec uniquement l'autorisation `host:get`.",
         "data": {
           "url": "Adresse du serveur",
           "token_key": "Clé du jeton",
           "token_secret": "Secret du jeton",
-          "verify_ssl": "Vérifier le certificat SSL"
+          "verify_ssl": "Vérifier le certificat SSL",
+          "area": "Pièce"
         },
         "data_description": {
-          "url": "Adresse de l'interface web de PatchMon, par exemple http://192.168.1.10:3000",
+          "url": "Adresse de l'interface web de PatchMon, par exemple http://192.168.1.10:3000. Les adresses https fonctionnent aussi.",
           "token_key": "La clé du jeton d'API",
           "token_secret": "Le secret du jeton d'API. PatchMon ne l'affiche qu'une seule fois, à la création du jeton.",
-          "verify_ssl": "À désactiver uniquement pour un serveur avec un certificat auto-signé"
+          "verify_ssl": "Ne s'applique qu'aux adresses https. À désactiver si le serveur utilise un certificat auto-signé.",
+          "area": "Les nouveaux hôtes et le serveur PatchMon sont placés dans cette pièce lors de leur ajout. Les appareils déplacés ensuite restent où vous les avez mis."
+        },
+        "sections": {
+          "optional_entities": {
+            "name": "Entités facultatives",
+            "description": "Active l'entité sur tous les hôtes. Modifiable plus tard sous Configurer.",
+            "data": {
+              "enable_update_entity": "Mises à jour (entité de mise à jour avec la liste des paquets)",
+              "enable_running_kernel": "Noyau en cours d'exécution",
+              "enable_installed_kernel": "Noyau installé",
+              "enable_installed_packages": "Paquets installés"
+            }
+          }
         }
       },
       "reauth_confirm": {
@@ -31,7 +45,7 @@
       },
       "reconfigure": {
         "title": "Modifier la connexion à PatchMon",
-        "description": "Les appareils et les entités sont conservés. Saisissez à nouveau le secret du jeton.",
+        "description": "Les appareils et les entités sont conservés.",
         "data": {
           "url": "Adresse du serveur",
           "token_key": "Clé du jeton",
@@ -39,10 +53,10 @@
           "verify_ssl": "Vérifier le certificat SSL"
         },
         "data_description": {
-          "url": "Adresse de l'interface web de PatchMon, par exemple http://192.168.1.10:3000",
+          "url": "Adresse de l'interface web de PatchMon, par exemple http://192.168.1.10:3000. Les adresses https fonctionnent aussi.",
           "token_key": "La clé du jeton d'API",
-          "token_secret": "Le secret du jeton d'API",
-          "verify_ssl": "À désactiver uniquement pour un serveur avec un certificat auto-signé"
+          "token_secret": "Laissez vide pour conserver le secret actuel.",
+          "verify_ssl": "Ne s'applique qu'aux adresses https. À désactiver si le serveur utilise un certificat auto-signé."
         }
       }
     },
@@ -70,11 +84,25 @@
         "title": "Options de PatchMon",
         "data": {
           "scan_interval": "Intervalle d'interrogation",
-          "host_groups": "Groupes d'hôtes"
+          "host_groups": "Groupes d'hôtes",
+          "area": "Pièce"
         },
         "data_description": {
           "scan_interval": "Fréquence à laquelle Home Assistant lit la liste des hôtes dans PatchMon. Les agents ne remontent pas leurs données plus souvent pour autant.",
-          "host_groups": "N'inclure que les hôtes de ces groupes. Laisser vide pour tous les hôtes."
+          "host_groups": "N'inclure que les hôtes de ces groupes. Laisser vide pour tous les hôtes.",
+          "area": "Les nouveaux hôtes et le serveur PatchMon sont placés dans cette pièce lors de leur ajout. Les appareils déplacés ensuite restent où vous les avez mis."
+        },
+        "sections": {
+          "optional_entities": {
+            "name": "Entités facultatives",
+            "description": "Active ou désactive l'entité sur tous les hôtes lors du changement. Vous pouvez ensuite toujours modifier des entités isolées à la main.",
+            "data": {
+              "enable_update_entity": "Mises à jour (entité de mise à jour avec la liste des paquets)",
+              "enable_running_kernel": "Noyau en cours d'exécution",
+              "enable_installed_kernel": "Noyau installé",
+              "enable_installed_packages": "Paquets installés"
+            }
+          }
         }
       }
     },
@@ -90,6 +118,93 @@
       "unknown": "Erreur inattendue. Consultez le journal pour plus de détails."
     }
   },
+  "entity": {
+    "binary_sensor": {
+      "restart_required": {
+        "name": "Redémarrage requis",
+        "state": {
+          "on": "Oui",
+          "off": "Non"
+        }
+      },
+      "reporting": {
+        "name": "Envoie des rapports",
+        "state_attributes": {
+          "reporting_state": {
+            "name": "État des rapports",
+            "state": {
+              "reporting": "Envoie des rapports",
+              "overdue": "En retard",
+              "stale": "Obsolète"
+            }
+          }
+        }
+      }
+    },
+    "sensor": {
+      "updates": {
+        "name": "Mises à jour en attente"
+      },
+      "security_updates": {
+        "name": "Mises à jour de sécurité"
+      },
+      "update_status": {
+        "name": "État des mises à jour",
+        "state": {
+          "up_to_date": "À jour",
+          "updates_pending": "Mises à jour en attente",
+          "security_required": "Mise à jour de sécurité requise"
+        }
+      },
+      "last_check_in": {
+        "name": "Dernier check-in"
+      },
+      "installed_packages": {
+        "name": "Paquets installés"
+      },
+      "restart_reason": {
+        "name": "Raison du redémarrage"
+      },
+      "agent_version": {
+        "name": "Version de l'agent"
+      },
+      "last_boot": {
+        "name": "Dernier démarrage"
+      },
+      "running_kernel": {
+        "name": "Noyau en cours d'exécution"
+      },
+      "installed_kernel": {
+        "name": "Noyau installé"
+      },
+      "hosts": {
+        "name": "Hôtes"
+      },
+      "hosts_with_updates": {
+        "name": "Hôtes avec mises à jour"
+      },
+      "hosts_with_security_updates": {
+        "name": "Hôtes avec mises à jour de sécurité"
+      },
+      "hosts_requiring_restart": {
+        "name": "Hôtes nécessitant un redémarrage"
+      },
+      "hosts_not_reporting": {
+        "name": "Hôtes sans rapport"
+      },
+      "total_updates": {
+        "name": "Total des mises à jour en attente"
+      },
+      "total_security_updates": {
+        "name": "Total des mises à jour de sécurité"
+      }
+    },
+    "update": {
+      "updates": {
+        "name": "Mises à jour"
+      }
+    }
+  },
   "exceptions": {
     "auth_failed": {
       "message": "PatchMon a refusé le jeton d'API : {error}"
@@ -99,6 +214,15 @@
     },
     "unsupported": {
       "message": "Réponse inattendue du serveur PatchMon : {error}"
+    },
+    "packages_failed": {
+      "message": "Impossible de charger la liste des paquets : {error}"
+    }
+  },
+  "issues": {
+    "host_groups_without_hosts": {
+      "title": "Le filtre de groupes d'hôtes de {title} ne correspond à aucun hôte",
+      "description": "Le filtre de groupes d'hôtes de {title} contient des groupes sans aucun hôte dans PatchMon : {groups}. Les groupes ont été supprimés ou sont vides. Leurs hôtes sont conservés dans Home Assistant mais indisponibles. Ouvrez **Configurer** sur l'entrée de l'intégration et mettez à jour le filtre de groupes d'hôtes."
     }
   }
 }

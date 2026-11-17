@@ -3,18 +3,32 @@
     "step": {
       "user": {
         "title": "Mit PatchMon verbinden",
-        "description": "Lege in PatchMon ein eigenes API-Token für Home Assistant an (Settings → Integrations → Scoped Credentials), nur mit der Berechtigung `host:get`. Vergib nie `host:delete`: Diese Integration liest nur Daten.",
+        "description": "Lege in PatchMon ein eigenes API-Token für Home Assistant an (Settings → Integrations → Scoped Credentials), nur mit der Berechtigung `host:get`.",
         "data": {
           "url": "Serveradresse",
           "token_key": "Token-Key",
           "token_secret": "Token-Secret",
-          "verify_ssl": "SSL-Zertifikat prüfen"
+          "verify_ssl": "SSL-Zertifikat prüfen",
+          "area": "Bereich"
         },
         "data_description": {
-          "url": "Adresse der PatchMon-Weboberfläche, zum Beispiel http://192.168.1.10:3000",
+          "url": "Adresse der PatchMon-Weboberfläche, zum Beispiel http://192.168.1.10:3000. https-Adressen gehen ebenso.",
           "token_key": "Der Key des API-Tokens",
           "token_secret": "Das Secret des API-Tokens. PatchMon zeigt es nur einmal beim Anlegen.",
-          "verify_ssl": "Nur bei einem Server mit selbstsigniertem Zertifikat ausschalten"
+          "verify_ssl": "Gilt nur für https-Adressen. Ausschalten, wenn der Server ein selbstsigniertes Zertifikat nutzt.",
+          "area": "Neue Hosts und der PatchMon-Server kommen beim Anlegen in diesen Bereich. Später von Hand verschobene Geräte bleiben, wo sie sind."
+        },
+        "sections": {
+          "optional_entities": {
+            "name": "Optionale Entitäten",
+            "description": "Aktiviert die Entität bei allen Hosts. Später unter Konfigurieren änderbar.",
+            "data": {
+              "enable_update_entity": "Updates (Update-Entität mit Paketliste)",
+              "enable_running_kernel": "Laufender Kernel",
+              "enable_installed_kernel": "Installierter Kernel",
+              "enable_installed_packages": "Installierte Pakete"
+            }
+          }
         }
       },
       "reauth_confirm": {
@@ -31,7 +45,7 @@
       },
       "reconfigure": {
         "title": "PatchMon-Verbindung ändern",
-        "description": "Geräte und Entitäten bleiben erhalten. Gib das Token-Secret erneut ein.",
+        "description": "Geräte und Entitäten bleiben erhalten.",
         "data": {
           "url": "Serveradresse",
           "token_key": "Token-Key",
@@ -39,10 +53,10 @@
           "verify_ssl": "SSL-Zertifikat prüfen"
         },
         "data_description": {
-          "url": "Adresse der PatchMon-Weboberfläche, zum Beispiel http://192.168.1.10:3000",
+          "url": "Adresse der PatchMon-Weboberfläche, zum Beispiel http://192.168.1.10:3000. https-Adressen gehen ebenso.",
           "token_key": "Der Key des API-Tokens",
-          "token_secret": "Das Secret des API-Tokens",
-          "verify_ssl": "Nur bei einem Server mit selbstsigniertem Zertifikat ausschalten"
+          "token_secret": "Leer lassen, um das bisherige Secret zu behalten.",
+          "verify_ssl": "Gilt nur für https-Adressen. Ausschalten, wenn der Server ein selbstsigniertes Zertifikat nutzt."
         }
       }
     },
@@ -70,11 +84,25 @@
         "title": "PatchMon-Optionen",
         "data": {
           "scan_interval": "Abfrage-Intervall",
-          "host_groups": "Hostgruppen"
+          "host_groups": "Hostgruppen",
+          "area": "Bereich"
         },
         "data_description": {
           "scan_interval": "Wie oft Home Assistant die Host-Liste aus PatchMon liest. Die Agenten melden dadurch nicht häufiger.",
-          "host_groups": "Nur Hosts aus diesen Gruppen einbeziehen. Leer lassen für alle Hosts."
+          "host_groups": "Nur Hosts aus diesen Gruppen einbeziehen. Leer lassen für alle Hosts.",
+          "area": "Neue Hosts und der PatchMon-Server kommen beim Anlegen in diesen Bereich. Später von Hand verschobene Geräte bleiben, wo sie sind."
+        },
+        "sections": {
+          "optional_entities": {
+            "name": "Optionale Entitäten",
+            "description": "Schaltet die Entität beim Umschalten bei allen Hosts ein oder aus. Einzelne Entitäten kannst du danach weiter von Hand umschalten.",
+            "data": {
+              "enable_update_entity": "Updates (Update-Entität mit Paketliste)",
+              "enable_running_kernel": "Laufender Kernel",
+              "enable_installed_kernel": "Installierter Kernel",
+              "enable_installed_packages": "Installierte Pakete"
+            }
+          }
         }
       }
     },
@@ -90,6 +118,93 @@
       "unknown": "Unerwarteter Fehler. Details stehen im Log."
     }
   },
+  "entity": {
+    "binary_sensor": {
+      "restart_required": {
+        "name": "Neustart erforderlich",
+        "state": {
+          "on": "Ja",
+          "off": "Nein"
+        }
+      },
+      "reporting": {
+        "name": "Meldet sich",
+        "state_attributes": {
+          "reporting_state": {
+            "name": "Meldestatus",
+            "state": {
+              "reporting": "Meldet sich",
+              "overdue": "Überfällig",
+              "stale": "Veraltet"
+            }
+          }
+        }
+      }
+    },
+    "sensor": {
+      "updates": {
+        "name": "Ausstehende Updates"
+      },
+      "security_updates": {
+        "name": "Sicherheitsupdates"
+      },
+      "update_status": {
+        "name": "Update-Status",
+        "state": {
+          "up_to_date": "Aktuell",
+          "updates_pending": "Updates ausstehend",
+          "security_required": "Sicherheitsupdate nötig"
+        }
+      },
+      "last_check_in": {
+        "name": "Letzter Check-in"
+      },
+      "installed_packages": {
+        "name": "Installierte Pakete"
+      },
+      "restart_reason": {
+        "name": "Neustartgrund"
+      },
+      "agent_version": {
+        "name": "Agent-Version"
+      },
+      "last_boot": {
+        "name": "Letzter Neustart"
+      },
+      "running_kernel": {
+        "name": "Laufender Kernel"
+      },
+      "installed_kernel": {
+        "name": "Installierter Kernel"
+      },
+      "hosts": {
+        "name": "Hosts"
+      },
+      "hosts_with_updates": {
+        "name": "Hosts mit Updates"
+      },
+      "hosts_with_security_updates": {
+        "name": "Hosts mit Sicherheitsupdates"
+      },
+      "hosts_requiring_restart": {
+        "name": "Hosts mit Neustartbedarf"
+      },
+      "hosts_not_reporting": {
+        "name": "Hosts ohne Meldung"
+      },
+      "total_updates": {
+        "name": "Ausstehende Updates gesamt"
+      },
+      "total_security_updates": {
+        "name": "Sicherheitsupdates gesamt"
+      }
+    },
+    "update": {
+      "updates": {
+        "name": "Updates"
+      }
+    }
+  },
   "exceptions": {
     "auth_failed": {
       "message": "PatchMon hat das API-Token abgelehnt: {error}"
@@ -99,6 +214,15 @@
     },
     "unsupported": {
       "message": "Unerwartete Antwort vom PatchMon-Server: {error}"
+    },
+    "packages_failed": {
+      "message": "Die Paketliste konnte nicht geladen werden: {error}"
+    }
+  },
+  "issues": {
+    "host_groups_without_hosts": {
+      "title": "Hostgruppen-Filter von {title} trifft keinen Host",
+      "description": "Der Hostgruppen-Filter von {title} enthält Gruppen ohne Host in PatchMon: {groups}. Die Gruppen wurden gelöscht oder sind leer. Ihre Hosts bleiben in Home Assistant erhalten, sind aber nicht verfügbar. Öffne beim Integrationseintrag **Konfigurieren** und passe den Hostgruppen-Filter an."
     }
   }
 }
