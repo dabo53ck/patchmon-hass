@@ -29,3 +29,22 @@ ENABLE_OPTIONS: Final[dict[str, tuple[str, str]]] = {
 DEFAULT_SCAN_INTERVAL: Final = 5  # minutes
 MIN_SCAN_INTERVAL: Final = 1
 MAX_SCAN_INTERVAL: Final = 60
+
+# Update status of a host (sensor states and filter values of get_hosts).
+UPDATE_STATES: Final = ["up_to_date", "updates_pending", "security_required"]
+
+# Actions
+SERVICE_GET_HOSTS: Final = "get_hosts"
+SERVICE_GET_PACKAGES: Final = "get_packages"
+SERVICE_REFRESH: Final = "refresh"
+ATTR_CONFIG_ENTRY_ID: Final = "config_entry_id"
+ATTR_DEVICE_ID: Final = "device_id"
+ATTR_UPDATE_STATUS: Final = "update_status"
+ATTR_RESTART_REQUIRED: Final = "restart_required"
+ATTR_REPORTING: Final = "reporting"
+ATTR_UPDATES_ONLY: Final = "updates_only"
+ATTR_SECURITY_ONLY: Final = "security_only"
+ATTR_LIMIT: Final = "limit"
+ATTR_INCLUDE_DESCRIPTIONS: Final = "include_descriptions"
+DEFAULT_PACKAGE_LIMIT: Final = 50
+MAX_PACKAGE_LIMIT: Final = 1000

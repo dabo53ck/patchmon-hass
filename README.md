@@ -121,6 +121,100 @@ selected group has no hosts in PatchMon any more (deleted or emptied),
 Home Assistant shows a repair issue and keeps the devices of those hosts as
 unavailable instead of removing them. Update the filter under **Configure**.
 
+## Actions
+
+All actions only read; none of them changes anything in PatchMon.
+
+| Action | What it does |
+| --- | --- |
+| `patchmon_hass.get_hosts` | Returns the hosts with their patch status as of the last update, without asking PatchMon. Optional filters: PatchMon server, update status, restart required, reporting. |
+| `patchmon_hass.get_packages` | Reads the packages of one host from PatchMon and returns them, security updates first. Options: only with updates (default on), only security updates, limit (default 50), include descriptions (default off, makes the answer much longer). |
+| `patchmon_hass.refresh` | Reads the host list and the host details from PatchMon now, for all hosts or the selected devices. It does **not** make the agents report: values only change after their next check-in. |
+
+`get_hosts` returns for each host the name it has in Home Assistant (your own
+name if you renamed the device), PatchMon's name as `patchmon_name`, the device
+ID, the server, the operating system, update status, pending and security
+updates, whether a restart is required and why, the reporting state, the last
+check-in and the agent version.
+
+## How data is updated
+
+- The host list with the update counters is read every 5 minutes (1 to 60,
+  under **Configure**).
+- Kernel, restart reason, last boot and agent version are read for a host only
+  when its agent has reported again since, and at least every 6 hours.
+- The package list is read only when you open the release notes of an update
+  entity or call `get_packages`.
+- PatchMon itself only knows what the agents report, on their own schedule.
+
+## Examples
+
+Notify when a host needs security updates:
+
+```yaml
+triggers:
+  - trigger: numeric_state
+    entity_id: sensor.patchmon_hosts_with_security_updates
+    above: 0
+actions:
+  - action: patchmon_hass.get_hosts
+    data:
+      update_status: security_required
+    response_variable: result
+  - action: notify.notify
+    data:
+      title: Security updates
+      message: >
+        {{ result.hosts | map(attribute='name') | join(', ') }}
+```
+
+A script for a voice assistant ("Which servers need a restart?"):
+
+```yaml
+sequence:
+  - action: patchmon_hass.get_hosts
+    data:
+      restart_required: true
+    response_variable: result
+  - stop: done
+    response_variable: result
+```
+
+## Troubleshooting
+
+- **Repair "answer from PatchMon not understood":** the server answered in a
+  way the integration does not understand, for example because the address
+  points to the web interface behind a proxy or the PatchMon version is not
+  supported yet. Check the address with **Reconfigure**. The repair goes away
+  by itself once an answer is understood again.
+- **Token rejected:** Home Assistant asks for a new token (re-authentication).
+  Check that the token is enabled, not expired, has `host:get` and, if
+  restricted, allows the IP address of Home Assistant.
+- **Diagnostics:** the integration entry and every device offer **Download
+  diagnostics**. The server address, the token, host names, IP addresses and
+  machine IDs are removed from the file.
+- **Debug logging:** enable it on the integration entry, or add
+  `custom_components.patchmon_hass: debug` under `logger:` → `logs:` in
+  `configuration.yaml`.
+
+## Known limitations
+
+- Read-only: no updates can be installed or approved from Home Assistant.
+- Values are only as fresh as the last agent report; `refresh` cannot change
+  that.
+- PatchMon has no version number for a whole host, so the update entity shows
+  labels instead of versions.
+- Only PatchMon 2.x is supported (tested with 2.1.8).
+- No push yet: changes arrive with the next poll.
+
+## Removal
+
+1. **Settings → Devices & services → PatchMon** → three-dot menu →
+   **Delete**. This removes all devices and entities of that server.
+2. Optional: uninstall **PatchMon** in HACS and restart Home Assistant.
+3. Delete the API token in PatchMon (**Settings → Integrations → Scoped
+   Credentials**).
+
 ## License
 
 [MIT](LICENSE)

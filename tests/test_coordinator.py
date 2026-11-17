@@ -18,6 +18,7 @@ from custom_components.patchmon_hass.api import Host
 from custom_components.patchmon_hass.const import CONF_HOST_GROUPS, DOMAIN
 from custom_components.patchmon_hass.coordinator import (
     ISSUE_GROUPS_WITHOUT_HOSTS,
+    ISSUE_UNSUPPORTED,
     PatchMonCoordinator,
     _update_state,
 )
@@ -266,3 +267,56 @@ async def test_suddenly_empty_list_is_incomplete(
 
     assert coordinator.data.hosts == {}
     assert not coordinator.data.complete
+
+
+async def test_unsupported_answer_raises_repair(
+    hass: HomeAssistant,
+    issue_registry: ir.IssueRegistry,
+    mock_config_entry: MockConfigEntry,
+    aioclient_mock: AiohttpClientMocker,
+) -> None:
+    """An answer we do not understand raises a repair at once; it goes away."""
+    issue_id = f"{ISSUE_UNSUPPORTED}_{mock_config_entry.entry_id}"
+    aioclient_mock.get(f"{API}/hosts", status=200, text="<html></html>")
+    mock_config_entry.add_to_hass(hass)
+
+    assert not await hass.config_entries.async_setup(mock_config_entry.entry_id)
+
+    issue = issue_registry.async_get_issue(DOMAIN, issue_id)
+    assert issue is not None
+    assert issue.severity is ir.IssueSeverity.ERROR
+    assert issue.translation_placeholders == {
+        "title": "PatchMon (patchmon.example)",
+        "error": "Unexpected answer (HTTP 200)",
+    }
+
+    _remock(aioclient_mock, load_fixture("hosts.json"))
+    await hass.config_entries.async_reload(mock_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert mock_config_entry.state is ConfigEntryState.LOADED
+    assert issue_registry.async_get_issue(DOMAIN, issue_id) is None
+
+
+async def test_unsupported_details_raise_repair(
+    hass: HomeAssistant,
+    issue_registry: ir.IssueRegistry,
+    mock_config_entry: MockConfigEntry,
+    aioclient_mock: AiohttpClientMocker,
+) -> None:
+    """Details we do not understand raise it too; removing the entry drops it."""
+    issue_id = f"{ISSUE_UNSUPPORTED}_{mock_config_entry.entry_id}"
+    aioclient_mock.get(f"{API}/hosts", json=load_fixture("hosts.json"))
+    aioclient_mock.get(f"{API}/hosts/{host_id(2)}/system", json=[])
+    mock_details(aioclient_mock)
+
+    coordinator = await _setup(hass, mock_config_entry)
+
+    assert host_id(2) not in coordinator.data.details
+    issue = issue_registry.async_get_issue(DOMAIN, issue_id)
+    assert issue is not None
+    assert issue.translation_placeholders is not None
+    assert issue.translation_placeholders["error"] == "System details are not an object"
+
+    await hass.config_entries.async_remove(mock_config_entry.entry_id)
+    assert issue_registry.async_get_issue(DOMAIN, issue_id) is None

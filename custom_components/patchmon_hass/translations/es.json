@@ -217,12 +217,103 @@
     },
     "packages_failed": {
       "message": "No se pudo cargar la lista de paquetes: {error}"
+    },
+    "not_loaded": {
+      "message": "No hay ninguna entrada de PatchMon cargada."
+    },
+    "entry_not_found": {
+      "message": "{entry_id} no es una entrada de PatchMon."
+    },
+    "device_not_found": {
+      "message": "{device_id} no es un dispositivo de PatchMon."
+    },
+    "not_a_host": {
+      "message": "Selecciona un host, no el servidor de PatchMon."
+    },
+    "host_not_found": {
+      "message": "PatchMon ya no conoce este host."
+    },
+    "refresh_failed": {
+      "message": "No se pudo actualizar PatchMon: {error}"
     }
   },
   "issues": {
     "host_groups_without_hosts": {
       "title": "El filtro de grupos de hosts de {title} no coincide con ningún host",
       "description": "El filtro de grupos de hosts de {title} contiene grupos sin ningún host en PatchMon: {groups}. Los grupos se eliminaron o están vacíos. Sus hosts se conservan en Home Assistant, pero no están disponibles. Abre **Configurar** en la entrada de la integración y actualiza el filtro de grupos de hosts."
+    },
+    "unsupported_answer": {
+      "title": "{title}: respuesta de PatchMon no entendida",
+      "description": "El servidor de PatchMon de {title} responde de una forma que esta versión de la integración no entiende ({error}). Normalmente la versión de PatchMon aún no es compatible, o la dirección del servidor apunta a otra cosa, por ejemplo la interfaz web detrás de un proxy. Comprueba que el servidor usa PatchMon 2.x y que la integración está actualizada; corrige la dirección con **Reconfigurar**. Este aviso desaparece solo en cuanto se vuelva a entender una respuesta."
+    }
+  },
+  "selector": {
+    "update_status": {
+      "options": {
+        "up_to_date": "Al día",
+        "updates_pending": "Actualizaciones pendientes",
+        "security_required": "Actualización de seguridad necesaria"
+      }
+    }
+  },
+  "services": {
+    "get_hosts": {
+      "name": "Obtener hosts",
+      "description": "Devuelve los hosts de la última actualización con su estado de parches. No consulta PatchMon; deben cumplirse todos los filtros indicados.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Servidor de PatchMon",
+          "description": "Solo los hosts de este servidor. Déjalo vacío para todos."
+        },
+        "update_status": {
+          "name": "Estado de actualización",
+          "description": "Solo los hosts con uno de estos estados."
+        },
+        "restart_required": {
+          "name": "Reinicio necesario",
+          "description": "Solo los hosts que necesitan reiniciarse (activado) o no (desactivado)."
+        },
+        "reporting": {
+          "name": "Informando",
+          "description": "Solo los hosts cuyo agente informa a tiempo (activado) o está retrasado u obsoleto (desactivado)."
+        }
+      }
+    },
+    "get_packages": {
+      "name": "Obtener paquetes",
+      "description": "Lee los paquetes de un host desde PatchMon y los devuelve, primero las actualizaciones de seguridad.",
+      "fields": {
+        "device_id": {
+          "name": "Host",
+          "description": "El dispositivo del host."
+        },
+        "updates_only": {
+          "name": "Solo con actualizaciones",
+          "description": "Solo paquetes con una actualización pendiente."
+        },
+        "security_only": {
+          "name": "Solo actualizaciones de seguridad",
+          "description": "Solo paquetes con una actualización de seguridad."
+        },
+        "limit": {
+          "name": "Límite",
+          "description": "Como máximo esta cantidad de paquetes."
+        },
+        "include_descriptions": {
+          "name": "Incluir descripciones",
+          "description": "Añade las descripciones de los paquetes; la respuesta es mucho más larga."
+        }
+      }
+    },
+    "refresh": {
+      "name": "Actualizar",
+      "description": "Lee ahora la lista de hosts y sus detalles desde PatchMon. No se pide a los agentes que informen: los valores solo cambian tras su próximo informe.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivos",
+          "description": "Hosts cuyos detalles se vuelven a leer; el dispositivo del servidor de PatchMon equivale a todos sus hosts. Déjalo vacío para todos."
+        }
+      }
     }
   }
 }

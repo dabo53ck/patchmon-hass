@@ -1,8 +1,10 @@
 {
   "domain": "patchmon_hass",
   "name": "PatchMon",
+  "categories": ["computers_network.monitoring"],
   "codeowners": ["@dabo53ck"],
   "config_flow": true,
+  "connectivity": ["network"],
   "documentation": "https://github.com/dabo53ck/patchmon-hass",
   "integration_type": "hub",
   "iot_class": "local_polling",

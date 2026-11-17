@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections.abc import Iterable
 from dataclasses import dataclass, field, replace
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryAuthFailed
+from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
 from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
@@ -23,6 +24,7 @@ from .api import (
     PatchMonConnectionError,
     PatchMonError,
     PatchMonNotFoundError,
+    PatchMonUnsupportedError,
 )
 from .const import (
     CONF_HOST_GROUPS,
@@ -39,6 +41,8 @@ _LOGGER = logging.getLogger(__name__)
 # Details only change when the agent reports; re-read them at least this often.
 DETAILS_MAX_AGE = timedelta(hours=6)
 ISSUE_GROUPS_WITHOUT_HOSTS = "host_groups_without_hosts"
+# The server answers in a way this version does not understand.
+ISSUE_UNSUPPORTED = "unsupported_answer"
 
 
 @dataclass(frozen=True, slots=True)
@@ -101,6 +105,38 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
         self.client = client
         self._host_groups: list[str] = list(entry.options.get(CONF_HOST_GROUPS, []))
         self._group_names: dict[str, str] = {}
+        # Hosts whose details the next update reads in any case (refresh action).
+        self._force_all_details = False
+        self._force_details: set[str] = set()
+
+    async def async_refresh_now(self, host_ids: Iterable[str] | None = None) -> None:
+        """Read the host list now, plus the details of ``host_ids`` (all if None).
+
+        Raises a translated error when the update failed.
+        """
+        if host_ids is None:
+            self._force_all_details = True
+        else:
+            self._force_details.update(host_ids)
+        try:
+            await self.async_refresh()
+        finally:
+            self._force_all_details = False
+            self._force_details.clear()
+        if self.last_update_success:
+            return
+        err = self.last_exception
+        if isinstance(err, HomeAssistantError) and err.translation_key:
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key=err.translation_key,
+                translation_placeholders=err.translation_placeholders,
+            ) from err
+        raise HomeAssistantError(
+            translation_domain=DOMAIN,
+            translation_key="refresh_failed",
+            translation_placeholders={"error": str(err)},
+        ) from err
 
     async def _async_update_data(self) -> PatchMonData:
         try:
@@ -118,6 +154,7 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
                 translation_placeholders={"error": str(err)},
             ) from err
         except PatchMonError as err:
+            self._unsupported_issue(err)
             raise UpdateFailed(
                 translation_domain=DOMAIN,
                 translation_key="unsupported",
@@ -135,7 +172,8 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
                 "PatchMon returned no hosts; keeping the known devices for now"
             )
 
-        details = await self._async_update_details(by_id)
+        details, unsupported = await self._async_update_details(by_id)
+        self._unsupported_issue(unsupported)
         return PatchMonData(
             hosts=by_id,
             details=details,
@@ -171,12 +209,35 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
             ir.async_delete_issue(self.hass, DOMAIN, issue_id)
         return missing
 
+    def _unsupported_issue(self, err: PatchMonError | None) -> None:
+        """Raise the repair for answers we do not understand, or remove it.
+
+        The issue ID holds only the entry ID: diagnostics list issue IDs.
+        """
+        issue_id = f"{ISSUE_UNSUPPORTED}_{self.config_entry.entry_id}"
+        if err is None:
+            ir.async_delete_issue(self.hass, DOMAIN, issue_id)
+            return
+        ir.async_create_issue(
+            self.hass,
+            DOMAIN,
+            issue_id,
+            is_fixable=False,
+            severity=ir.IssueSeverity.ERROR,
+            translation_key=ISSUE_UNSUPPORTED,
+            translation_placeholders={
+                "title": self.config_entry.title,
+                "error": str(err),
+            },
+        )
+
     async def _async_update_details(
         self, hosts: dict[str, Host]
-    ) -> dict[str, HostDetails]:
+    ) -> tuple[dict[str, HostDetails], PatchMonError | None]:
         """Keep fresh details, re-read the others (the client limits parallelism).
 
-        Hosts deleted in the meantime are dropped from ``hosts``.
+        Hosts deleted in the meantime are dropped from ``hosts``. Also
+        returns the last answer that was not understood, if any.
         """
         old = self.data.details if self.data is not None else {}
         now = dt_util.utcnow()
@@ -186,6 +247,8 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
             known = old.get(host_id)
             if (
                 known is not None
+                and not self._force_all_details
+                and host_id not in self._force_details
                 and known.last_update == host.last_update
                 and now - known.fetched_at < DETAILS_MAX_AGE
             ):
@@ -197,6 +260,7 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
             *(self._async_fetch_details(host, now) for host in stale),
             return_exceptions=True,
         )
+        unsupported: PatchMonError | None = None
         for host, result in zip(stale, results, strict=True):
             if isinstance(result, HostDetails):
                 details[host.id] = result
@@ -210,12 +274,14 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
                 # Deleted between the list and the details request.
                 del hosts[host.id]
             elif isinstance(result, PatchMonError):
+                if isinstance(result, PatchMonUnsupportedError):
+                    unsupported = result
                 _LOGGER.debug(
                     "Could not read details of %s: %s", host.friendly_name, result
                 )
             else:
                 raise result
-        return details
+        return details, unsupported
 
     async def _async_fetch_details(self, host: Host, now: datetime) -> HostDetails:
         system = await self.client.get_host_system(host.id)
