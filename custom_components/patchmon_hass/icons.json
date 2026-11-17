@@ -1,0 +1,67 @@
+{
+  "entity": {
+    "binary_sensor": {
+      "restart_required": {
+        "default": "mdi:restart-off",
+        "state": {
+          "on": "mdi:restart-alert"
+        }
+      }
+    },
+    "sensor": {
+      "updates": {
+        "default": "mdi:package-up"
+      },
+      "security_updates": {
+        "default": "mdi:shield-alert-outline"
+      },
+      "update_status": {
+        "default": "mdi:package-variant",
+        "state": {
+          "up_to_date": "mdi:check-circle-outline",
+          "updates_pending": "mdi:package-up",
+          "security_required": "mdi:shield-alert-outline"
+        }
+      },
+      "last_check_in": {
+        "default": "mdi:clock-check-outline"
+      },
+      "installed_packages": {
+        "default": "mdi:package-variant-closed"
+      },
+      "agent_version": {
+        "default": "mdi:tag-outline"
+      },
+      "last_boot": {
+        "default": "mdi:power"
+      },
+      "running_kernel": {
+        "default": "mdi:chip"
+      },
+      "installed_kernel": {
+        "default": "mdi:chip"
+      },
+      "hosts": {
+        "default": "mdi:server"
+      },
+      "hosts_with_updates": {
+        "default": "mdi:package-up"
+      },
+      "hosts_with_security_updates": {
+        "default": "mdi:shield-alert-outline"
+      },
+      "hosts_requiring_restart": {
+        "default": "mdi:restart-alert"
+      },
+      "hosts_not_reporting": {
+        "default": "mdi:lan-disconnect"
+      },
+      "total_updates": {
+        "default": "mdi:package-up"
+      },
+      "total_security_updates": {
+        "default": "mdi:shield-alert-outline"
+      }
+    }
+  }
+}

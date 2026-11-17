@@ -33,7 +33,8 @@ warn_unreachable = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
-addopts = "-q"
+# Same folder for syrupy 6.0 (HA 2026.9) and 6.1+, where HA sets it itself.
+addopts = "-q --snapshot-dirname=snapshots"
 
 [tool.coverage.run]
 source = ["custom_components/patchmon_hass"]

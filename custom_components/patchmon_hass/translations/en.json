@@ -90,6 +90,95 @@
       "unknown": "Unexpected error. See the log for details."
     }
   },
+  "entity": {
+    "binary_sensor": {
+      "restart_required": {
+        "name": "Restart required",
+        "state": {
+          "on": "Yes",
+          "off": "No"
+        },
+        "state_attributes": {
+          "reason": {
+            "name": "Reason"
+          }
+        }
+      },
+      "reporting": {
+        "name": "Reporting",
+        "state_attributes": {
+          "reporting_state": {
+            "name": "Reporting state",
+            "state": {
+              "reporting": "Reporting",
+              "overdue": "Overdue",
+              "stale": "Stale"
+            }
+          }
+        }
+      }
+    },
+    "sensor": {
+      "updates": {
+        "name": "Pending updates"
+      },
+      "security_updates": {
+        "name": "Security updates"
+      },
+      "update_status": {
+        "name": "Update status",
+        "state": {
+          "up_to_date": "Up to date",
+          "updates_pending": "Updates pending",
+          "security_required": "Security update required"
+        }
+      },
+      "last_check_in": {
+        "name": "Last check-in"
+      },
+      "installed_packages": {
+        "name": "Installed packages"
+      },
+      "agent_version": {
+        "name": "Agent version"
+      },
+      "last_boot": {
+        "name": "Last boot"
+      },
+      "running_kernel": {
+        "name": "Running kernel"
+      },
+      "installed_kernel": {
+        "name": "Installed kernel"
+      },
+      "hosts": {
+        "name": "Hosts"
+      },
+      "hosts_with_updates": {
+        "name": "Hosts with updates"
+      },
+      "hosts_with_security_updates": {
+        "name": "Hosts with security updates"
+      },
+      "hosts_requiring_restart": {
+        "name": "Hosts requiring restart"
+      },
+      "hosts_not_reporting": {
+        "name": "Hosts not reporting"
+      },
+      "total_updates": {
+        "name": "Total pending updates"
+      },
+      "total_security_updates": {
+        "name": "Total security updates"
+      }
+    },
+    "update": {
+      "updates": {
+        "name": "Updates"
+      }
+    }
+  },
   "exceptions": {
     "auth_failed": {
       "message": "PatchMon rejected the API token: {error}"
@@ -99,6 +188,9 @@
     },
     "unsupported": {
       "message": "Unexpected answer from the PatchMon server: {error}"
+    },
+    "packages_failed": {
+      "message": "Could not load the package list: {error}"
     }
   },
   "issues": {

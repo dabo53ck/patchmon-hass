@@ -1,0 +1,103 @@
+# serializer version: 1
+# name: test_binary_sensors
+  dict({
+    'binary_sensor.host_01_reporting': dict({
+      'attributes': dict({
+        'device_class': 'connectivity',
+        'friendly_name': 'Host 01 Reporting',
+        'reporting_state': 'reporting',
+      }),
+      'device_class': <BinarySensorDeviceClass.CONNECTIVITY: 'connectivity'>,
+      'disabled_by': None,
+      'entity_category': None,
+      'state': 'on',
+      'translation_key': 'reporting',
+      'unique_id': '00000000-0000-4000-8000-a00000000001_reporting',
+    }),
+    'binary_sensor.host_01_restart_required': dict({
+      'attributes': dict({
+        'friendly_name': 'Host 01 Restart required',
+        'reason': 'Kernel version mismatch | Running kernel: 6.12.15-production+truenas, Installed kernel: 7.0.14-29-pve',
+      }),
+      'device_class': None,
+      'disabled_by': None,
+      'entity_category': None,
+      'state': 'on',
+      'translation_key': 'restart_required',
+      'unique_id': '00000000-0000-4000-8000-a00000000001_restart_required',
+    }),
+    'binary_sensor.host_02_reporting': dict({
+      'attributes': dict({
+        'device_class': 'connectivity',
+        'friendly_name': 'Host 02 Reporting',
+        'reporting_state': 'reporting',
+      }),
+      'device_class': <BinarySensorDeviceClass.CONNECTIVITY: 'connectivity'>,
+      'disabled_by': None,
+      'entity_category': None,
+      'state': 'on',
+      'translation_key': 'reporting',
+      'unique_id': '00000000-0000-4000-8000-a00000000002_reporting',
+    }),
+    'binary_sensor.host_02_restart_required': dict({
+      'attributes': dict({
+        'friendly_name': 'Host 02 Restart required',
+        'reason': 'Reboot flag file exists (/var/run/reboot-required) | Running kernel: 7.0.0-42-generic, Installed kernel: 7.0.0-43-generic',
+      }),
+      'device_class': None,
+      'disabled_by': None,
+      'entity_category': None,
+      'state': 'on',
+      'translation_key': 'restart_required',
+      'unique_id': '00000000-0000-4000-8000-a00000000002_restart_required',
+    }),
+    'binary_sensor.host_03_reporting': dict({
+      'attributes': dict({
+        'device_class': 'connectivity',
+        'friendly_name': 'Host 03 Reporting',
+        'reporting_state': 'reporting',
+      }),
+      'device_class': <BinarySensorDeviceClass.CONNECTIVITY: 'connectivity'>,
+      'disabled_by': None,
+      'entity_category': None,
+      'state': 'on',
+      'translation_key': 'reporting',
+      'unique_id': '00000000-0000-4000-8000-a00000000003_reporting',
+    }),
+    'binary_sensor.host_03_restart_required': dict({
+      'attributes': dict({
+        'friendly_name': 'Host 03 Restart required',
+      }),
+      'device_class': None,
+      'disabled_by': None,
+      'entity_category': None,
+      'state': 'off',
+      'translation_key': 'restart_required',
+      'unique_id': '00000000-0000-4000-8000-a00000000003_restart_required',
+    }),
+    'binary_sensor.host_04_reporting': dict({
+      'attributes': dict({
+        'device_class': 'connectivity',
+        'friendly_name': 'Host 04 Reporting',
+        'reporting_state': 'reporting',
+      }),
+      'device_class': <BinarySensorDeviceClass.CONNECTIVITY: 'connectivity'>,
+      'disabled_by': None,
+      'entity_category': None,
+      'state': 'on',
+      'translation_key': 'reporting',
+      'unique_id': '00000000-0000-4000-8000-a00000000004_reporting',
+    }),
+    'binary_sensor.host_04_restart_required': dict({
+      'attributes': dict({
+        'friendly_name': 'Host 04 Restart required',
+      }),
+      'device_class': None,
+      'disabled_by': None,
+      'entity_category': None,
+      'state': 'off',
+      'translation_key': 'restart_required',
+      'unique_id': '00000000-0000-4000-8000-a00000000004_restart_required',
+    }),
+  })
+# ---

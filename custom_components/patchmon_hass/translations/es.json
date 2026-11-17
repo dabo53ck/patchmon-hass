@@ -90,6 +90,95 @@
       "unknown": "Error inesperado. Consulta el registro para más detalles."
     }
   },
+  "entity": {
+    "binary_sensor": {
+      "restart_required": {
+        "name": "Reinicio necesario",
+        "state": {
+          "on": "Sí",
+          "off": "No"
+        },
+        "state_attributes": {
+          "reason": {
+            "name": "Motivo"
+          }
+        }
+      },
+      "reporting": {
+        "name": "Informando",
+        "state_attributes": {
+          "reporting_state": {
+            "name": "Estado de informe",
+            "state": {
+              "reporting": "Informando",
+              "overdue": "Retrasado",
+              "stale": "Obsoleto"
+            }
+          }
+        }
+      }
+    },
+    "sensor": {
+      "updates": {
+        "name": "Actualizaciones pendientes"
+      },
+      "security_updates": {
+        "name": "Actualizaciones de seguridad"
+      },
+      "update_status": {
+        "name": "Estado de actualización",
+        "state": {
+          "up_to_date": "Al día",
+          "updates_pending": "Actualizaciones pendientes",
+          "security_required": "Actualización de seguridad necesaria"
+        }
+      },
+      "last_check_in": {
+        "name": "Último check-in"
+      },
+      "installed_packages": {
+        "name": "Paquetes instalados"
+      },
+      "agent_version": {
+        "name": "Versión del agente"
+      },
+      "last_boot": {
+        "name": "Último arranque"
+      },
+      "running_kernel": {
+        "name": "Kernel en ejecución"
+      },
+      "installed_kernel": {
+        "name": "Kernel instalado"
+      },
+      "hosts": {
+        "name": "Hosts"
+      },
+      "hosts_with_updates": {
+        "name": "Hosts con actualizaciones"
+      },
+      "hosts_with_security_updates": {
+        "name": "Hosts con actualizaciones de seguridad"
+      },
+      "hosts_requiring_restart": {
+        "name": "Hosts que requieren reinicio"
+      },
+      "hosts_not_reporting": {
+        "name": "Hosts sin informar"
+      },
+      "total_updates": {
+        "name": "Total de actualizaciones pendientes"
+      },
+      "total_security_updates": {
+        "name": "Total de actualizaciones de seguridad"
+      }
+    },
+    "update": {
+      "updates": {
+        "name": "Actualizaciones"
+      }
+    }
+  },
   "exceptions": {
     "auth_failed": {
       "message": "PatchMon ha rechazado el token de API: {error}"
@@ -99,6 +188,9 @@
     },
     "unsupported": {
       "message": "Respuesta inesperada del servidor de PatchMon: {error}"
+    },
+    "packages_failed": {
+      "message": "No se pudo cargar la lista de paquetes: {error}"
     }
   },
   "issues": {

@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_URL
+from homeassistant.const import CONF_URL, Platform
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import issue_registry as ir
@@ -13,6 +13,8 @@ from homeassistant.helpers import issue_registry as ir
 from .const import DOMAIN
 from .coordinator import ISSUE_GROUPS_WITHOUT_HOSTS, PatchMonCoordinator
 from .helpers import create_client
+
+PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.UPDATE]
 
 
 @dataclass(slots=True)
@@ -50,6 +52,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: PatchMonConfigEntry) -> 
 
     _async_sync()
     entry.async_on_unload(coordinator.async_add_listener(_async_sync))
+
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
 
@@ -91,8 +95,8 @@ def _async_sync_devices(
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: PatchMonConfigEntry) -> bool:
-    """Unload a config entry (no platforms yet)."""
-    return True
+    """Unload a config entry."""
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
 
 async def async_remove_config_entry_device(

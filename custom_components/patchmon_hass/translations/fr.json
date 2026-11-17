@@ -90,6 +90,95 @@
       "unknown": "Erreur inattendue. Consultez le journal pour plus de détails."
     }
   },
+  "entity": {
+    "binary_sensor": {
+      "restart_required": {
+        "name": "Redémarrage requis",
+        "state": {
+          "on": "Oui",
+          "off": "Non"
+        },
+        "state_attributes": {
+          "reason": {
+            "name": "Raison"
+          }
+        }
+      },
+      "reporting": {
+        "name": "Envoie des rapports",
+        "state_attributes": {
+          "reporting_state": {
+            "name": "État des rapports",
+            "state": {
+              "reporting": "Envoie des rapports",
+              "overdue": "En retard",
+              "stale": "Obsolète"
+            }
+          }
+        }
+      }
+    },
+    "sensor": {
+      "updates": {
+        "name": "Mises à jour en attente"
+      },
+      "security_updates": {
+        "name": "Mises à jour de sécurité"
+      },
+      "update_status": {
+        "name": "État des mises à jour",
+        "state": {
+          "up_to_date": "À jour",
+          "updates_pending": "Mises à jour en attente",
+          "security_required": "Mise à jour de sécurité requise"
+        }
+      },
+      "last_check_in": {
+        "name": "Dernier check-in"
+      },
+      "installed_packages": {
+        "name": "Paquets installés"
+      },
+      "agent_version": {
+        "name": "Version de l'agent"
+      },
+      "last_boot": {
+        "name": "Dernier démarrage"
+      },
+      "running_kernel": {
+        "name": "Noyau en cours d'exécution"
+      },
+      "installed_kernel": {
+        "name": "Noyau installé"
+      },
+      "hosts": {
+        "name": "Hôtes"
+      },
+      "hosts_with_updates": {
+        "name": "Hôtes avec mises à jour"
+      },
+      "hosts_with_security_updates": {
+        "name": "Hôtes avec mises à jour de sécurité"
+      },
+      "hosts_requiring_restart": {
+        "name": "Hôtes nécessitant un redémarrage"
+      },
+      "hosts_not_reporting": {
+        "name": "Hôtes sans rapport"
+      },
+      "total_updates": {
+        "name": "Total des mises à jour en attente"
+      },
+      "total_security_updates": {
+        "name": "Total des mises à jour de sécurité"
+      }
+    },
+    "update": {
+      "updates": {
+        "name": "Mises à jour"
+      }
+    }
+  },
   "exceptions": {
     "auth_failed": {
       "message": "PatchMon a refusé le jeton d'API : {error}"
@@ -99,6 +188,9 @@
     },
     "unsupported": {
       "message": "Réponse inattendue du serveur PatchMon : {error}"
+    },
+    "packages_failed": {
+      "message": "Impossible de charger la liste des paquets : {error}"
     }
   },
   "issues": {

@@ -90,6 +90,95 @@
       "unknown": "Unerwarteter Fehler. Details stehen im Log."
     }
   },
+  "entity": {
+    "binary_sensor": {
+      "restart_required": {
+        "name": "Neustart erforderlich",
+        "state": {
+          "on": "Ja",
+          "off": "Nein"
+        },
+        "state_attributes": {
+          "reason": {
+            "name": "Grund"
+          }
+        }
+      },
+      "reporting": {
+        "name": "Meldet sich",
+        "state_attributes": {
+          "reporting_state": {
+            "name": "Meldestatus",
+            "state": {
+              "reporting": "Meldet sich",
+              "overdue": "Überfällig",
+              "stale": "Veraltet"
+            }
+          }
+        }
+      }
+    },
+    "sensor": {
+      "updates": {
+        "name": "Ausstehende Updates"
+      },
+      "security_updates": {
+        "name": "Sicherheitsupdates"
+      },
+      "update_status": {
+        "name": "Update-Status",
+        "state": {
+          "up_to_date": "Aktuell",
+          "updates_pending": "Updates ausstehend",
+          "security_required": "Sicherheitsupdate nötig"
+        }
+      },
+      "last_check_in": {
+        "name": "Letzter Check-in"
+      },
+      "installed_packages": {
+        "name": "Installierte Pakete"
+      },
+      "agent_version": {
+        "name": "Agent-Version"
+      },
+      "last_boot": {
+        "name": "Letzter Neustart"
+      },
+      "running_kernel": {
+        "name": "Laufender Kernel"
+      },
+      "installed_kernel": {
+        "name": "Installierter Kernel"
+      },
+      "hosts": {
+        "name": "Hosts"
+      },
+      "hosts_with_updates": {
+        "name": "Hosts mit Updates"
+      },
+      "hosts_with_security_updates": {
+        "name": "Hosts mit Sicherheitsupdates"
+      },
+      "hosts_requiring_restart": {
+        "name": "Hosts mit Neustartbedarf"
+      },
+      "hosts_not_reporting": {
+        "name": "Hosts ohne Meldung"
+      },
+      "total_updates": {
+        "name": "Ausstehende Updates gesamt"
+      },
+      "total_security_updates": {
+        "name": "Sicherheitsupdates gesamt"
+      }
+    },
+    "update": {
+      "updates": {
+        "name": "Updates"
+      }
+    }
+  },
   "exceptions": {
     "auth_failed": {
       "message": "PatchMon hat das API-Token abgelehnt: {error}"
@@ -99,6 +188,9 @@
     },
     "unsupported": {
       "message": "Unerwartete Antwort vom PatchMon-Server: {error}"
+    },
+    "packages_failed": {
+      "message": "Die Paketliste konnte nicht geladen werden: {error}"
     }
   },
   "issues": {
