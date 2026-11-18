@@ -3,13 +3,17 @@ description: Something is not working as expected
 labels: ["bug"]
 body:
   - type: dropdown
-    id: component
+    id: area
     attributes:
       label: Which part is affected?
       options:
-        - Setup (config flow, re-authentication, options)
-        - Entities (sensors, binary sensors, update entities)
+        - Setup (add, re-authenticate, reconfigure, options)
+        - Devices (PatchMon server, hosts added or removed)
+        - Sensors and binary sensors
+        - Update entities
         - Actions (get_hosts, get_packages, refresh)
+        - Repair issues
+        - Diagnostics
         - Documentation
         - Not sure
     validations:
@@ -21,33 +25,61 @@ body:
       description: What did you expect, and what happened instead?
     validations:
       required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: What you did, in the order you did it.
+      placeholder: |
+        1. …
+        2. …
+        3. …
+    validations:
+      required: true
   - type: input
     id: ha_version
     attributes:
       label: Home Assistant version
+      description: Settings → About, e.g. `2026.11.2`.
     validations:
       required: true
   - type: input
     id: integration_version
     attributes:
-      label: Integration version (HACS)
+      label: Integration version
+      description: Shown in HACS, or `version` in `custom_components/patchmon_hass/manifest.json`.
     validations:
       required: true
   - type: input
     id: patchmon_version
     attributes:
       label: PatchMon server version
-      description: Shown in the PatchMon web interface (Settings → About).
+      description: Shown in the PatchMon web interface (Settings → About), e.g. `2.1.8`.
     validations:
       required: true
   - type: textarea
     id: logs
     attributes:
       label: Relevant logs
-      description: Settings → System → Logs, filtered to `patchmon_hass`.
+      description: >
+        Settings → System → Logs, filtered to `patchmon_hass`. For more detail,
+        enable debug logging on the integration entry, reproduce the problem and
+        disable it again; Home Assistant then offers the log as a download. It
+        contains host names, but not the server address or the token.
       render: text
   - type: textarea
     id: diagnostics
     attributes:
       label: Diagnostics
-      description: Download from the integration or device page and paste or attach (tokens, addresses and host names are redacted).
+      description: >
+        Optional. Settings → Devices & services → PatchMon, three-dot menu of the
+        entry (or of a device), Download diagnostics, then drag the file in here.
+        The server address, the token, host names, IP addresses and machine IDs
+        are removed from it.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues.
+          required: true

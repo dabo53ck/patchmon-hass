@@ -3,13 +3,17 @@ description: Suggest an idea or improvement
 labels: ["enhancement"]
 body:
   - type: dropdown
-    id: component
+    id: area
     attributes:
       label: Which part is this about?
       options:
-        - Setup (config flow, re-authentication, options)
-        - Entities (sensors, binary sensors, update entities)
+        - Setup (add, re-authenticate, reconfigure, options)
+        - Devices (PatchMon server, hosts added or removed)
+        - Sensors and binary sensors
+        - Update entities
         - Actions (get_hosts, get_packages, refresh)
+        - Repair issues
+        - Diagnostics
         - Documentation
         - Not sure
     validations:
@@ -18,7 +22,7 @@ body:
     id: problem
     attributes:
       label: What problem would this solve?
-      description: The use case or frustration behind the request, not just the solution.
+      description: The situation or frustration behind the request, not just the solution.
     validations:
       required: true
   - type: textarea
@@ -26,7 +30,8 @@ body:
     attributes:
       label: What would you like to see?
       description: >
-        The behaviour, entity, action or option you have in mind. Note that this
+        The behaviour, entity, action or option you have in mind. A rough sketch of
+        the automation or dashboard that would use it helps a lot. Note that this
         integration is read-only by design: it never patches or changes hosts.
     validations:
       required: true
@@ -34,6 +39,7 @@ body:
     id: alternatives
     attributes:
       label: Alternatives you have tried
+      description: Templates, helpers, the actions of this integration, other integrations.
   - type: checkboxes
     id: checks
     attributes:
