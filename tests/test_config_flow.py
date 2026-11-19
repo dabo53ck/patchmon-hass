@@ -29,7 +29,15 @@ from custom_components.patchmon_hass.const import (
     ENABLE_OPTIONS,
 )
 
-from .conftest import API, ENTRY_DATA, URL, host_id, load_fixture, setup_entry
+from .conftest import (
+    API,
+    ENTRY_DATA,
+    URL,
+    host_id,
+    load_fixture,
+    mock_details,
+    setup_entry,
+)
 
 USER_INPUT = {
     CONF_URL: "http://PatchMon.example:3000/api/v1/api/",
@@ -336,6 +344,107 @@ async def test_reconfigure_to_other_configured_server(
 
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "already_configured"
+
+
+OTHER_ADDRESS = "http://192.0.2.10:3000"
+
+
+def _other_server_hosts() -> dict[str, Any]:
+    """The host list of a different PatchMon server: same names, new IDs."""
+    body = load_fixture("hosts.json")
+    for host in body["hosts"]:
+        host["id"] = host["id"].replace("-a0", "-b0")
+    return body
+
+
+@pytest.mark.parametrize("loaded", [True, False])
+async def test_user_flow_same_server_other_address(
+    hass: HomeAssistant,
+    mock_config_entry: MockConfigEntry,
+    mock_hosts: AiohttpClientMocker,
+    loaded: bool,
+) -> None:
+    """A second address of a set-up server is refused, loaded or not."""
+    await setup_entry(hass, mock_config_entry)
+    if not loaded:
+        assert await hass.config_entries.async_unload(mock_config_entry.entry_id)
+    mock_hosts.get(f"{OTHER_ADDRESS}/api/v1/api/hosts", json=load_fixture("hosts.json"))
+    result = await _start_user_flow(hass)
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {**USER_INPUT, CONF_URL: OTHER_ADDRESS}
+    )
+
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "already_configured_other_address"
+    assert result["description_placeholders"] == {
+        "title": "PatchMon (patchmon.example)"
+    }
+    assert len(hass.config_entries.async_entries(DOMAIN)) == 1
+
+
+async def test_user_flow_second_server(
+    hass: HomeAssistant,
+    mock_config_entry: MockConfigEntry,
+    mock_hosts: AiohttpClientMocker,
+) -> None:
+    """A different server (other host IDs) is added next to the first one."""
+    await setup_entry(hass, mock_config_entry)
+    mock_hosts.get(f"{OTHER_ADDRESS}/api/v1/api/hosts", json=_other_server_hosts())
+    result = await _start_user_flow(hass)
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {**USER_INPUT, CONF_URL: OTHER_ADDRESS}
+    )
+
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["title"] == "PatchMon (192.0.2.10)"
+
+
+async def test_reconfigure_to_address_of_other_entry(
+    hass: HomeAssistant,
+    mock_config_entry: MockConfigEntry,
+    mock_hosts: AiohttpClientMocker,
+) -> None:
+    """A second entry cannot be pointed at the server of the first one."""
+    await setup_entry(hass, mock_config_entry)
+    second = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id="http://other.example:3000",
+        data={**ENTRY_DATA, CONF_URL: "http://other.example:3000"},
+    )
+    second.add_to_hass(hass)
+    mock_hosts.get(f"{OTHER_ADDRESS}/api/v1/api/hosts", json=load_fixture("hosts.json"))
+    result = await second.start_reconfigure_flow(hass)
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {**ENTRY_DATA, CONF_URL: OTHER_ADDRESS}
+    )
+
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "already_configured_other_address"
+    assert second.unique_id == "http://other.example:3000"
+
+
+async def test_reconfigure_own_hosts_new_address(
+    hass: HomeAssistant,
+    mock_config_entry: MockConfigEntry,
+    mock_hosts: AiohttpClientMocker,
+) -> None:
+    """Moving an entry to a new address of its own server is allowed."""
+    await setup_entry(hass, mock_config_entry)
+    mock_hosts.get(f"{OTHER_ADDRESS}/api/v1/api/hosts", json=load_fixture("hosts.json"))
+    mock_details(mock_hosts, f"{OTHER_ADDRESS}/api/v1/api")
+    result = await mock_config_entry.start_reconfigure_flow(hass)
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {**ENTRY_DATA, CONF_URL: OTHER_ADDRESS}
+    )
+    await hass.async_block_till_done()
+
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "reconfigure_successful"
+    assert mock_config_entry.unique_id == OTHER_ADDRESS
 
 
 def _host_list_calls(mock: AiohttpClientMocker) -> list[yarl.URL]:
