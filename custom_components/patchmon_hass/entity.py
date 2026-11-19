@@ -5,7 +5,8 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING
 
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import Event, HomeAssistant, callback
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import Entity
@@ -90,24 +91,43 @@ def async_add_host_entities(
 ) -> None:
     """Add the entities of every host now and of new hosts later.
 
-    A host that disappears (and whose device was removed with its entities)
-    gets new entities when it comes back.
+    A host whose device was removed (with its entities), by the integration
+    or by the user, gets new entities when it comes back. The device sync
+    runs first, so a returning host already has its device again.
     """
     coordinator = entry.runtime_data.coordinator
-    known: set[str] = set()
+    devices = dr.async_get(coordinator.hass)
+    # Host ID -> ID of its device when the entities were added.
+    known: dict[str, str | None] = {}
 
     @callback
     def _async_add_new() -> None:
         data = coordinator.data
-        if data.complete:
-            known.intersection_update(data.hosts)
         if new := [host_id for host_id in data.hosts if host_id not in known]:
-            known.update(new)
+            for host_id in new:
+                device = devices.async_get_device_by_identifier(
+                    (DOMAIN, host_id), entry.entry_id
+                )
+                known[host_id] = device.id if device else None
             async_add_entities(
                 [entity for host_id in new for entity in factory(host_id)]
             )
 
+    @callback
+    def _async_device_removed(event: Event[dr.EventDeviceRegistryUpdatedData]) -> None:
+        """Removing a device removes its entities: forget its host."""
+        if event.data["action"] != "remove":
+            return
+        for host_id, device_id in list(known.items()):
+            if device_id == event.data["device_id"]:
+                del known[host_id]
+
     _async_add_new()
+    entry.async_on_unload(
+        coordinator.hass.bus.async_listen(
+            dr.EVENT_DEVICE_REGISTRY_UPDATED, _async_device_removed
+        )
+    )
     entry.async_on_unload(coordinator.async_add_listener(_async_add_new))
 
 

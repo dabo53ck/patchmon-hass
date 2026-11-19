@@ -16,6 +16,8 @@ import asyncio
 import base64
 import json
 import logging
+import os
+import socket
 import time
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -278,6 +280,30 @@ class Package:
         )
 
 
+def _describe(err: BaseException) -> str:
+    """Error type plus reason, without the server address.
+
+    aiohttp puts host and port (or the URL) into its messages, and these
+    texts end up in logs and in the Home Assistant interface.
+    """
+    name = type(err).__name__
+    reason: object = None
+    if isinstance(err, aiohttp.ClientConnectorCertificateError):
+        reason = getattr(err.certificate_error, "reason", None)
+    elif isinstance(err, aiohttp.ClientConnectorError):
+        reason = getattr(err.os_error, "reason", None) or _os_reason(err.os_error)
+    elif isinstance(err, OSError):
+        reason = _os_reason(err)
+    return f"{name} ({reason})" if reason else name
+
+
+def _os_reason(err: OSError) -> str | None:
+    """The standard text for the error number; asyncio adds the address."""
+    if isinstance(err, socket.gaierror):
+        return err.strerror  # "Name or service not known", without the name
+    return os.strerror(err.errno) if err.errno else None
+
+
 class PatchMonClient:
     """Async, read-only client for one PatchMon server."""
 
@@ -324,7 +350,7 @@ class PatchMonClient:
             # Binary or wrongly encoded body, e.g. from a proxy.
             raise PatchMonUnsupportedError("Answer is not valid text") from err
         except aiohttp.ClientSSLError as err:
-            raise PatchMonSSLError(str(err)) from err
+            raise PatchMonSSLError(_describe(err)) from err
         except (TimeoutError, aiohttp.ClientError) as err:
             _LOGGER.debug(
                 "GET %s failed after %.2f s: %s",
@@ -332,7 +358,7 @@ class PatchMonClient:
                 time.monotonic() - start,
                 type(err).__name__,
             )
-            raise PatchMonConnectionError(str(err) or type(err).__name__) from err
+            raise PatchMonConnectionError(_describe(err)) from err
         _LOGGER.debug(
             "GET %s: HTTP %s in %.2f s", path, status, time.monotonic() - start
         )

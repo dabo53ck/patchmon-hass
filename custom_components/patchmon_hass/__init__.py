@@ -6,7 +6,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import ConfigEntry, ConfigEntryState
 from homeassistant.const import CONF_URL, Platform
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import area_registry as ar
@@ -179,8 +179,16 @@ async def async_unload_entry(hass: HomeAssistant, entry: PatchMonConfigEntry) ->
 async def async_remove_config_entry_device(
     hass: HomeAssistant, entry: PatchMonConfigEntry, device: dr.DeviceEntry
 ) -> bool:
-    """Allow deleting a host device only while PatchMon does not list it."""
-    hosts = entry.runtime_data.coordinator.data.hosts
+    """Allow deleting a host device only while PatchMon does not list it.
+
+    The server device stays. While the entry is not loaded (for example the
+    server is unreachable) there is no host list, so host devices may go.
+    """
+    hosts = (
+        entry.runtime_data.coordinator.data.hosts
+        if entry.state is ConfigEntryState.LOADED
+        else {}
+    )
     return not any(
         domain == DOMAIN and (ident == entry.entry_id or ident in hosts)
         for domain, ident in device.identifiers

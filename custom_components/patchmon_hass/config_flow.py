@@ -37,6 +37,7 @@ from .api import (
     PatchMonAuthError,
     PatchMonConnectionError,
     PatchMonError,
+    PatchMonNotFoundError,
     PatchMonSSLError,
     PatchMonUnsupportedError,
     normalize_url,
@@ -100,7 +101,8 @@ def _error_key(err: Exception) -> str:
         return "ssl_error"
     if isinstance(err, PatchMonConnectionError):
         return "cannot_connect"
-    if isinstance(err, PatchMonUnsupportedError):
+    if isinstance(err, PatchMonUnsupportedError | PatchMonNotFoundError):
+        # A 404 on the host list: the address points somewhere else.
         return "unsupported"
     _LOGGER.exception("Unexpected error while talking to PatchMon")
     return "unknown"

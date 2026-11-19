@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
@@ -23,7 +24,6 @@ from .api import (
     PatchMonClient,
     PatchMonConnectionError,
     PatchMonError,
-    PatchMonNotFoundError,
     PatchMonUnsupportedError,
 )
 from .const import (
@@ -118,11 +118,7 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
             self._force_all_details = True
         else:
             self._force_details.update(host_ids)
-        try:
-            await self.async_refresh()
-        finally:
-            self._force_all_details = False
-            self._force_details.clear()
+        await self.async_refresh()
         if self.last_update_success:
             return
         err = self.last_exception
@@ -139,6 +135,10 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
         ) from err
 
     async def _async_update_data(self) -> PatchMonData:
+        # Take the refresh flags over: a refresh asked for meanwhile gets its
+        # own update.
+        force_all, force = self._force_all_details, self._force_details
+        self._force_all_details, self._force_details = False, set()
         try:
             hosts = await self.client.get_hosts(self._host_groups or None)
         except PatchMonAuthError as err:
@@ -166,14 +166,16 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
             self._group_names.update({g.id: g.name for g in host.host_groups})
 
         missing = self._groups_without_hosts(hosts)
-        suddenly_empty = not by_id and self.data is not None and bool(self.data.hosts)
+        suddenly_empty = not by_id and self._had_hosts()
         if suddenly_empty:
             _LOGGER.warning(
                 "PatchMon returned no hosts; keeping the known devices for now"
             )
 
-        forced = self._force_all_details or bool(self._force_details)
-        details, unsupported = await self._async_update_details(by_id)
+        forced = force_all or bool(force)
+        details, unsupported = await self._async_update_details(
+            by_id, None if force_all else force
+        )
         _LOGGER.debug(
             "%d hosts listed, details available for %d%s%s",
             len(by_id),
@@ -187,6 +189,25 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
             details=details,
             complete=not missing and not suddenly_empty,
             groups_without_hosts=missing,
+        )
+
+    def _had_hosts(self) -> bool:
+        """Whether hosts were known: from the last update, else the registry.
+
+        After a restart there is no last update yet, but the devices of the
+        last run are still in the device registry.
+        """
+        data: PatchMonData | None = self.data
+        if data is not None:
+            return bool(data.hosts)
+        entry_id = self.config_entry.entry_id
+        return any(
+            ident != entry_id
+            for device in dr.async_entries_for_config_entry(
+                dr.async_get(self.hass), entry_id
+            )
+            for domain, ident in device.identifiers
+            if domain == DOMAIN
         )
 
     def _groups_without_hosts(self, hosts: list[Host]) -> tuple[str, ...]:
@@ -240,12 +261,12 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
         )
 
     async def _async_update_details(
-        self, hosts: dict[str, Host]
+        self, hosts: dict[str, Host], force: set[str] | None
     ) -> tuple[dict[str, HostDetails], PatchMonError | None]:
         """Keep fresh details, re-read the others (the client limits parallelism).
 
-        Hosts deleted in the meantime are dropped from ``hosts``. Also
-        returns the last answer that was not understood, if any.
+        ``force`` are hosts to re-read in any case; None means all of them.
+        Also returns the last answer that was not understood, if any.
         """
         old = self.data.details if self.data is not None else {}
         now = dt_util.utcnow()
@@ -255,8 +276,8 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
             known = old.get(host_id)
             if (
                 known is not None
-                and not self._force_all_details
-                and host_id not in self._force_details
+                and force is not None
+                and host_id not in force
                 and known.last_update == host.last_update
                 and now - known.fetched_at < DETAILS_MAX_AGE
             ):
@@ -285,11 +306,10 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
                     translation_key="auth_failed",
                     translation_placeholders={"error": result.message},
                 ) from result
-            elif isinstance(result, PatchMonNotFoundError):
-                # Deleted between the list and the details request.
-                _LOGGER.debug("%s was deleted during the update", host.friendly_name)
-                del hosts[host.id]
             elif isinstance(result, PatchMonError):
+                # Also a 404: the host may have been deleted in the meantime,
+                # but a proxy or another server version can answer 404 too.
+                # Only the host list decides whether a host is gone.
                 if isinstance(result, PatchMonUnsupportedError):
                     unsupported = result
                 _LOGGER.debug(
