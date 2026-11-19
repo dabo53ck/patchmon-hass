@@ -20,6 +20,7 @@ from custom_components.patchmon_hass.api import (
     PatchMonClient,
     PatchMonConnectionError,
     PatchMonNotFoundError,
+    PatchMonRedirectError,
     PatchMonSSLError,
     PatchMonUnsupportedError,
     normalize_url,
@@ -68,6 +69,8 @@ async def test_get_hosts(
     hosts = await client.get_hosts()
 
     assert len(hosts) == 4
+    assert hosts.total == 4
+    assert not hosts.truncated
     first = hosts[0]
     assert first.id == HOST_01
     assert first.friendly_name == "Host 01"
@@ -349,6 +352,55 @@ async def test_server_error(
 
     with pytest.raises(PatchMonConnectionError, match="HTTP 500"):
         await client.get_hosts()
+
+
+async def test_host_list_count(
+    client: PatchMonClient, aioclient_mock: AiohttpClientMocker
+) -> None:
+    """A count above the list length marks it as cut off; no count is fine."""
+    body = load_fixture("hosts.json")
+    aioclient_mock.get(f"{API}/hosts", json={**body, "total": 9})
+    hosts = await client.get_hosts()
+    assert hosts.total == 9
+    assert hosts.truncated
+
+    aioclient_mock.clear_requests()
+    aioclient_mock.get(f"{API}/hosts", json={"hosts": body["hosts"]})
+    hosts = await client.get_hosts()
+    assert hosts.total is None
+    assert not hosts.truncated
+
+
+async def test_host_id_is_encoded(
+    client: PatchMonClient, aioclient_mock: AiohttpClientMocker
+) -> None:
+    """A host ID stays one path segment, whatever it contains."""
+    aioclient_mock.get(
+        f"{API}/hosts/a%2Fb%3Fc/system", json=load_fixture("host_01_system.json")
+    )
+
+    await client.get_host_system("a/b?c")
+
+    _, url, _, _ = aioclient_mock.mock_calls[0]
+    assert url.raw_path.endswith("/hosts/a%2Fb%3Fc/system")
+    assert not url.query
+
+
+@pytest.mark.parametrize("status", [301, 302, 307, 308])
+async def test_redirect(
+    client: PatchMonClient, aioclient_mock: AiohttpClientMocker, status: int
+) -> None:
+    """Redirects are not followed and name no address."""
+    aioclient_mock.get(
+        f"{API}/hosts",
+        status=status,
+        headers={"Location": "https://login.example/"},
+    )
+
+    with pytest.raises(PatchMonRedirectError) as err:
+        await client.get_hosts()
+
+    assert str(err.value) == f"Redirect (HTTP {status})"
 
 
 @pytest.mark.parametrize(
