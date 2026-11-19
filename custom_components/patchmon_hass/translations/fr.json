@@ -74,6 +74,7 @@
     },
     "abort": {
       "already_configured": "Ce serveur PatchMon est déjà configuré.",
+      "already_configured_other_address": "Ce serveur PatchMon est déjà configuré sous une autre adresse comme « {title} ». Pour changer l'adresse, choisissez Reconfigurer sur cette entrée.",
       "reauth_successful": "Le jeton a été mis à jour.",
       "reconfigure_successful": "La connexion a été mise à jour."
     }

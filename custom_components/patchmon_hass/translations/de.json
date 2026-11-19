@@ -74,6 +74,7 @@
     },
     "abort": {
       "already_configured": "Dieser PatchMon-Server ist bereits eingerichtet.",
+      "already_configured_other_address": "Dieser PatchMon-Server ist bereits unter einer anderen Adresse als „{title}“ eingerichtet. Um die Adresse zu ändern, wähle bei diesem Eintrag „Neu konfigurieren“.",
       "reauth_successful": "Das Token wurde aktualisiert.",
       "reconfigure_successful": "Die Verbindung wurde aktualisiert."
     }

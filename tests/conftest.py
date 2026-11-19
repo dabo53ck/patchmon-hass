@@ -67,12 +67,12 @@ def host_id(number: int) -> str:
     return f"00000000-0000-4000-8000-a0000000000{number}"
 
 
-def mock_details(aioclient_mock: AiohttpClientMocker) -> None:
-    """Answer /system and /info of the four fixture hosts."""
+def mock_details(aioclient_mock: AiohttpClientMocker, api: str = API) -> None:
+    """Answer /system and /info of the four fixture hosts (at ``api``)."""
     for number in range(1, 5):
         for part in ("system", "info"):
             aioclient_mock.get(
-                f"{API}/hosts/{host_id(number)}/{part}",
+                f"{api}/hosts/{host_id(number)}/{part}",
                 json=load_fixture(f"host_0{number}_{part}.json"),
             )
 

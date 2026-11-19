@@ -70,6 +70,11 @@ entities can still be switched by hand afterwards. If the token is changed or ex
 asks for a new one; **Reconfigure** changes the address or token without
 losing anything (leave the secret empty to keep the current one).
 
+Each PatchMon server can be added once. Setup recognises the same server
+under a second address (IP and name, LAN and reverse proxy) by its hosts and
+stops; use **Reconfigure** on the existing entry to switch it to the new
+address instead.
+
 ## Devices and entities
 
 The PatchMon server is a device of its own; every host is a device linked to

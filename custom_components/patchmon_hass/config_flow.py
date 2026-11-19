@@ -9,6 +9,7 @@ from urllib.parse import urlsplit
 
 import probatio as vol
 from homeassistant.config_entries import (
+    ConfigEntry,
     ConfigFlow,
     ConfigFlowResult,
     OptionsFlowWithReload,
@@ -16,6 +17,7 @@ from homeassistant.config_entries import (
 from homeassistant.const import CONF_URL, CONF_VERIFY_SSL
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import section
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.selector import (
     AreaSelector,
@@ -108,13 +110,15 @@ def _error_key(err: Exception) -> str:
     return "unknown"
 
 
-async def _async_test(hass: HomeAssistant, data: Mapping[str, Any]) -> str | None:
-    """Try one read; return an error key or None when everything works."""
+async def _async_test(
+    hass: HomeAssistant, data: Mapping[str, Any]
+) -> tuple[str | None, set[str]]:
+    """Try one read; return an error key (None when it works) and the host IDs."""
     try:
-        await create_client(hass, data).get_hosts()
+        hosts = await create_client(hass, data).get_hosts()
     except Exception as err:  # every failure becomes a form error
-        return _error_key(err)
-    return None
+        return _error_key(err), set()
+    return None, {host.id for host in hosts}
 
 
 def _title(url: str) -> str:
@@ -153,7 +157,10 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
                 data.pop(CONF_OPTIONAL_ENTITIES, None)
                 if area := data.pop(CONF_AREA, None):
                     options[CONF_AREA] = area
-                if not (error := await _async_test(self.hass, data)):
+                error, host_ids = await _async_test(self.hass, data)
+                if not error:
+                    if other := self._entry_with_hosts(host_ids):
+                        return self._abort_other_address(other)
                     return self.async_create_entry(
                         title=_title(url), data=data, options=options
                     )
@@ -180,6 +187,32 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
+    def _entry_with_hosts(
+        self, host_ids: set[str], exclude: str | None = None
+    ) -> ConfigEntry | None:
+        """Another entry that already has a device for one of ``host_ids``.
+
+        Host IDs are UUIDs that PatchMon gives out, so a match means the same
+        server under a second address (e.g. IP and name, or LAN and proxy).
+        Devices are used instead of runtime data: they exist for entries
+        that are not loaded, too.
+        """
+        devices = dr.async_get(self.hass)
+        for entry in self._async_current_entries(include_ignore=False):
+            if entry.entry_id == exclude:
+                continue
+            for device in dr.async_entries_for_config_entry(devices, entry.entry_id):
+                if any(d == DOMAIN and i in host_ids for d, i in device.identifiers):
+                    return entry
+        return None
+
+    def _abort_other_address(self, other: ConfigEntry) -> ConfigFlowResult:
+        """Stop: the server is already set up as ``other`` (another address)."""
+        return self.async_abort(
+            reason="already_configured_other_address",
+            description_placeholders={"title": other.title},
+        )
+
     async def async_step_reauth(
         self, entry_data: Mapping[str, Any]
     ) -> ConfigFlowResult:
@@ -194,7 +227,8 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         if user_input is not None:
             data = {**entry.data, **user_input}
-            if not (error := await _async_test(self.hass, data)):
+            error, _ = await _async_test(self.hass, data)
+            if not error:
                 return self.async_update_reload_and_abort(entry, data=data)
             errors["base"] = error
 
@@ -228,7 +262,10 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
                         k: v for k, v in user_input.items() if k != CONF_TOKEN_SECRET
                     }
                 data = {**entry.data, **user_input, CONF_URL: url}
-                if not (error := await _async_test(self.hass, data)):
+                error, host_ids = await _async_test(self.hass, data)
+                if not error:
+                    if other := self._entry_with_hosts(host_ids, entry.entry_id):
+                        return self._abort_other_address(other)
                     return self.async_update_reload_and_abort(
                         entry, unique_id=url, title=_title(url), data=data
                     )

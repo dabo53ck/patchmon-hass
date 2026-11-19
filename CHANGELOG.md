@@ -54,3 +54,7 @@ pre-release identifiers included (`0.1.0-rc.1`, …).
   no longer fails.
 - Connection and certificate errors no longer contain the server address or
   IP address (aiohttp puts them into its messages).
+- The same server can no longer be added a second time under another
+  address (e.g. IP and host name): setup and reconfiguration recognise it by
+  its hosts and point to **Reconfigure** on the existing entry. Before, the
+  second entry could not create its host entities (their IDs were taken).

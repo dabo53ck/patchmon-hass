@@ -74,6 +74,7 @@
     },
     "abort": {
       "already_configured": "Este servidor de PatchMon ya está configurado.",
+      "already_configured_other_address": "Este servidor de PatchMon ya está configurado con otra dirección como «{title}». Para cambiar la dirección, elige Reconfigurar en esa entrada.",
       "reauth_successful": "El token se ha actualizado.",
       "reconfigure_successful": "La conexión se ha actualizado."
     }
