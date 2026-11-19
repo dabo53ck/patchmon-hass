@@ -63,7 +63,8 @@ class PatchMonData:
     # Hosts whose details could not be read in the last attempt are missing.
     details: dict[str, HostDetails]
     # False when the host list may be incomplete (a filtered group has no
-    # hosts, or the list is suddenly empty): then nothing must be removed.
+    # hosts, the list is suddenly empty or shorter than PatchMon's count):
+    # then nothing must be removed.
     complete: bool = True
     groups_without_hosts: tuple[str, ...] = field(default=())
 
@@ -171,6 +172,12 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
             _LOGGER.warning(
                 "PatchMon returned no hosts; keeping the known devices for now"
             )
+        if hosts.truncated:
+            _LOGGER.warning(
+                "PatchMon listed %d of %d hosts; keeping the known devices for now",
+                len(hosts),
+                hosts.total,
+            )
 
         forced = force_all or bool(force)
         details, unsupported = await self._async_update_details(
@@ -187,7 +194,7 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
         return PatchMonData(
             hosts=by_id,
             details=details,
-            complete=not missing and not suddenly_empty,
+            complete=not missing and not suddenly_empty and not hosts.truncated,
             groups_without_hosts=missing,
         )
 

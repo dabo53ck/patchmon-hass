@@ -58,3 +58,11 @@ pre-release identifiers included (`0.1.0-rc.1`, …).
   address (e.g. IP and host name): setup and reconfiguration recognise it by
   its hosts and point to **Reconfigure** on the existing entry. Before, the
   second entry could not create its host entities (their IDs were taken).
+- If PatchMon reports more hosts (`total`) than its list holds, the list
+  counts as cut off and no device is removed.
+- Host IDs are encoded in request paths, so an unusual ID cannot change the
+  request.
+- A redirect (e.g. `http://` to `https://`, or a proxy login page) gets its
+  own message in setup and options instead of "did not answer like a
+  PatchMon server".
+- README: what **Skip** on the update entity does.

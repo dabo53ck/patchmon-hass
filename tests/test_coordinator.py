@@ -307,6 +307,24 @@ async def test_suddenly_empty_list_is_incomplete(
     assert not coordinator.data.complete
 
 
+async def test_cut_off_list_is_incomplete(
+    hass: HomeAssistant,
+    mock_config_entry: MockConfigEntry,
+    mock_hosts: AiohttpClientMocker,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Fewer hosts than PatchMon's count must not count as "rest deleted"."""
+    coordinator = await _setup(hass, mock_config_entry)
+    body = load_fixture("hosts.json")
+    _remock(mock_hosts, {"hosts": body["hosts"][:2], "total": 4})
+
+    await coordinator.async_refresh()
+
+    assert len(coordinator.data.hosts) == 2
+    assert not coordinator.data.complete
+    assert "PatchMon listed 2 of 4 hosts" in caplog.text
+
+
 async def test_unsupported_answer_raises_repair(
     hass: HomeAssistant,
     issue_registry: ir.IssueRegistry,

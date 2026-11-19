@@ -19,12 +19,12 @@ import logging
 import os
 import socket
 import time
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import quote, urlsplit, urlunsplit
 
 import aiohttp
 
@@ -73,6 +73,10 @@ class PatchMonNotFoundError(PatchMonError):
 
 class PatchMonUnsupportedError(PatchMonError):
     """The answer does not look like a supported PatchMon server."""
+
+
+class PatchMonRedirectError(PatchMonUnsupportedError):
+    """The address redirects (http to https, a proxy login page, ...)."""
 
 
 # Exact error texts of PatchMon 2.x (internal/middleware/api_auth.go and
@@ -304,6 +308,32 @@ def _os_reason(err: OSError) -> str | None:
     return os.strerror(err.errno) if err.errno else None
 
 
+class HostList(list[Host]):
+    """The host list, plus the number of hosts PatchMon says it has.
+
+    ``total`` is None when the answer has no count. A ``total`` above the
+    length means the list is cut off (PatchMon 2.x does not page it, but
+    a later version might).
+    """
+
+    __slots__ = ("total",)
+
+    def __init__(self, hosts: Iterable[Host] = (), total: int | None = None) -> None:
+        """Store the hosts and the reported count."""
+        super().__init__(hosts)
+        self.total = total
+
+    @property
+    def truncated(self) -> bool:
+        """Whether PatchMon reported more hosts than the list holds."""
+        return self.total is not None and self.total > len(self)
+
+
+def _host_path(host_id: str, part: str) -> str:
+    """Path below one host; the ID is encoded so it stays one path segment."""
+    return f"/hosts/{quote(host_id, safe='')}/{part}"
+
+
 class PatchMonClient:
     """Async, read-only client for one PatchMon server."""
 
@@ -375,9 +405,13 @@ class PatchMonClient:
             raise PatchMonNotFoundError(path)
         if status >= 500:
             raise PatchMonConnectionError(f"HTTP {status}")
+        if 300 <= status < 400:
+            # Redirects are not followed: the token would go to the new
+            # address. The target is left out, it holds an address too.
+            raise PatchMonRedirectError(f"Redirect (HTTP {status})")
         if status != 200 or body is None:
             # Typical when the address points at the web interface or a
-            # proxy: HTML instead of JSON, or a redirect to a login page.
+            # proxy: HTML instead of JSON.
             raise PatchMonUnsupportedError(f"Unexpected answer (HTTP {status})")
         return body
 
@@ -396,7 +430,7 @@ class PatchMonClient:
             )
         return PatchMonAuthError(AuthFailure.INVALID_CREDENTIALS, error or "HTTP 401")
 
-    async def get_hosts(self, host_groups: list[str] | None = None) -> list[Host]:
+    async def get_hosts(self, host_groups: list[str] | None = None) -> HostList:
         """Return all hosts with their update counters.
 
         ``host_groups`` filters by group IDs or names (PatchMon matches
@@ -409,18 +443,20 @@ class PatchMonClient:
         hosts = body.get("hosts") if isinstance(body, Mapping) else None
         if not isinstance(hosts, list):
             raise PatchMonUnsupportedError("No host list in the answer")
-        return [Host.from_api(item) for item in hosts]
+        return HostList(
+            (Host.from_api(item) for item in hosts), total=_opt_int(body, "total")
+        )
 
     async def get_host_system(self, host_id: str) -> HostSystem:
         """Return kernel, reboot and boot details of one host."""
-        body = await self._get(f"/hosts/{host_id}/system")
+        body = await self._get(_host_path(host_id, "system"))
         if not isinstance(body, Mapping):
             raise PatchMonUnsupportedError("System details are not an object")
         return HostSystem.from_api(body)
 
     async def get_host_info(self, host_id: str) -> HostInfo:
         """Return agent details of one host."""
-        body = await self._get(f"/hosts/{host_id}/info")
+        body = await self._get(_host_path(host_id, "info"))
         if not isinstance(body, Mapping):
             raise PatchMonUnsupportedError("Host info is not an object")
         return HostInfo.from_api(body)
@@ -430,7 +466,7 @@ class PatchMonClient:
     ) -> list[Package]:
         """Return the packages of one host, by default only those with updates."""
         params = {"updates_only": "true"} if updates_only else None
-        body = await self._get(f"/hosts/{host_id}/packages", params)
+        body = await self._get(_host_path(host_id, "packages"), params)
         packages = body.get("packages") if isinstance(body, Mapping) else None
         if not isinstance(packages, list):
             raise PatchMonUnsupportedError("No package list in the answer")

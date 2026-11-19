@@ -70,6 +70,7 @@
       "ip_not_allowed": "Ce jeton d'API n'est pas autorisé depuis l'adresse IP de Home Assistant. Vérifiez la restriction d'IP du jeton dans PatchMon.",
       "missing_permission": "Il manque l'autorisation `host:get` à ce jeton d'API.",
       "unsupported": "Le serveur ne répond pas comme un serveur PatchMon 2.x. Vérifiez l'adresse.",
+      "redirect": "L'adresse redirige vers une autre, par exemple de http:// vers https:// ou vers une page de connexion. Indiquez l'adresse à laquelle PatchMon répond directement.",
       "unknown": "Erreur inattendue. Consultez le journal pour plus de détails."
     },
     "abort": {
@@ -116,6 +117,7 @@
       "ip_not_allowed": "Ce jeton d'API n'est pas autorisé depuis l'adresse IP de Home Assistant.",
       "missing_permission": "Il manque l'autorisation `host:get` à ce jeton d'API.",
       "unsupported": "Le serveur ne répond pas comme un serveur PatchMon 2.x.",
+      "redirect": "L'adresse redirige vers une autre, par exemple de http:// vers https:// ou vers une page de connexion. Indiquez l'adresse à laquelle PatchMon répond directement.",
       "unknown": "Erreur inattendue. Consultez le journal pour plus de détails."
     }
   },

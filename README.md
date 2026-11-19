@@ -119,6 +119,8 @@ labels instead of versions:
 
 **Release notes** shows the packages with updates (security updates first,
 at most 50). There is no install button: the integration is read-only.
+**Skip** hides only the label shown at that moment: once the number of
+updates changes, the update shows up again.
 The update entity is disabled by default so that many hosts do not crowd the
 update list in the Home Assistant settings; enable it per host if you want it.
 
@@ -195,6 +197,10 @@ sequence:
   points to the web interface behind a proxy or the PatchMon version is not
   supported yet. Check the address with **Reconfigure**. The repair goes away
   by itself once an answer is understood again.
+- **"The address redirects to another one":** the address answers with a
+  redirect, typically from `http://` to `https://` or to the login page of a
+  proxy. Redirects are not followed, so the token never goes to another
+  address; enter the address PatchMon answers on directly.
 - **Token rejected:** Home Assistant asks for a new token (re-authentication).
   Check that the token is enabled, not expired, has `host:get` and, if
   restricted, allows the IP address of Home Assistant.

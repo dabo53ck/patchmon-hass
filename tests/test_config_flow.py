@@ -63,6 +63,8 @@ ERROR_CASES = [
     ({"status": 200, "text": "<!doctype html>"}, "unsupported"),
     # Wrong path, e.g. a proxy or a pasted API address: no traceback.
     ({"status": 404, "text": "404 page not found"}, "unsupported"),
+    # http to https, or a proxy login page.
+    ({"status": 301, "headers": {"Location": "https://x.example/"}}, "redirect"),
 ]
 
 

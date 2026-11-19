@@ -179,6 +179,7 @@ async def test_devices_follow_patchmon(
     hosts["hosts"][0]["friendly_name"] = "Renamed"
     hosts["hosts"][1]["friendly_name"] = "Also renamed"
     del hosts["hosts"][3]
+    hosts["total"] = 3
     mock_hosts.clear_requests()
     mock_hosts.get(f"{API}/hosts", json=hosts)
     mock_details(mock_hosts)

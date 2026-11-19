@@ -40,6 +40,7 @@ from .api import (
     PatchMonConnectionError,
     PatchMonError,
     PatchMonNotFoundError,
+    PatchMonRedirectError,
     PatchMonSSLError,
     PatchMonUnsupportedError,
     normalize_url,
@@ -103,6 +104,8 @@ def _error_key(err: Exception) -> str:
         return "ssl_error"
     if isinstance(err, PatchMonConnectionError):
         return "cannot_connect"
+    if isinstance(err, PatchMonRedirectError):
+        return "redirect"
     if isinstance(err, PatchMonUnsupportedError | PatchMonNotFoundError):
         # A 404 on the host list: the address points somewhere else.
         return "unsupported"

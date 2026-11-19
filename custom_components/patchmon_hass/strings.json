@@ -70,6 +70,7 @@
       "ip_not_allowed": "This API token is not allowed from the IP address of Home Assistant. Check the token's IP restriction in PatchMon.",
       "missing_permission": "This API token lacks the `host:get` permission.",
       "unsupported": "The server did not answer like a PatchMon 2.x server. Check the address.",
+      "redirect": "The address redirects to another one, e.g. from http:// to https:// or to a login page. Enter the address PatchMon answers on directly.",
       "unknown": "Unexpected error. See the log for details."
     },
     "abort": {
@@ -116,6 +117,7 @@
       "ip_not_allowed": "This API token is not allowed from the IP address of Home Assistant.",
       "missing_permission": "This API token lacks the `host:get` permission.",
       "unsupported": "The server did not answer like a PatchMon 2.x server.",
+      "redirect": "The address redirects to another one, e.g. from http:// to https:// or to a login page. Enter the address PatchMon answers on directly.",
       "unknown": "Unexpected error. See the log for details."
     }
   },
