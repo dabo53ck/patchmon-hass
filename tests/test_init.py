@@ -314,6 +314,85 @@ async def test_devices_kept_while_list_incomplete(
     assert _device(device_registry, mock_config_entry, host_id(1)) is not None
 
 
+async def test_devices_kept_when_empty_after_restart(
+    hass: HomeAssistant,
+    mock_config_entry: MockConfigEntry,
+    mock_hosts: AiohttpClientMocker,
+    device_registry: dr.DeviceRegistry,
+) -> None:
+    """An empty list on the first update after a restart removes no device."""
+    mock_config_entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(mock_config_entry.entry_id)
+    await hass.async_block_till_done()
+    assert await hass.config_entries.async_unload(mock_config_entry.entry_id)
+
+    mock_hosts.clear_requests()
+    mock_hosts.get(f"{API}/hosts", json={"hosts": [], "total": 0})
+    assert await hass.config_entries.async_setup(mock_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert not mock_config_entry.runtime_data.coordinator.data.complete
+    assert _device(device_registry, mock_config_entry, host_id(1)) is not None
+
+
+async def test_deleted_device_gets_entities_back(
+    hass: HomeAssistant,
+    mock_config_entry: MockConfigEntry,
+    mock_hosts: AiohttpClientMocker,
+    device_registry: dr.DeviceRegistry,
+    entity_registry: er.EntityRegistry,
+) -> None:
+    """A device the user deleted gets its entities again when the host returns."""
+    mock_config_entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(mock_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    # The list is suddenly empty: devices stay, the user deletes one.
+    await _refresh_with(hass, mock_config_entry, mock_hosts, {"hosts": []})
+    device = _device(device_registry, mock_config_entry, host_id(1))
+    assert device is not None
+    assert await async_remove_config_entry_device(hass, mock_config_entry, device)
+    device_registry.async_remove_device(device.id)
+    await hass.async_block_till_done()
+
+    await _refresh_with(hass, mock_config_entry, mock_hosts, load_fixture("hosts.json"))
+    await hass.async_block_till_done()
+
+    device = _device(device_registry, mock_config_entry, host_id(1))
+    assert device is not None
+    entities = er.async_entries_for_device(entity_registry, device.id)
+    assert entities
+    # Hosts that kept their device did not get a second set of entities.
+    other = _device(device_registry, mock_config_entry, host_id(2))
+    assert other is not None
+    assert len(er.async_entries_for_device(entity_registry, other.id)) == len(entities)
+    assert hass.states.get(entities[0].entity_id) is not None or entities[0].disabled
+
+
+async def test_remove_device_while_not_loaded(
+    hass: HomeAssistant,
+    mock_config_entry: MockConfigEntry,
+    aioclient_mock: AiohttpClientMocker,
+    device_registry: dr.DeviceRegistry,
+) -> None:
+    """Without a host list, host devices may go; the server device stays."""
+    aioclient_mock.get(f"{API}/hosts", exc=TimeoutError())
+    mock_config_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(mock_config_entry.entry_id)
+    await hass.async_block_till_done()
+    assert mock_config_entry.state is ConfigEntryState.SETUP_RETRY
+    entry_id = mock_config_entry.entry_id
+    server = device_registry.async_get_or_create(
+        config_entry_id=entry_id, identifiers={(DOMAIN, entry_id)}
+    )
+    host = device_registry.async_get_or_create(
+        config_entry_id=entry_id, identifiers={(DOMAIN, host_id(1))}
+    )
+
+    assert not await async_remove_config_entry_device(hass, mock_config_entry, server)
+    assert await async_remove_config_entry_device(hass, mock_config_entry, host)
+
+
 async def test_remove_device(
     hass: HomeAssistant,
     mock_config_entry: MockConfigEntry,

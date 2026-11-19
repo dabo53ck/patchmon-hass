@@ -38,3 +38,19 @@ pre-release identifiers included (`0.1.0-rc.1`, …).
 - Debug logging: every request to PatchMon (path, status, duration), a
   summary per update (hosts listed, details read again) and added or removed
   devices; never the server address or the token.
+
+### Fixed (since 0.1.0-rc.1)
+
+- A 404 on the details of a host no longer removes the host and its device;
+  only the host list decides that a host is gone.
+- An empty host list on the first update after a restart no longer removes
+  all host devices.
+- A host device deleted by the user gets its entities back when the host
+  returns, without reloading the entry.
+- Two `refresh` actions at the same time both get the details they asked for.
+- A wrong address that answers 404 is shown as "did not answer like a
+  PatchMon server" instead of "unexpected error" with a traceback in the log.
+- Deleting a host device while the entry is not loaded (server unreachable)
+  no longer fails.
+- Connection and certificate errors no longer contain the server address or
+  IP address (aiohttp puts them into its messages).

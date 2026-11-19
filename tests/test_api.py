@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import logging
+import socket
+import ssl
 from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
@@ -274,6 +276,57 @@ async def test_requests_logged_without_secrets(
     assert "ClientConnectionError" in caplog.text
     assert "patchmon.example" not in caplog.text
     assert "Basic" not in caplog.text
+
+
+@pytest.mark.parametrize(
+    ("exc", "expected"),
+    [
+        (
+            aiohttp.ClientConnectorError(
+                MagicMock(host="patchmon.example", port=3000, ssl=True),
+                OSError(111, "Connect call failed ('192.0.2.1', 3000)"),
+            ),
+            PatchMonConnectionError,
+        ),
+        (
+            aiohttp.ClientConnectorCertificateError(
+                MagicMock(host="patchmon.example", port=443, ssl=True),
+                ssl.SSLCertVerificationError(
+                    1,
+                    "Hostname mismatch, certificate is not valid for 'patchmon.example'.",
+                ),
+            ),
+            PatchMonSSLError,
+        ),
+        (
+            aiohttp.ClientConnectorError(
+                MagicMock(host="patchmon.example", port=3000, ssl=True),
+                socket.gaierror(-2, "Name or service not known"),
+            ),
+            PatchMonConnectionError,
+        ),
+        (aiohttp.InvalidURL("http://patchmon.example:3000/x"), PatchMonConnectionError),
+    ],
+)
+async def test_error_text_without_address(
+    client: PatchMonClient,
+    aioclient_mock: AiohttpClientMocker,
+    caplog: pytest.LogCaptureFixture,
+    exc: Exception,
+    expected: type[Exception],
+) -> None:
+    """aiohttp's messages name host and port; ours do not."""
+    caplog.set_level(logging.DEBUG, logger="custom_components.patchmon_hass")
+    assert "patchmon.example" in str(exc)
+    aioclient_mock.get(f"{API}/hosts", exc=exc)
+
+    with pytest.raises(expected) as err:
+        await client.get_hosts()
+
+    assert str(err.value).startswith(type(exc).__name__)
+    for text in (str(err.value), caplog.text):
+        assert "patchmon.example" not in text
+        assert "192.0.2.1" not in text
 
 
 async def test_ssl_error(

@@ -75,6 +75,9 @@ losing anything (leave the secret empty to keep the current one).
 The PatchMon server is a device of its own; every host is a device linked to
 it, with a link to the host page in PatchMon. Hosts added in PatchMon appear by
 themselves, hosts deleted in PatchMon are removed together with their entities.
+Only the host list decides that a host is gone: if it is suddenly empty (also
+right after a restart), nothing is removed. A host device you delete yourself
+gets its entities back when PatchMon lists the host again.
 
 ### Per host
 
@@ -198,7 +201,9 @@ sequence:
   `configuration.yaml`. The log then shows every request to PatchMon (path,
   HTTP status, duration), how many hosts were listed and how many had their
   details read again, and which devices were added or removed. Host names
-  appear in it, the server address and the token do not; check before sharing.
+  appear in it. The integration's own messages never contain the server
+  address or the token, but lines from Home Assistant itself show the entry
+  title, which contains the address; check before sharing.
 
 ## Known limitations
 

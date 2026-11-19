@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import timedelta
 from typing import Any
@@ -140,27 +141,46 @@ async def test_details_failure_only_affects_that_host(
     assert details.info.agent_version is not None
 
 
-async def test_host_deleted_during_update(
+async def test_details_404_keeps_host(
     hass: HomeAssistant,
     mock_config_entry: MockConfigEntry,
     aioclient_mock: AiohttpClientMocker,
-    caplog: pytest.LogCaptureFixture,
 ) -> None:
-    """A host whose details answer 404 was deleted and is dropped."""
-    caplog.set_level(logging.DEBUG, logger="custom_components.patchmon_hass")
+    """A 404 on the details only drops the details; the host list decides.
+
+    A proxy or another server version can answer every detail path with 404
+    while the host list is fine: that must not remove any host.
+    """
     aioclient_mock.get(f"{API}/hosts", json=load_fixture("hosts.json"))
-    aioclient_mock.get(
-        f"{API}/hosts/{host_id(3)}/system",
-        status=404,
-        json=load_fixture("error_404.json"),
-    )
-    mock_details(aioclient_mock)
+    for n in range(1, 5):
+        aioclient_mock.get(f"{API}/hosts/{host_id(n)}/system", status=404, text="")
 
     coordinator = await _setup(hass, mock_config_entry)
 
-    assert host_id(3) not in coordinator.data.hosts
-    assert len(coordinator.data.hosts) == 3
-    assert "was deleted during the update" in caplog.text
+    assert coordinator.last_update_success
+    assert len(coordinator.data.hosts) == 4
+    assert coordinator.data.details == {}
+    assert coordinator.data.complete
+
+
+async def test_parallel_refresh_keeps_each_request(
+    hass: HomeAssistant,
+    mock_config_entry: MockConfigEntry,
+    mock_hosts: AiohttpClientMocker,
+) -> None:
+    """Two refresh actions at once both get the details they asked for."""
+    coordinator = await _setup(hass, mock_config_entry)
+    _remock(mock_hosts, load_fixture("hosts.json"))
+
+    await asyncio.gather(
+        coordinator.async_refresh_now([host_id(1)]),
+        coordinator.async_refresh_now([host_id(2)]),
+    )
+
+    assert {call.split("/")[0] for call in _detail_calls(mock_hosts)} == {
+        host_id(1),
+        host_id(2),
+    }
 
 
 async def test_details_auth_error_starts_reauth(
