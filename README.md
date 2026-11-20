@@ -210,8 +210,9 @@ sequence:
 - **Debug logging:** enable it on the integration entry, or add
   `custom_components.patchmon_hass: debug` under `logger:` → `logs:` in
   `configuration.yaml`. The log then shows every request to PatchMon (path,
-  HTTP status, duration), how many hosts were listed and how many had their
-  details read again, and which devices were added or removed. Host names
+  HTTP status, duration), how many hosts were listed, which hosts had their
+  details read again and why (no details yet, reported again, older than six
+  hours, refresh action), and which devices were added or removed. Host names
   appear in it. The integration's own messages never contain the server
   address or the token, but lines from Home Assistant itself show the entry
   title, which contains the address; check before sharing.

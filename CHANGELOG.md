@@ -36,8 +36,9 @@ pre-release identifiers included (`0.1.0-rc.1`, …).
   "Local network" for the Marketplace in Home Assistant 2026.11.
 - Quality scale checklist (`quality_scale.yaml`).
 - Debug logging: every request to PatchMon (path, status, duration), a
-  summary per update (hosts listed, details read again) and added or removed
-  devices; never the server address or the token.
+  summary per update (hosts listed, which hosts had their details read again
+  and why) and added or removed devices; never the server address or the
+  token.
 
 ### Fixed (since 0.1.0-rc.1)
 

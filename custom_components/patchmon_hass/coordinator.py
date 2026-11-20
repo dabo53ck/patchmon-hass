@@ -279,25 +279,32 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
         now = dt_util.utcnow()
         details: dict[str, HostDetails] = {}
         stale: list[Host] = []
+        # Why each host is read again, for the debug log.
+        reasons: dict[str, list[str]] = {}
         for host_id, host in hosts.items():
             known = old.get(host_id)
-            if (
-                known is not None
-                and force is not None
-                and host_id not in force
-                and known.last_update == host.last_update
-                and now - known.fetched_at < DETAILS_MAX_AGE
-            ):
-                details[host_id] = known
+            if force is None or host_id in force:
+                reason = "refresh action"
+            elif known is None:
+                reason = "no details yet"
+            elif known.last_update != host.last_update:
+                reason = "reported again"
+            elif now - known.fetched_at >= DETAILS_MAX_AGE:
+                reason = f"older than {DETAILS_MAX_AGE}"
             else:
-                stale.append(host)
+                details[host_id] = known
+                continue
+            stale.append(host)
+            reasons.setdefault(reason, []).append(host.friendly_name)
 
         if stale:
             _LOGGER.debug(
-                "Reading details of %d hosts (new, reported again, older than %s "
-                "or asked for)",
+                "Reading details of %d hosts: %s",
                 len(stale),
-                DETAILS_MAX_AGE,
+                "; ".join(
+                    f"{reason}: {', '.join(sorted(names, key=str.casefold))}"
+                    for reason, names in reasons.items()
+                ),
             )
         results = await asyncio.gather(
             *(self._async_fetch_details(host, now) for host in stale),

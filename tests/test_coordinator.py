@@ -95,7 +95,8 @@ async def test_details_only_after_new_report(
         f"{host_id(1)}/info",
         f"{host_id(1)}/system",
     ]
-    assert "Reading details of 1 hosts" in caplog.text
+    assert "Reading details of 4 hosts: no details yet: Host 01, Host 02" in caplog.text
+    assert "Reading details of 1 hosts: reported again: Host 01\n" in caplog.text
     assert "4 hosts listed, details available for 4" in caplog.text
     assert "(refresh action)" not in caplog.text
 
@@ -103,6 +104,7 @@ async def test_details_only_after_new_report(
     await coordinator.async_refresh_now()
     assert len(_detail_calls(mock_hosts)) == 8
     assert "details available for 4 (refresh action)" in caplog.text
+    assert "Reading details of 4 hosts: refresh action: Host 01" in caplog.text
 
 
 async def test_details_reread_after_max_age(
@@ -110,8 +112,10 @@ async def test_details_reread_after_max_age(
     mock_config_entry: MockConfigEntry,
     mock_hosts: AiohttpClientMocker,
     freezer: FrozenDateTimeFactory,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Details older than six hours are read again even without a report."""
+    caplog.set_level(logging.DEBUG, logger="custom_components.patchmon_hass")
     coordinator = await _setup(hass, mock_config_entry)
 
     freezer.tick(timedelta(hours=6))
@@ -119,6 +123,7 @@ async def test_details_reread_after_max_age(
     await coordinator.async_refresh()
 
     assert len(_detail_calls(mock_hosts)) == 8
+    assert "Reading details of 4 hosts: older than 6:00:00: Host 01" in caplog.text
 
 
 async def test_details_failure_only_affects_that_host(
