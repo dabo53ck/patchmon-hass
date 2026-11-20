@@ -294,7 +294,7 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
             elif known.last_update != host.last_update:
                 reason = "reported again"
             elif now - known.fetched_at >= DETAILS_MAX_AGE:
-                reason = f"older than {DETAILS_MAX_AGE}"
+                reason = f"older than {DETAILS_MAX_AGE / timedelta(hours=1):g} hours"
             else:
                 details[host_id] = known
                 continue

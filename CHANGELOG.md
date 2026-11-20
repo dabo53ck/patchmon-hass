@@ -1,8 +1,8 @@
 # Changelog
 
 All notable changes to this project are documented here. The format loosely
-follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). SemVer,
-pre-release identifiers included (`0.1.0-rc.1`, …).
+follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The project
+follows SemVer, including pre-release identifiers such as `0.1.0-rc.1`.
 
 ## [Unreleased]
 

@@ -65,7 +65,9 @@ body:
         Settings → System → Logs, filtered to `patchmon_hass`. For more detail,
         enable debug logging on the integration entry, reproduce the problem and
         disable it again; Home Assistant then offers the log as a download. It
-        contains host names, but not the server address or the token.
+        contains host names, but not the server address or the token. Lines
+        from Home Assistant itself show the entry title, which contains the
+        server address; check before sharing.
       render: text
   - type: textarea
     id: diagnostics

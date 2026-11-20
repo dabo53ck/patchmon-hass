@@ -127,7 +127,7 @@ async def test_details_reread_after_max_age(
     await coordinator.async_refresh()
 
     assert len(_detail_calls(mock_hosts)) == 8
-    assert "Reading details of 4 hosts: older than 6:00:00: Host 01" in caplog.text
+    assert "Reading details of 4 hosts: older than 6 hours: Host 01" in caplog.text
 
 
 async def test_details_failure_only_affects_that_host(
