@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import logging
+import socket
+import ssl
 from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
@@ -17,6 +20,7 @@ from custom_components.patchmon_hass.api import (
     PatchMonClient,
     PatchMonConnectionError,
     PatchMonNotFoundError,
+    PatchMonRedirectError,
     PatchMonSSLError,
     PatchMonUnsupportedError,
     normalize_url,
@@ -65,6 +69,8 @@ async def test_get_hosts(
     hosts = await client.get_hosts()
 
     assert len(hosts) == 4
+    assert hosts.total == 4
+    assert not hosts.truncated
     first = hosts[0]
     assert first.id == HOST_01
     assert first.friendly_name == "Host 01"
@@ -125,6 +131,20 @@ async def test_get_hosts_old_server_fields_missing(
     assert second.friendly_name == "y"
     assert second.last_update is None
     assert second.host_groups == ()
+
+
+async def test_naive_timestamp_is_utc(
+    client: PatchMonClient, aioclient_mock: AiohttpClientMocker
+) -> None:
+    """A timestamp without time zone is taken as UTC."""
+    aioclient_mock.get(
+        f"{API}/hosts",
+        json={"hosts": [{"id": "x", "last_update": "2026-11-16T18:45:22"}]},
+    )
+
+    (host,) = await client.get_hosts()
+
+    assert host.last_update == datetime(2026, 11, 16, 18, 45, 22, tzinfo=UTC)
 
 
 async def test_get_host_details(
@@ -240,6 +260,78 @@ async def test_connection_errors(
     assert str(err.value)
 
 
+async def test_requests_logged_without_secrets(
+    client: PatchMonClient,
+    aioclient_mock: AiohttpClientMocker,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Each request is logged with path, status and duration, nothing secret."""
+    caplog.set_level(logging.DEBUG, logger="custom_components.patchmon_hass")
+    aioclient_mock.get(f"{API}/hosts", json=load_fixture("hosts.json"))
+    await client.get_hosts()
+    aioclient_mock.clear_requests()
+    aioclient_mock.get(f"{API}/hosts", exc=aiohttp.ClientConnectionError("down"))
+    with pytest.raises(PatchMonConnectionError):
+        await client.get_hosts()
+
+    assert "GET /hosts: HTTP 200 in" in caplog.text
+    assert "GET /hosts failed after" in caplog.text
+    assert "ClientConnectionError" in caplog.text
+    assert "patchmon.example" not in caplog.text
+    assert "Basic" not in caplog.text
+
+
+@pytest.mark.parametrize(
+    ("exc", "expected"),
+    [
+        (
+            aiohttp.ClientConnectorError(
+                MagicMock(host="patchmon.example", port=3000, ssl=True),
+                OSError(111, "Connect call failed ('192.0.2.1', 3000)"),
+            ),
+            PatchMonConnectionError,
+        ),
+        (
+            aiohttp.ClientConnectorCertificateError(
+                MagicMock(host="patchmon.example", port=443, ssl=True),
+                ssl.SSLCertVerificationError(
+                    1,
+                    "Hostname mismatch, certificate is not valid for 'patchmon.example'.",
+                ),
+            ),
+            PatchMonSSLError,
+        ),
+        (
+            aiohttp.ClientConnectorError(
+                MagicMock(host="patchmon.example", port=3000, ssl=True),
+                socket.gaierror(-2, "Name or service not known"),
+            ),
+            PatchMonConnectionError,
+        ),
+        (aiohttp.InvalidURL("http://patchmon.example:3000/x"), PatchMonConnectionError),
+    ],
+)
+async def test_error_text_without_address(
+    client: PatchMonClient,
+    aioclient_mock: AiohttpClientMocker,
+    caplog: pytest.LogCaptureFixture,
+    exc: Exception,
+    expected: type[Exception],
+) -> None:
+    """aiohttp's messages name host and port; ours do not."""
+    caplog.set_level(logging.DEBUG, logger="custom_components.patchmon_hass")
+    assert "patchmon.example" in str(exc)
+    aioclient_mock.get(f"{API}/hosts", exc=exc)
+
+    with pytest.raises(expected) as err:
+        await client.get_hosts()
+
+    assert str(err.value).startswith(type(exc).__name__)
+    for text in (str(err.value), caplog.text):
+        assert "patchmon.example" not in text
+        assert "192.0.2.1" not in text
+
+
 async def test_ssl_error(
     client: PatchMonClient, aioclient_mock: AiohttpClientMocker
 ) -> None:
@@ -262,6 +354,55 @@ async def test_server_error(
         await client.get_hosts()
 
 
+async def test_host_list_count(
+    client: PatchMonClient, aioclient_mock: AiohttpClientMocker
+) -> None:
+    """A count above the list length marks it as cut off; no count is fine."""
+    body = load_fixture("hosts.json")
+    aioclient_mock.get(f"{API}/hosts", json={**body, "total": 9})
+    hosts = await client.get_hosts()
+    assert hosts.total == 9
+    assert hosts.truncated
+
+    aioclient_mock.clear_requests()
+    aioclient_mock.get(f"{API}/hosts", json={"hosts": body["hosts"]})
+    hosts = await client.get_hosts()
+    assert hosts.total is None
+    assert not hosts.truncated
+
+
+async def test_host_id_is_encoded(
+    client: PatchMonClient, aioclient_mock: AiohttpClientMocker
+) -> None:
+    """A host ID stays one path segment, whatever it contains."""
+    aioclient_mock.get(
+        f"{API}/hosts/a%2Fb%3Fc/system", json=load_fixture("host_01_system.json")
+    )
+
+    await client.get_host_system("a/b?c")
+
+    _, url, _, _ = aioclient_mock.mock_calls[0]
+    assert url.raw_path.endswith("/hosts/a%2Fb%3Fc/system")
+    assert not url.query
+
+
+@pytest.mark.parametrize("status", [301, 302, 307, 308])
+async def test_redirect(
+    client: PatchMonClient, aioclient_mock: AiohttpClientMocker, status: int
+) -> None:
+    """Redirects are not followed and name no address."""
+    aioclient_mock.get(
+        f"{API}/hosts",
+        status=status,
+        headers={"Location": "https://login.example/"},
+    )
+
+    with pytest.raises(PatchMonRedirectError) as err:
+        await client.get_hosts()
+
+    assert str(err.value) == f"Redirect (HTTP {status})"
+
+
 @pytest.mark.parametrize(
     ("status", "text"),
     [
@@ -279,6 +420,16 @@ async def test_unexpected_answers(
 ) -> None:
     """HTML, empty bodies, redirects and other codes are not supported."""
     aioclient_mock.get(f"{API}/hosts", status=status, text=text)
+
+    with pytest.raises(PatchMonUnsupportedError):
+        await client.get_hosts()
+
+
+async def test_undecodable_answer(
+    client: PatchMonClient, aioclient_mock: AiohttpClientMocker
+) -> None:
+    """A body that is not valid text is not supported."""
+    aioclient_mock.get(f"{API}/hosts", content=b"\x89PNG\xff\xfe")
 
     with pytest.raises(PatchMonUnsupportedError):
         await client.get_hosts()

@@ -3,18 +3,32 @@
     "step": {
       "user": {
         "title": "Connect to PatchMon",
-        "description": "Create a dedicated API token for Home Assistant in PatchMon (Settings → Integrations → Scoped Credentials) with only the `host:get` permission. Never grant `host:delete`: this integration only reads data.",
+        "description": "Create a dedicated API token for Home Assistant in PatchMon (Settings → API integrations → Scoped Credentials) with only the `host:get` permission.",
         "data": {
           "url": "Server address",
           "token_key": "Token key",
           "token_secret": "Token secret",
-          "verify_ssl": "Verify SSL certificate"
+          "verify_ssl": "Verify SSL certificate",
+          "area": "Area"
         },
         "data_description": {
-          "url": "Address of the PatchMon web interface, for example http://192.168.1.10:3000",
+          "url": "Address of the PatchMon web interface, for example http://192.168.1.10:3000. https addresses work as well.",
           "token_key": "The key of the API token",
           "token_secret": "The secret of the API token. PatchMon shows it only once, when the token is created.",
-          "verify_ssl": "Turn off only for a server with a self-signed certificate"
+          "verify_ssl": "Only applies to https addresses. Turn off if the server uses a self-signed certificate.",
+          "area": "New hosts and the PatchMon server are placed in this area when they are added. Devices you move later stay where you put them."
+        },
+        "sections": {
+          "optional_entities": {
+            "name": "Optional entities",
+            "description": "Enables the entity on every host. You can change this later under Configure.",
+            "data": {
+              "enable_update_entity": "Updates (update entity with the package list)",
+              "enable_running_kernel": "Running kernel",
+              "enable_installed_kernel": "Installed kernel",
+              "enable_installed_packages": "Installed packages"
+            }
+          }
         }
       },
       "reauth_confirm": {
@@ -31,7 +45,7 @@
       },
       "reconfigure": {
         "title": "Change the PatchMon connection",
-        "description": "Devices and entities are kept. Enter the token secret again.",
+        "description": "Devices and entities are kept.",
         "data": {
           "url": "Server address",
           "token_key": "Token key",
@@ -39,10 +53,10 @@
           "verify_ssl": "Verify SSL certificate"
         },
         "data_description": {
-          "url": "Address of the PatchMon web interface, for example http://192.168.1.10:3000",
+          "url": "Address of the PatchMon web interface, for example http://192.168.1.10:3000. https addresses work as well.",
           "token_key": "The key of the API token",
-          "token_secret": "The secret of the API token",
-          "verify_ssl": "Turn off only for a server with a self-signed certificate"
+          "token_secret": "Leave empty to keep the current secret.",
+          "verify_ssl": "Only applies to https addresses. Turn off if the server uses a self-signed certificate."
         }
       }
     },
@@ -56,10 +70,12 @@
       "ip_not_allowed": "This API token is not allowed from the IP address of Home Assistant. Check the token's IP restriction in PatchMon.",
       "missing_permission": "This API token lacks the `host:get` permission.",
       "unsupported": "The server did not answer like a PatchMon 2.x server. Check the address.",
+      "redirect": "The address redirects to another one, e.g. from http:// to https:// or to a login page. Enter the address PatchMon answers on directly.",
       "unknown": "Unexpected error. See the log for details."
     },
     "abort": {
       "already_configured": "This PatchMon server is already set up.",
+      "already_configured_other_address": "This PatchMon server is already set up under another address as \"{title}\". To change its address, choose Reconfigure on that entry.",
       "reauth_successful": "The token was updated.",
       "reconfigure_successful": "The connection was updated."
     }
@@ -70,11 +86,25 @@
         "title": "PatchMon options",
         "data": {
           "scan_interval": "Polling interval",
-          "host_groups": "Host groups"
+          "host_groups": "Host groups",
+          "area": "Area"
         },
         "data_description": {
           "scan_interval": "How often Home Assistant reads the host list from PatchMon. This does not make the agents report more often.",
-          "host_groups": "Only include hosts in these groups. Leave empty for all hosts."
+          "host_groups": "Only include hosts in these groups. Leave empty for all hosts.",
+          "area": "New hosts and the PatchMon server are placed in this area when they are added. Devices you move later stay where you put them."
+        },
+        "sections": {
+          "optional_entities": {
+            "name": "Optional entities",
+            "description": "Enables or disables the entity on every host when switched. Single entities can still be switched by hand afterwards.",
+            "data": {
+              "enable_update_entity": "Updates (update entity with the package list)",
+              "enable_running_kernel": "Running kernel",
+              "enable_installed_kernel": "Installed kernel",
+              "enable_installed_packages": "Installed packages"
+            }
+          }
         }
       }
     },
@@ -87,7 +117,95 @@
       "ip_not_allowed": "This API token is not allowed from the IP address of Home Assistant.",
       "missing_permission": "This API token lacks the `host:get` permission.",
       "unsupported": "The server did not answer like a PatchMon 2.x server.",
+      "redirect": "The address redirects to another one, e.g. from http:// to https:// or to a login page. Enter the address PatchMon answers on directly.",
       "unknown": "Unexpected error. See the log for details."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "restart_required": {
+        "name": "Restart required",
+        "state": {
+          "on": "Yes",
+          "off": "No"
+        }
+      },
+      "reporting": {
+        "name": "Reporting",
+        "state_attributes": {
+          "reporting_state": {
+            "name": "Reporting state",
+            "state": {
+              "reporting": "Reporting",
+              "overdue": "Overdue",
+              "stale": "Stale"
+            }
+          }
+        }
+      }
+    },
+    "sensor": {
+      "updates": {
+        "name": "Pending updates"
+      },
+      "security_updates": {
+        "name": "Security updates"
+      },
+      "update_status": {
+        "name": "Update status",
+        "state": {
+          "up_to_date": "Up to date",
+          "updates_pending": "Updates pending",
+          "security_required": "Security update required"
+        }
+      },
+      "last_check_in": {
+        "name": "Last check-in"
+      },
+      "installed_packages": {
+        "name": "Installed packages"
+      },
+      "restart_reason": {
+        "name": "Restart reason"
+      },
+      "agent_version": {
+        "name": "Agent version"
+      },
+      "last_boot": {
+        "name": "Last boot"
+      },
+      "running_kernel": {
+        "name": "Running kernel"
+      },
+      "installed_kernel": {
+        "name": "Installed kernel"
+      },
+      "hosts": {
+        "name": "Hosts"
+      },
+      "hosts_with_updates": {
+        "name": "Hosts with updates"
+      },
+      "hosts_with_security_updates": {
+        "name": "Hosts with security updates"
+      },
+      "hosts_requiring_restart": {
+        "name": "Hosts requiring restart"
+      },
+      "hosts_not_reporting": {
+        "name": "Hosts not reporting"
+      },
+      "total_updates": {
+        "name": "Total pending updates"
+      },
+      "total_security_updates": {
+        "name": "Total security updates"
+      }
+    },
+    "update": {
+      "updates": {
+        "name": "Updates"
+      }
     }
   },
   "exceptions": {
@@ -99,6 +217,106 @@
     },
     "unsupported": {
       "message": "Unexpected answer from the PatchMon server: {error}"
+    },
+    "packages_failed": {
+      "message": "Could not load the package list: {error}"
+    },
+    "not_loaded": {
+      "message": "No PatchMon entry is loaded."
+    },
+    "entry_not_found": {
+      "message": "{entry_id} is not a PatchMon entry."
+    },
+    "device_not_found": {
+      "message": "{device_id} is not a PatchMon device."
+    },
+    "not_a_host": {
+      "message": "Select a host, not the PatchMon server."
+    },
+    "host_not_found": {
+      "message": "PatchMon does not know this host any more."
+    },
+    "refresh_failed": {
+      "message": "Could not refresh PatchMon: {error}"
+    }
+  },
+  "issues": {
+    "host_groups_without_hosts": {
+      "title": "Host group filter of {title} matches no host",
+      "description": "The host group filter of {title} contains groups without any host in PatchMon: {groups}. The groups were deleted or are empty. Their hosts are kept in Home Assistant but are unavailable. Open **Configure** on the integration entry and update the host group filter."
+    },
+    "unsupported_answer": {
+      "title": "{title}: answer from PatchMon not understood",
+      "description": "The PatchMon server of {title} answers in a way this version of the integration does not understand ({error}). Usually the PatchMon version is not supported yet, or the server address points to something else, for example the web interface behind a proxy. Check that the server runs PatchMon 2.x and that the integration is up to date; use **Reconfigure** to fix the address. This message goes away by itself once an answer is understood again."
+    }
+  },
+  "selector": {
+    "update_status": {
+      "options": {
+        "up_to_date": "Up to date",
+        "updates_pending": "Updates pending",
+        "security_required": "Security update required"
+      }
+    }
+  },
+  "services": {
+    "get_hosts": {
+      "name": "Get hosts",
+      "description": "Returns the hosts of the last update with their patch status. Reads nothing from PatchMon; all filters given must match.",
+      "fields": {
+        "config_entry_id": {
+          "name": "PatchMon server",
+          "description": "Only hosts of this server. Leave empty for all."
+        },
+        "update_status": {
+          "name": "Update status",
+          "description": "Only hosts with one of these update statuses."
+        },
+        "restart_required": {
+          "name": "Restart required",
+          "description": "Only hosts that need a restart (on) or do not (off)."
+        },
+        "reporting": {
+          "name": "Reporting",
+          "description": "Only hosts whose agent reports in time (on) or is overdue or stale (off)."
+        }
+      }
+    },
+    "get_packages": {
+      "name": "Get packages",
+      "description": "Reads the packages of one host from PatchMon and returns them, security updates first.",
+      "fields": {
+        "device_id": {
+          "name": "Host",
+          "description": "The host device."
+        },
+        "updates_only": {
+          "name": "Only with updates",
+          "description": "Only packages with a pending update."
+        },
+        "security_only": {
+          "name": "Only security updates",
+          "description": "Only packages with a security update."
+        },
+        "limit": {
+          "name": "Limit",
+          "description": "At most this many packages."
+        },
+        "include_descriptions": {
+          "name": "Include descriptions",
+          "description": "Add the package descriptions; makes the answer much longer."
+        }
+      }
+    },
+    "refresh": {
+      "name": "Refresh",
+      "description": "Reads the host list and host details from PatchMon now. The agents are not asked to report: values only change after their next check-in.",
+      "fields": {
+        "device_id": {
+          "name": "Devices",
+          "description": "Hosts whose details are read again; the PatchMon server device means all of its hosts. Leave empty for all."
+        }
+      }
     }
   }
 }

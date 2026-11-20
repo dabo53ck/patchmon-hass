@@ -9,13 +9,18 @@ from urllib.parse import urlsplit
 
 import probatio as vol
 from homeassistant.config_entries import (
+    ConfigEntry,
     ConfigFlow,
     ConfigFlowResult,
     OptionsFlowWithReload,
 )
 from homeassistant.const import CONF_URL, CONF_VERIFY_SSL
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.data_entry_flow import section
+from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.selector import (
+    AreaSelector,
     BooleanSelector,
     NumberSelector,
     NumberSelectorConfig,
@@ -34,20 +39,27 @@ from .api import (
     PatchMonAuthError,
     PatchMonConnectionError,
     PatchMonError,
+    PatchMonNotFoundError,
+    PatchMonRedirectError,
     PatchMonSSLError,
     PatchMonUnsupportedError,
     normalize_url,
 )
 from .const import (
+    CONF_AREA,
+    CONF_HOST_GROUP_NAMES,
     CONF_HOST_GROUPS,
+    CONF_OPTIONAL_ENTITIES,
     CONF_SCAN_INTERVAL,
     CONF_TOKEN_KEY,
     CONF_TOKEN_SECRET,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
+    ENABLE_OPTIONS,
     MAX_SCAN_INTERVAL,
     MIN_SCAN_INTERVAL,
 )
+from .entity import async_entities_for_option
 from .helpers import create_client
 
 _LOGGER = logging.getLogger(__name__)
@@ -64,6 +76,27 @@ def _credentials_schema() -> dict[vol.Marker, Any]:
     }
 
 
+def _optional_entities_section(options: Mapping[str, Any]) -> section:
+    """One switch per optional host entity, preset from ``options``."""
+    return section(
+        vol.Schema(
+            {
+                vol.Required(option, default=bool(options.get(option, False))): (
+                    BooleanSelector()
+                )
+                for option in ENABLE_OPTIONS
+            }
+        ),
+        {"collapsed": False},
+    )
+
+
+def _switches(user_input: Mapping[str, Any]) -> dict[str, bool]:
+    """The switches of the form as flat options."""
+    switches = user_input.get(CONF_OPTIONAL_ENTITIES, {})
+    return {option: bool(switches.get(option, False)) for option in ENABLE_OPTIONS}
+
+
 def _error_key(err: Exception) -> str:
     """Map a client error to a translation key under config.error."""
     if isinstance(err, PatchMonAuthError):
@@ -72,19 +105,24 @@ def _error_key(err: Exception) -> str:
         return "ssl_error"
     if isinstance(err, PatchMonConnectionError):
         return "cannot_connect"
-    if isinstance(err, PatchMonUnsupportedError):
+    if isinstance(err, PatchMonRedirectError):
+        return "redirect"
+    if isinstance(err, PatchMonUnsupportedError | PatchMonNotFoundError):
+        # A 404 on the host list: the address points somewhere else.
         return "unsupported"
     _LOGGER.exception("Unexpected error while talking to PatchMon")
     return "unknown"
 
 
-async def _async_test(hass: HomeAssistant, data: Mapping[str, Any]) -> str | None:
-    """Try one read; return an error key or None when everything works."""
+async def _async_test(
+    hass: HomeAssistant, data: Mapping[str, Any]
+) -> tuple[str | None, set[str]]:
+    """Try one read; return an error key (None when it works) and the host IDs."""
     try:
-        await create_client(hass, data).get_hosts()
+        hosts = await create_client(hass, data).get_hosts()
     except Exception as err:  # every failure becomes a form error
-        return _error_key(err)
-    return None
+        return _error_key(err), set()
+    return None, {host.id for host in hosts}
 
 
 def _title(url: str) -> str:
@@ -119,8 +157,17 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
                 await self.async_set_unique_id(url)
                 self._abort_if_unique_id_configured()
                 data = {**user_input, CONF_URL: url}
-                if not (error := await _async_test(self.hass, data)):
-                    return self.async_create_entry(title=_title(url), data=data)
+                options: dict[str, Any] = _switches(data)
+                data.pop(CONF_OPTIONAL_ENTITIES, None)
+                if area := data.pop(CONF_AREA, None):
+                    options[CONF_AREA] = area
+                error, host_ids = await _async_test(self.hass, data)
+                if not error:
+                    if other := self._entry_with_hosts(host_ids):
+                        return self._abort_other_address(other)
+                    return self.async_create_entry(
+                        title=_title(url), data=data, options=options
+                    )
                 errors["base"] = error
 
         return self.async_show_form(
@@ -131,11 +178,43 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
                         vol.Required(CONF_URL): _URL_SELECTOR,
                         **_credentials_schema(),
                         vol.Required(CONF_VERIFY_SSL, default=True): BooleanSelector(),
+                        vol.Optional(CONF_AREA): AreaSelector(),
+                        vol.Required(
+                            CONF_OPTIONAL_ENTITIES
+                        ): _optional_entities_section(
+                            (user_input or {}).get(CONF_OPTIONAL_ENTITIES, {})
+                        ),
                     }
                 ),
                 user_input,
             ),
             errors=errors,
+        )
+
+    def _entry_with_hosts(
+        self, host_ids: set[str], exclude: str | None = None
+    ) -> ConfigEntry | None:
+        """Another entry that already has a device for one of ``host_ids``.
+
+        Host IDs are UUIDs that PatchMon gives out, so a match means the same
+        server under a second address (e.g. IP and name, or LAN and proxy).
+        Devices are used instead of runtime data: they exist for entries
+        that are not loaded, too.
+        """
+        devices = dr.async_get(self.hass)
+        for entry in self._async_current_entries(include_ignore=False):
+            if entry.entry_id == exclude:
+                continue
+            for device in dr.async_entries_for_config_entry(devices, entry.entry_id):
+                if any(d == DOMAIN and i in host_ids for d, i in device.identifiers):
+                    return entry
+        return None
+
+    def _abort_other_address(self, other: ConfigEntry) -> ConfigFlowResult:
+        """Stop: the server is already set up as ``other`` (another address)."""
+        return self.async_abort(
+            reason="already_configured_other_address",
+            description_placeholders={"title": other.title},
         )
 
     async def async_step_reauth(
@@ -152,7 +231,8 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         if user_input is not None:
             data = {**entry.data, **user_input}
-            if not (error := await _async_test(self.hass, data)):
+            error, _ = await _async_test(self.hass, data)
+            if not error:
                 return self.async_update_reload_and_abort(entry, data=data)
             errors["base"] = error
 
@@ -180,8 +260,16 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
                     for other in self._async_current_entries(include_ignore=False)
                 ):
                     return self.async_abort(reason="already_configured")
+                if not user_input.get(CONF_TOKEN_SECRET):
+                    # Empty secret field: keep the stored one.
+                    user_input = {
+                        k: v for k, v in user_input.items() if k != CONF_TOKEN_SECRET
+                    }
                 data = {**entry.data, **user_input, CONF_URL: url}
-                if not (error := await _async_test(self.hass, data)):
+                error, host_ids = await _async_test(self.hass, data)
+                if not error:
+                    if other := self._entry_with_hosts(host_ids, entry.entry_id):
+                        return self._abort_other_address(other)
                     return self.async_update_reload_and_abort(
                         entry, unique_id=url, title=_title(url), data=data
                     )
@@ -199,7 +287,8 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
                 vol.Schema(
                     {
                         vol.Required(CONF_URL): _URL_SELECTOR,
-                        **_credentials_schema(),
+                        vol.Required(CONF_TOKEN_KEY): _TEXT_SELECTOR,
+                        vol.Optional(CONF_TOKEN_SECRET): _SECRET_SELECTOR,
                         vol.Required(CONF_VERIFY_SSL): BooleanSelector(),
                     }
                 ),
@@ -209,20 +298,65 @@ class PatchMonConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
 
+@callback
+def _async_apply_enable_option(
+    hass: HomeAssistant, entry: PatchMonConfigEntry, option: str, enabled: bool
+) -> None:
+    """Enable or disable the entity of ``option`` on every host.
+
+    Runs only when the option is switched, so single entities switched by
+    hand stay as they are while other options are saved.
+    """
+    registry = er.async_get(hass)
+    for entity in async_entities_for_option(hass, entry, option):
+        if enabled and entity.disabled_by in (
+            er.RegistryEntryDisabler.INTEGRATION,
+            er.RegistryEntryDisabler.USER,
+        ):
+            registry.async_update_entity(entity.entity_id, disabled_by=None)
+        elif not enabled and entity.disabled_by is None:
+            registry.async_update_entity(
+                entity.entity_id,
+                disabled_by=er.RegistryEntryDisabler.INTEGRATION,
+            )
+
+
 class PatchMonOptionsFlow(OptionsFlowWithReload):
-    """Polling interval and host group filter."""
+    """Polling interval, host group filter, area and optional entities."""
+
+    def __init__(self) -> None:
+        """Start without known group names; the form fills them in."""
+        super().__init__()
+        # Group ID -> name, as shown in the form.
+        self._group_names: dict[str, str] = {}
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Show and store the options; the entry reloads afterwards."""
         if user_input is not None:
-            return self.async_create_entry(
-                data={
-                    CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL]),
-                    CONF_HOST_GROUPS: user_input.get(CONF_HOST_GROUPS, []),
-                }
-            )
+            selected: list[str] = user_input.get(CONF_HOST_GROUPS, [])
+            options: dict[str, Any] = {
+                CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL]),
+                CONF_HOST_GROUPS: selected,
+            }
+            # Keep the names: once a group has no hosts, PatchMon no longer
+            # tells them, and messages would show only the ID.
+            if names := {
+                gid: name
+                for gid in selected
+                if (name := self._group_names.get(gid, gid)) != gid
+            }:
+                options[CONF_HOST_GROUP_NAMES] = names
+            if area := user_input.get(CONF_AREA):
+                options[CONF_AREA] = area
+            for option, enabled in _switches(user_input).items():
+                options[option] = enabled
+                if enabled != self.config_entry.options.get(option, False):
+                    _async_apply_enable_option(
+                        self.hass, self.config_entry, option, enabled
+                    )
+            return self.async_create_entry(data=options)
 
         errors: dict[str, str] = {}
         current: list[str] = list(self.config_entry.options.get(CONF_HOST_GROUPS, []))
@@ -237,9 +371,13 @@ class PatchMonOptionsFlow(OptionsFlowWithReload):
                 for group in host.host_groups:
                     groups[group.id] = group.name
         # Keep selected groups that no longer exist selectable, so saving the
-        # form does not fail on them.
+        # form does not fail on them; show them by their stored name.
+        stored: dict[str, str] = self.config_entry.options.get(
+            CONF_HOST_GROUP_NAMES, {}
+        )
         for group_id in current:
-            groups.setdefault(group_id, group_id)
+            groups.setdefault(group_id, stored.get(group_id, group_id))
+        self._group_names = groups
 
         schema = vol.Schema(
             {
@@ -268,6 +406,15 @@ class PatchMonOptionsFlow(OptionsFlowWithReload):
                         multiple=True,
                         mode=SelectSelectorMode.DROPDOWN,
                     )
+                ),
+                vol.Optional(
+                    CONF_AREA,
+                    description={
+                        "suggested_value": self.config_entry.options.get(CONF_AREA)
+                    },
+                ): AreaSelector(),
+                vol.Required(CONF_OPTIONAL_ENTITIES): _optional_entities_section(
+                    self.config_entry.options
                 ),
             }
         )

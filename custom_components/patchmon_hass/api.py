@@ -15,14 +15,20 @@ from __future__ import annotations
 import asyncio
 import base64
 import json
-from collections.abc import Mapping
+import logging
+import os
+import socket
+import time
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import quote, urlsplit, urlunsplit
 
 import aiohttp
+
+_LOGGER = logging.getLogger(__name__)
 
 API_PATH = "/api/v1/api"
 DEFAULT_TIMEOUT = 15
@@ -69,6 +75,10 @@ class PatchMonUnsupportedError(PatchMonError):
     """The answer does not look like a supported PatchMon server."""
 
 
+class PatchMonRedirectError(PatchMonUnsupportedError):
+    """The address redirects (http to https, a proxy login page, ...)."""
+
+
 # Exact error texts of PatchMon 2.x (internal/middleware/api_auth.go and
 # api_scope.go). Anything else on a 401 counts as invalid credentials.
 _AUTH_MESSAGES: dict[str, AuthFailure] = {
@@ -105,9 +115,11 @@ def _parse_datetime(value: Any) -> datetime | None:
     if not isinstance(value, str) or not value:
         return None
     try:
-        return datetime.fromisoformat(value)
+        parsed = datetime.fromisoformat(value)
     except ValueError:
         return None
+    # Timestamp sensors need an aware datetime; PatchMon sends UTC.
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=UTC)
 
 
 def _opt_str(data: Mapping[str, Any], key: str) -> str | None:
@@ -272,6 +284,56 @@ class Package:
         )
 
 
+def _describe(err: BaseException) -> str:
+    """Error type plus reason, without the server address.
+
+    aiohttp puts host and port (or the URL) into its messages, and these
+    texts end up in logs and in the Home Assistant interface.
+    """
+    name = type(err).__name__
+    reason: object = None
+    if isinstance(err, aiohttp.ClientConnectorCertificateError):
+        reason = getattr(err.certificate_error, "reason", None)
+    elif isinstance(err, aiohttp.ClientConnectorError):
+        reason = getattr(err.os_error, "reason", None) or _os_reason(err.os_error)
+    elif isinstance(err, OSError):
+        reason = _os_reason(err)
+    return f"{name} ({reason})" if reason else name
+
+
+def _os_reason(err: OSError) -> str | None:
+    """The standard text for the error number; asyncio adds the address."""
+    if isinstance(err, socket.gaierror):
+        return err.strerror  # "Name or service not known", without the name
+    return os.strerror(err.errno) if err.errno else None
+
+
+class HostList(list[Host]):
+    """The host list, plus the number of hosts PatchMon says it has.
+
+    ``total`` is None when the answer has no count. A ``total`` above the
+    length means the list is cut off (PatchMon 2.x does not page it, but
+    a later version might).
+    """
+
+    __slots__ = ("total",)
+
+    def __init__(self, hosts: Iterable[Host] = (), total: int | None = None) -> None:
+        """Store the hosts and the reported count."""
+        super().__init__(hosts)
+        self.total = total
+
+    @property
+    def truncated(self) -> bool:
+        """Whether PatchMon reported more hosts than the list holds."""
+        return self.total is not None and self.total > len(self)
+
+
+def _host_path(host_id: str, part: str) -> str:
+    """Path below one host; the ID is encoded so it stays one path segment."""
+    return f"/hosts/{quote(host_id, safe='')}/{part}"
+
+
 class PatchMonClient:
     """Async, read-only client for one PatchMon server."""
 
@@ -295,7 +357,12 @@ class PatchMonClient:
         self._semaphore = asyncio.Semaphore(MAX_PARALLEL_REQUESTS)
 
     async def _get(self, path: str, params: Mapping[str, str] | None = None) -> Any:
-        """GET ``path`` and return the decoded JSON body."""
+        """GET ``path`` and return the decoded JSON body.
+
+        Logs path, status and duration at debug level; never the server
+        address or the token.
+        """
+        start = time.monotonic()
         try:
             async with (
                 self._semaphore,
@@ -309,10 +376,22 @@ class PatchMonClient:
             ):
                 text = await resp.text()
                 status = resp.status
+        except UnicodeDecodeError as err:
+            # Binary or wrongly encoded body, e.g. from a proxy.
+            raise PatchMonUnsupportedError("Answer is not valid text") from err
         except aiohttp.ClientSSLError as err:
-            raise PatchMonSSLError(str(err)) from err
+            raise PatchMonSSLError(_describe(err)) from err
         except (TimeoutError, aiohttp.ClientError) as err:
-            raise PatchMonConnectionError(str(err) or type(err).__name__) from err
+            _LOGGER.debug(
+                "GET %s failed after %.2f s: %s",
+                path,
+                time.monotonic() - start,
+                type(err).__name__,
+            )
+            raise PatchMonConnectionError(_describe(err)) from err
+        _LOGGER.debug(
+            "GET %s: HTTP %s in %.2f s", path, status, time.monotonic() - start
+        )
 
         body: Any
         try:
@@ -326,9 +405,13 @@ class PatchMonClient:
             raise PatchMonNotFoundError(path)
         if status >= 500:
             raise PatchMonConnectionError(f"HTTP {status}")
+        if 300 <= status < 400:
+            # Redirects are not followed: the token would go to the new
+            # address. The target is left out, it holds an address too.
+            raise PatchMonRedirectError(f"Redirect (HTTP {status})")
         if status != 200 or body is None:
             # Typical when the address points at the web interface or a
-            # proxy: HTML instead of JSON, or a redirect to a login page.
+            # proxy: HTML instead of JSON.
             raise PatchMonUnsupportedError(f"Unexpected answer (HTTP {status})")
         return body
 
@@ -347,7 +430,7 @@ class PatchMonClient:
             )
         return PatchMonAuthError(AuthFailure.INVALID_CREDENTIALS, error or "HTTP 401")
 
-    async def get_hosts(self, host_groups: list[str] | None = None) -> list[Host]:
+    async def get_hosts(self, host_groups: list[str] | None = None) -> HostList:
         """Return all hosts with their update counters.
 
         ``host_groups`` filters by group IDs or names (PatchMon matches
@@ -360,18 +443,20 @@ class PatchMonClient:
         hosts = body.get("hosts") if isinstance(body, Mapping) else None
         if not isinstance(hosts, list):
             raise PatchMonUnsupportedError("No host list in the answer")
-        return [Host.from_api(item) for item in hosts]
+        return HostList(
+            (Host.from_api(item) for item in hosts), total=_opt_int(body, "total")
+        )
 
     async def get_host_system(self, host_id: str) -> HostSystem:
         """Return kernel, reboot and boot details of one host."""
-        body = await self._get(f"/hosts/{host_id}/system")
+        body = await self._get(_host_path(host_id, "system"))
         if not isinstance(body, Mapping):
             raise PatchMonUnsupportedError("System details are not an object")
         return HostSystem.from_api(body)
 
     async def get_host_info(self, host_id: str) -> HostInfo:
         """Return agent details of one host."""
-        body = await self._get(f"/hosts/{host_id}/info")
+        body = await self._get(_host_path(host_id, "info"))
         if not isinstance(body, Mapping):
             raise PatchMonUnsupportedError("Host info is not an object")
         return HostInfo.from_api(body)
@@ -381,7 +466,7 @@ class PatchMonClient:
     ) -> list[Package]:
         """Return the packages of one host, by default only those with updates."""
         params = {"updates_only": "true"} if updates_only else None
-        body = await self._get(f"/hosts/{host_id}/packages", params)
+        body = await self._get(_host_path(host_id, "packages"), params)
         packages = body.get("packages") if isinstance(body, Mapping) else None
         if not isinstance(packages, list):
             raise PatchMonUnsupportedError("No package list in the answer")

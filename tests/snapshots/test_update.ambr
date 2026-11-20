@@ -1,0 +1,117 @@
+# serializer version: 1
+# name: test_release_notes
+  '''
+  - **sos** 4.11.2-0ubuntu0.1 → 4.11.2-0ubuntu0.2 (security)
+  - **base-files** 14ubuntu6.2 → 14ubuntu6.3
+  - **containerd.io** 2.4.2-3~ubuntu.26.04~resolute → 2.4.2-4~ubuntu.26.04~resolute
+  - **distro-info** 1.15 → 1.15ubuntu0.1
+  - **docker-buildx-plugin** 0.38.1-1~ubuntu.26.04~resolute → 0.39.0-1~ubuntu.26.04~resolute
+  - **docker-ce** 5:29.9.2-1~ubuntu.26.04~resolute → 5:29.10.0-1~ubuntu.26.04~resolute
+  - **docker-ce-cli** 5:29.9.2-1~ubuntu.26.04~resolute → 5:29.10.0-1~ubuntu.26.04~resolute
+  - **docker-ce-rootless-extras** 5:29.9.2-1~ubuntu.26.04~resolute → 5:29.10.0-1~ubuntu.26.04~resolute
+  - **docker-compose-plugin** 5.7.0-1~ubuntu.26.04~resolute → 5.7.1-1~ubuntu.26.04~resolute
+  - **motd-news-config** 14ubuntu6.2 → 14ubuntu6.3
+  - **python3-distro-info** 1.15 → 1.15ubuntu0.1
+  - **vim** 2:9.1.2141-1ubuntu4.9 → 2:9.1.2141-1ubuntu4.10
+  - **vim-common** 2:9.1.2141-1ubuntu4.9 → 2:9.1.2141-1ubuntu4.10
+  - **vim-runtime** 2:9.1.2141-1ubuntu4.9 → 2:9.1.2141-1ubuntu4.10
+  - **vim-tiny** 2:9.1.2141-1ubuntu4.9 → 2:9.1.2141-1ubuntu4.10
+  - **xxd** 2:9.1.2141-1ubuntu4.9 → 2:9.1.2141-1ubuntu4.10
+  '''
+# ---
+# name: test_update_entities
+  dict({
+    'update.host_01_updates': dict({
+      'attributes': dict({
+        'auto_update': False,
+        'display_precision': 0,
+        'entity_picture': '/api/brands/integration/patchmon_hass/icon.png',
+        'friendly_name': 'Host 01 Updates',
+        'in_progress': False,
+        'installed_version': 'current',
+        'latest_version': 'current',
+        'release_summary': None,
+        'release_url': None,
+        'skipped_version': None,
+        'supported_features': 16,
+        'title': None,
+        'update_percentage': None,
+      }),
+      'device_class': None,
+      'disabled_by': None,
+      'entity_category': <EntityCategory.DIAGNOSTIC: 'diagnostic'>,
+      'state': 'off',
+      'translation_key': 'updates',
+      'unique_id': '00000000-0000-4000-8000-a00000000001_updates',
+    }),
+    'update.host_02_updates': dict({
+      'attributes': dict({
+        'auto_update': False,
+        'display_precision': 0,
+        'entity_picture': '/api/brands/integration/patchmon_hass/icon.png',
+        'friendly_name': 'Host 02 Updates',
+        'in_progress': False,
+        'installed_version': 'current',
+        'latest_version': '16 updates (1 security)',
+        'release_summary': None,
+        'release_url': None,
+        'skipped_version': None,
+        'supported_features': 16,
+        'title': None,
+        'update_percentage': None,
+      }),
+      'device_class': None,
+      'disabled_by': None,
+      'entity_category': <EntityCategory.DIAGNOSTIC: 'diagnostic'>,
+      'state': 'on',
+      'translation_key': 'updates',
+      'unique_id': '00000000-0000-4000-8000-a00000000002_updates',
+    }),
+    'update.host_03_updates': dict({
+      'attributes': dict({
+        'auto_update': False,
+        'display_precision': 0,
+        'entity_picture': '/api/brands/integration/patchmon_hass/icon.png',
+        'friendly_name': 'Host 03 Updates',
+        'in_progress': False,
+        'installed_version': 'current',
+        'latest_version': '7 updates',
+        'release_summary': None,
+        'release_url': None,
+        'skipped_version': None,
+        'supported_features': 16,
+        'title': None,
+        'update_percentage': None,
+      }),
+      'device_class': None,
+      'disabled_by': None,
+      'entity_category': <EntityCategory.DIAGNOSTIC: 'diagnostic'>,
+      'state': 'on',
+      'translation_key': 'updates',
+      'unique_id': '00000000-0000-4000-8000-a00000000003_updates',
+    }),
+    'update.host_04_updates': dict({
+      'attributes': dict({
+        'auto_update': False,
+        'display_precision': 0,
+        'entity_picture': '/api/brands/integration/patchmon_hass/icon.png',
+        'friendly_name': 'Host 04 Updates',
+        'in_progress': False,
+        'installed_version': 'current',
+        'latest_version': '1 update (1 security)',
+        'release_summary': None,
+        'release_url': None,
+        'skipped_version': None,
+        'supported_features': 16,
+        'title': None,
+        'update_percentage': None,
+      }),
+      'device_class': None,
+      'disabled_by': None,
+      'entity_category': <EntityCategory.DIAGNOSTIC: 'diagnostic'>,
+      'state': 'on',
+      'translation_key': 'updates',
+      'unique_id': '00000000-0000-4000-8000-a00000000004_updates',
+    }),
+  })
+# ---

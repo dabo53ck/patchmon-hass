@@ -3,18 +3,32 @@
     "step": {
       "user": {
         "title": "Mit PatchMon verbinden",
-        "description": "Lege in PatchMon ein eigenes API-Token für Home Assistant an (Settings → Integrations → Scoped Credentials), nur mit der Berechtigung `host:get`. Vergib nie `host:delete`: Diese Integration liest nur Daten.",
+        "description": "Lege in PatchMon ein eigenes API-Token für Home Assistant an (Settings → API integrations → Scoped Credentials), nur mit der Berechtigung `host:get`.",
         "data": {
           "url": "Serveradresse",
           "token_key": "Token-Key",
           "token_secret": "Token-Secret",
-          "verify_ssl": "SSL-Zertifikat prüfen"
+          "verify_ssl": "SSL-Zertifikat prüfen",
+          "area": "Bereich"
         },
         "data_description": {
-          "url": "Adresse der PatchMon-Weboberfläche, zum Beispiel http://192.168.1.10:3000",
+          "url": "Adresse der PatchMon-Weboberfläche, zum Beispiel http://192.168.1.10:3000. https-Adressen gehen ebenso.",
           "token_key": "Der Key des API-Tokens",
           "token_secret": "Das Secret des API-Tokens. PatchMon zeigt es nur einmal beim Anlegen.",
-          "verify_ssl": "Nur bei einem Server mit selbstsigniertem Zertifikat ausschalten"
+          "verify_ssl": "Gilt nur für https-Adressen. Ausschalten, wenn der Server ein selbstsigniertes Zertifikat nutzt.",
+          "area": "Neue Hosts und der PatchMon-Server kommen beim Anlegen in diesen Bereich. Später von Hand verschobene Geräte bleiben, wo sie sind."
+        },
+        "sections": {
+          "optional_entities": {
+            "name": "Optionale Entitäten",
+            "description": "Aktiviert die Entität bei allen Hosts. Später unter Konfigurieren änderbar.",
+            "data": {
+              "enable_update_entity": "Updates (Update-Entität mit Paketliste)",
+              "enable_running_kernel": "Laufender Kernel",
+              "enable_installed_kernel": "Installierter Kernel",
+              "enable_installed_packages": "Installierte Pakete"
+            }
+          }
         }
       },
       "reauth_confirm": {
@@ -31,7 +45,7 @@
       },
       "reconfigure": {
         "title": "PatchMon-Verbindung ändern",
-        "description": "Geräte und Entitäten bleiben erhalten. Gib das Token-Secret erneut ein.",
+        "description": "Geräte und Entitäten bleiben erhalten.",
         "data": {
           "url": "Serveradresse",
           "token_key": "Token-Key",
@@ -39,10 +53,10 @@
           "verify_ssl": "SSL-Zertifikat prüfen"
         },
         "data_description": {
-          "url": "Adresse der PatchMon-Weboberfläche, zum Beispiel http://192.168.1.10:3000",
+          "url": "Adresse der PatchMon-Weboberfläche, zum Beispiel http://192.168.1.10:3000. https-Adressen gehen ebenso.",
           "token_key": "Der Key des API-Tokens",
-          "token_secret": "Das Secret des API-Tokens",
-          "verify_ssl": "Nur bei einem Server mit selbstsigniertem Zertifikat ausschalten"
+          "token_secret": "Leer lassen, um das bisherige Secret zu behalten.",
+          "verify_ssl": "Gilt nur für https-Adressen. Ausschalten, wenn der Server ein selbstsigniertes Zertifikat nutzt."
         }
       }
     },
@@ -56,10 +70,12 @@
       "ip_not_allowed": "Dieses API-Token ist für die IP-Adresse von Home Assistant nicht freigegeben. Prüfe die IP-Beschränkung des Tokens in PatchMon.",
       "missing_permission": "Diesem API-Token fehlt die Berechtigung `host:get`.",
       "unsupported": "Der Server antwortet nicht wie ein PatchMon-2.x-Server. Prüfe die Adresse.",
+      "redirect": "Die Adresse leitet weiter, z. B. von http:// auf https:// oder auf eine Anmeldeseite. Gib die Adresse ein, unter der PatchMon direkt antwortet.",
       "unknown": "Unerwarteter Fehler. Details stehen im Log."
     },
     "abort": {
       "already_configured": "Dieser PatchMon-Server ist bereits eingerichtet.",
+      "already_configured_other_address": "Dieser PatchMon-Server ist bereits unter einer anderen Adresse als „{title}“ eingerichtet. Um die Adresse zu ändern, wähle bei diesem Eintrag „Neu konfigurieren“.",
       "reauth_successful": "Das Token wurde aktualisiert.",
       "reconfigure_successful": "Die Verbindung wurde aktualisiert."
     }
@@ -69,12 +85,26 @@
       "init": {
         "title": "PatchMon-Optionen",
         "data": {
-          "scan_interval": "Abfrage-Intervall",
-          "host_groups": "Hostgruppen"
+          "scan_interval": "Abfrageintervall",
+          "host_groups": "Hostgruppen",
+          "area": "Bereich"
         },
         "data_description": {
-          "scan_interval": "Wie oft Home Assistant die Host-Liste aus PatchMon liest. Die Agenten melden dadurch nicht häufiger.",
-          "host_groups": "Nur Hosts aus diesen Gruppen einbeziehen. Leer lassen für alle Hosts."
+          "scan_interval": "Wie oft Home Assistant die Hostliste aus PatchMon liest. Die Agenten melden dadurch nicht häufiger.",
+          "host_groups": "Nur Hosts aus diesen Gruppen einbeziehen. Leer lassen für alle Hosts.",
+          "area": "Neue Hosts und der PatchMon-Server kommen beim Anlegen in diesen Bereich. Später von Hand verschobene Geräte bleiben, wo sie sind."
+        },
+        "sections": {
+          "optional_entities": {
+            "name": "Optionale Entitäten",
+            "description": "Schaltet die Entität beim Umschalten bei allen Hosts ein oder aus. Einzelne Entitäten kannst du danach weiter von Hand umschalten.",
+            "data": {
+              "enable_update_entity": "Updates (Update-Entität mit Paketliste)",
+              "enable_running_kernel": "Laufender Kernel",
+              "enable_installed_kernel": "Installierter Kernel",
+              "enable_installed_packages": "Installierte Pakete"
+            }
+          }
         }
       }
     },
@@ -87,7 +117,95 @@
       "ip_not_allowed": "Dieses API-Token ist für die IP-Adresse von Home Assistant nicht freigegeben.",
       "missing_permission": "Diesem API-Token fehlt die Berechtigung `host:get`.",
       "unsupported": "Der Server antwortet nicht wie ein PatchMon-2.x-Server.",
+      "redirect": "Die Adresse leitet weiter, z. B. von http:// auf https:// oder auf eine Anmeldeseite. Gib die Adresse ein, unter der PatchMon direkt antwortet.",
       "unknown": "Unerwarteter Fehler. Details stehen im Log."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "restart_required": {
+        "name": "Neustart erforderlich",
+        "state": {
+          "on": "Ja",
+          "off": "Nein"
+        }
+      },
+      "reporting": {
+        "name": "Meldet sich",
+        "state_attributes": {
+          "reporting_state": {
+            "name": "Meldestatus",
+            "state": {
+              "reporting": "Meldet sich",
+              "overdue": "Überfällig",
+              "stale": "Veraltet"
+            }
+          }
+        }
+      }
+    },
+    "sensor": {
+      "updates": {
+        "name": "Ausstehende Updates"
+      },
+      "security_updates": {
+        "name": "Sicherheitsupdates"
+      },
+      "update_status": {
+        "name": "Update-Status",
+        "state": {
+          "up_to_date": "Aktuell",
+          "updates_pending": "Updates ausstehend",
+          "security_required": "Sicherheitsupdate nötig"
+        }
+      },
+      "last_check_in": {
+        "name": "Letzter Check-in"
+      },
+      "installed_packages": {
+        "name": "Installierte Pakete"
+      },
+      "restart_reason": {
+        "name": "Neustartgrund"
+      },
+      "agent_version": {
+        "name": "Agent-Version"
+      },
+      "last_boot": {
+        "name": "Letzter Neustart"
+      },
+      "running_kernel": {
+        "name": "Laufender Kernel"
+      },
+      "installed_kernel": {
+        "name": "Installierter Kernel"
+      },
+      "hosts": {
+        "name": "Hosts"
+      },
+      "hosts_with_updates": {
+        "name": "Hosts mit Updates"
+      },
+      "hosts_with_security_updates": {
+        "name": "Hosts mit Sicherheitsupdates"
+      },
+      "hosts_requiring_restart": {
+        "name": "Hosts mit Neustartbedarf"
+      },
+      "hosts_not_reporting": {
+        "name": "Hosts ohne Meldung"
+      },
+      "total_updates": {
+        "name": "Ausstehende Updates gesamt"
+      },
+      "total_security_updates": {
+        "name": "Sicherheitsupdates gesamt"
+      }
+    },
+    "update": {
+      "updates": {
+        "name": "Updates"
+      }
     }
   },
   "exceptions": {
@@ -99,6 +217,106 @@
     },
     "unsupported": {
       "message": "Unerwartete Antwort vom PatchMon-Server: {error}"
+    },
+    "packages_failed": {
+      "message": "Die Paketliste konnte nicht geladen werden: {error}"
+    },
+    "not_loaded": {
+      "message": "Es ist kein PatchMon-Eintrag geladen."
+    },
+    "entry_not_found": {
+      "message": "{entry_id} ist kein PatchMon-Eintrag."
+    },
+    "device_not_found": {
+      "message": "{device_id} ist kein PatchMon-Gerät."
+    },
+    "not_a_host": {
+      "message": "Wähle einen Host aus, nicht den PatchMon-Server."
+    },
+    "host_not_found": {
+      "message": "PatchMon kennt diesen Host nicht mehr."
+    },
+    "refresh_failed": {
+      "message": "PatchMon konnte nicht aktualisiert werden: {error}"
+    }
+  },
+  "issues": {
+    "host_groups_without_hosts": {
+      "title": "Hostgruppen-Filter von {title} trifft keinen Host",
+      "description": "Der Hostgruppen-Filter von {title} enthält Gruppen ohne Host in PatchMon: {groups}. Die Gruppen wurden gelöscht oder sind leer. Ihre Hosts bleiben in Home Assistant erhalten, sind aber nicht verfügbar. Öffne beim Integrationseintrag **Konfigurieren** und passe den Hostgruppen-Filter an."
+    },
+    "unsupported_answer": {
+      "title": "{title}: Antwort von PatchMon nicht verstanden",
+      "description": "Der PatchMon-Server von {title} antwortet so, dass diese Version der Integration die Antwort nicht versteht ({error}). Meist wird die PatchMon-Version noch nicht unterstützt, oder die Serveradresse zeigt auf etwas anderes, zum Beispiel die Weboberfläche hinter einem Proxy. Prüfe, ob der Server PatchMon 2.x verwendet und die Integration aktuell ist; die Adresse änderst du über **Neu konfigurieren**. Dieser Hinweis verschwindet von selbst, sobald eine Antwort wieder verstanden wird."
+    }
+  },
+  "selector": {
+    "update_status": {
+      "options": {
+        "up_to_date": "Aktuell",
+        "updates_pending": "Updates ausstehend",
+        "security_required": "Sicherheitsupdate nötig"
+      }
+    }
+  },
+  "services": {
+    "get_hosts": {
+      "name": "Hosts abrufen",
+      "description": "Gibt die Hosts der letzten Aktualisierung mit ihrem Patch-Stand zurück. Liest nichts aus PatchMon; alle angegebenen Filter müssen zutreffen.",
+      "fields": {
+        "config_entry_id": {
+          "name": "PatchMon-Server",
+          "description": "Nur Hosts dieses Servers. Leer lassen für alle."
+        },
+        "update_status": {
+          "name": "Update-Status",
+          "description": "Nur Hosts mit einem dieser Update-Status."
+        },
+        "restart_required": {
+          "name": "Neustart nötig",
+          "description": "Nur Hosts, die einen Neustart brauchen (an) oder nicht (aus)."
+        },
+        "reporting": {
+          "name": "Meldet sich",
+          "description": "Nur Hosts, deren Agent sich rechtzeitig meldet (an) oder überfällig bzw. veraltet ist (aus)."
+        }
+      }
+    },
+    "get_packages": {
+      "name": "Pakete abrufen",
+      "description": "Liest die Pakete eines Hosts aus PatchMon und gibt sie zurück, Sicherheitsupdates zuerst.",
+      "fields": {
+        "device_id": {
+          "name": "Host",
+          "description": "Das Gerät des Hosts."
+        },
+        "updates_only": {
+          "name": "Nur mit Updates",
+          "description": "Nur Pakete mit ausstehendem Update."
+        },
+        "security_only": {
+          "name": "Nur Sicherheitsupdates",
+          "description": "Nur Pakete mit Sicherheitsupdate."
+        },
+        "limit": {
+          "name": "Höchstzahl",
+          "description": "Höchstens so viele Pakete."
+        },
+        "include_descriptions": {
+          "name": "Mit Beschreibungen",
+          "description": "Paketbeschreibungen mitliefern; macht die Antwort deutlich länger."
+        }
+      }
+    },
+    "refresh": {
+      "name": "Aktualisieren",
+      "description": "Liest die Hostliste und die Hostdetails jetzt aus PatchMon. Die Agenten werden nicht zum Melden aufgefordert: Werte ändern sich erst nach ihrer nächsten Meldung.",
+      "fields": {
+        "device_id": {
+          "name": "Geräte",
+          "description": "Hosts, deren Details neu gelesen werden; das Gerät des PatchMon-Servers steht für alle seine Hosts. Leer lassen für alle."
+        }
+      }
     }
   }
 }

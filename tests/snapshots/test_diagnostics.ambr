@@ -1,0 +1,271 @@
+# serializer version: 1
+# name: test_device_diagnostics
+  dict({
+    'coordinator': dict({
+      'complete': True,
+      'groups_without_hosts': list([
+      ]),
+      'hosts': 4,
+      'hosts_with_details': 4,
+      'last_exception': None,
+      'last_update_success': True,
+      'update_interval_seconds': 300.0,
+    }),
+    'entry': dict({
+      'data': dict({
+        'token_key': '**REDACTED**',
+        'token_secret': '**REDACTED**',
+        'url': '**REDACTED**',
+        'verify_ssl': True,
+      }),
+      'options': dict({
+      }),
+    }),
+    'host': dict({
+      'details': dict({
+        'info': dict({
+          'agent_version': '2.1.8',
+          'config_version': '2.1.8',
+          'machine_id': '**REDACTED**',
+        }),
+        'last_update': '2026-11-16T18:45:22+00:00',
+        'system': dict({
+          'architecture': 'x86_64',
+          'boot_time': '2026-11-16T00:45:01.904536+00:00',
+          'installed_kernel_version': '7.0.14-29-pve',
+          'kernel_version': '6.12.15-production+truenas',
+          'needs_reboot': True,
+          'reboot_reason': 'Kernel version mismatch | Running kernel: 6.12.15-production+truenas, Installed kernel: 7.0.14-29-pve',
+          'system_uptime': '18 hours, 0 minutes',
+        }),
+      }),
+      'host': dict({
+        'effective_status': 'active',
+        'friendly_name': '**REDACTED**',
+        'host_groups': list([
+          dict({
+            'id': '00000000-0000-4000-8000-b00000000001',
+            'name': 'auto-updates',
+          }),
+        ]),
+        'hostname': '**REDACTED**',
+        'id': '00000000-0000-4000-8000-a00000000001',
+        'ip': '**REDACTED**',
+        'last_update': '2026-11-16T18:45:22+00:00',
+        'needs_reboot': True,
+        'os_type': 'Debian GNU/Linux',
+        'os_version': '13 (trixie)',
+        'reporting_state': 'reporting',
+        'security_updates_count': 0,
+        'status': 'active',
+        'total_packages': 429,
+        'update_state': 'up_to_date',
+        'updates_count': 0,
+      }),
+      'id': '00000000-0000-4000-8000-a00000000001',
+      'listed': True,
+    }),
+  })
+# ---
+# name: test_entry_diagnostics
+  dict({
+    'coordinator': dict({
+      'complete': True,
+      'groups_without_hosts': list([
+      ]),
+      'hosts': 4,
+      'hosts_with_details': 4,
+      'last_exception': None,
+      'last_update_success': True,
+      'update_interval_seconds': 300.0,
+    }),
+    'entry': dict({
+      'data': dict({
+        'token_key': '**REDACTED**',
+        'token_secret': '**REDACTED**',
+        'url': '**REDACTED**',
+        'verify_ssl': True,
+      }),
+      'options': dict({
+      }),
+    }),
+    'hosts': list([
+      dict({
+        'details': dict({
+          'info': dict({
+            'agent_version': '2.1.8',
+            'config_version': '2.1.8',
+            'machine_id': '**REDACTED**',
+          }),
+          'last_update': '2026-11-16T18:45:22+00:00',
+          'system': dict({
+            'architecture': 'x86_64',
+            'boot_time': '2026-11-16T00:45:01.904536+00:00',
+            'installed_kernel_version': '7.0.14-29-pve',
+            'kernel_version': '6.12.15-production+truenas',
+            'needs_reboot': True,
+            'reboot_reason': 'Kernel version mismatch | Running kernel: 6.12.15-production+truenas, Installed kernel: 7.0.14-29-pve',
+            'system_uptime': '18 hours, 0 minutes',
+          }),
+        }),
+        'host': dict({
+          'effective_status': 'active',
+          'friendly_name': '**REDACTED**',
+          'host_groups': list([
+            dict({
+              'id': '00000000-0000-4000-8000-b00000000001',
+              'name': 'auto-updates',
+            }),
+          ]),
+          'hostname': '**REDACTED**',
+          'id': '00000000-0000-4000-8000-a00000000001',
+          'ip': '**REDACTED**',
+          'last_update': '2026-11-16T18:45:22+00:00',
+          'needs_reboot': True,
+          'os_type': 'Debian GNU/Linux',
+          'os_version': '13 (trixie)',
+          'reporting_state': 'reporting',
+          'security_updates_count': 0,
+          'status': 'active',
+          'total_packages': 429,
+          'update_state': 'up_to_date',
+          'updates_count': 0,
+        }),
+        'id': '00000000-0000-4000-8000-a00000000001',
+        'listed': True,
+      }),
+      dict({
+        'details': dict({
+          'info': dict({
+            'agent_version': '2.1.8',
+            'config_version': '2.1.8',
+            'machine_id': '**REDACTED**',
+          }),
+          'last_update': '2026-11-16T18:17:20+00:00',
+          'system': dict({
+            'architecture': 'x86_64',
+            'boot_time': '2026-11-07T13:16:50+00:00',
+            'installed_kernel_version': '7.0.0-43-generic',
+            'kernel_version': '7.0.0-42-generic',
+            'needs_reboot': True,
+            'reboot_reason': 'Reboot flag file exists (/var/run/reboot-required) | Running kernel: 7.0.0-42-generic, Installed kernel: 7.0.0-43-generic',
+            'system_uptime': '9 days, 5 hours, 0 minutes',
+          }),
+        }),
+        'host': dict({
+          'effective_status': 'active',
+          'friendly_name': '**REDACTED**',
+          'host_groups': list([
+            dict({
+              'id': '00000000-0000-4000-8000-b00000000002',
+              'name': 'security-only',
+            }),
+          ]),
+          'hostname': '**REDACTED**',
+          'id': '00000000-0000-4000-8000-a00000000002',
+          'ip': '**REDACTED**',
+          'last_update': '2026-11-16T18:17:20+00:00',
+          'needs_reboot': True,
+          'os_type': 'Ubuntu',
+          'os_version': '26.04.1 LTS (Resolute Raccoon)',
+          'reporting_state': 'reporting',
+          'security_updates_count': 1,
+          'status': 'active',
+          'total_packages': 761,
+          'update_state': 'security_required',
+          'updates_count': 16,
+        }),
+        'id': '00000000-0000-4000-8000-a00000000002',
+        'listed': True,
+      }),
+      dict({
+        'details': dict({
+          'info': dict({
+            'agent_version': '2.1.8',
+            'config_version': '2.1.8',
+            'machine_id': '**REDACTED**',
+          }),
+          'last_update': '2026-11-16T18:53:25+00:00',
+          'system': dict({
+            'architecture': 'x86_64',
+            'boot_time': '2026-10-26T18:52:45.982140+00:00',
+            'installed_kernel_version': None,
+            'kernel_version': '7.0.14-25-pve',
+            'needs_reboot': False,
+            'reboot_reason': None,
+            'system_uptime': '21 days, 0 hours, 0 minutes',
+          }),
+        }),
+        'host': dict({
+          'effective_status': 'active',
+          'friendly_name': '**REDACTED**',
+          'host_groups': list([
+            dict({
+              'id': '00000000-0000-4000-8000-b00000000002',
+              'name': 'security-only',
+            }),
+          ]),
+          'hostname': '**REDACTED**',
+          'id': '00000000-0000-4000-8000-a00000000003',
+          'ip': '**REDACTED**',
+          'last_update': '2026-11-16T18:53:25+00:00',
+          'needs_reboot': False,
+          'os_type': 'Debian GNU/Linux',
+          'os_version': '13 (trixie)',
+          'reporting_state': 'reporting',
+          'security_updates_count': 0,
+          'status': 'active',
+          'total_packages': 374,
+          'update_state': 'updates_pending',
+          'updates_count': 7,
+        }),
+        'id': '00000000-0000-4000-8000-a00000000003',
+        'listed': True,
+      }),
+      dict({
+        'details': dict({
+          'info': dict({
+            'agent_version': '2.1.8',
+            'config_version': '2.1.8',
+            'machine_id': '**REDACTED**',
+          }),
+          'last_update': '2026-11-16T18:30:18+00:00',
+          'system': dict({
+            'architecture': 'x86_64',
+            'boot_time': '2026-11-14T04:30:08+00:00',
+            'installed_kernel_version': '7.0.0-43-generic',
+            'kernel_version': '7.0.0-43-generic',
+            'needs_reboot': False,
+            'reboot_reason': None,
+            'system_uptime': '2 days, 14 hours, 0 minutes',
+          }),
+        }),
+        'host': dict({
+          'effective_status': 'active',
+          'friendly_name': '**REDACTED**',
+          'host_groups': list([
+            dict({
+              'id': '00000000-0000-4000-8000-b00000000001',
+              'name': 'auto-updates',
+            }),
+          ]),
+          'hostname': '**REDACTED**',
+          'id': '00000000-0000-4000-8000-a00000000004',
+          'ip': '**REDACTED**',
+          'last_update': '2026-11-16T18:30:18+00:00',
+          'needs_reboot': False,
+          'os_type': 'Ubuntu',
+          'os_version': '26.04.1 LTS (Resolute Raccoon)',
+          'reporting_state': 'reporting',
+          'security_updates_count': 1,
+          'status': 'active',
+          'total_packages': 1309,
+          'update_state': 'security_required',
+          'updates_count': 1,
+        }),
+        'id': '00000000-0000-4000-8000-a00000000004',
+        'listed': True,
+      }),
+    ]),
+  })
+# ---

@@ -1,0 +1,68 @@
+get_hosts:
+  fields:
+    config_entry_id:
+      required: false
+      selector:
+        config_entry:
+          integration: patchmon_hass
+    update_status:
+      required: false
+      example: security_required
+      selector:
+        select:
+          translation_key: update_status
+          multiple: true
+          options:
+            - up_to_date
+            - updates_pending
+            - security_required
+    restart_required:
+      required: false
+      example: true
+      selector:
+        boolean:
+    reporting:
+      required: false
+      example: false
+      selector:
+        boolean:
+
+get_packages:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: patchmon_hass
+    updates_only:
+      required: false
+      default: true
+      selector:
+        boolean:
+    security_only:
+      required: false
+      default: false
+      selector:
+        boolean:
+    limit:
+      required: false
+      default: 50
+      selector:
+        number:
+          min: 1
+          max: 1000
+          mode: box
+    include_descriptions:
+      required: false
+      default: false
+      selector:
+        boolean:
+
+refresh:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: patchmon_hass
+          multiple: true
