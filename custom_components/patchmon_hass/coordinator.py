@@ -27,6 +27,7 @@ from .api import (
     PatchMonUnsupportedError,
 )
 from .const import (
+    CONF_HOST_GROUP_NAMES,
     CONF_HOST_GROUPS,
     CONF_SCAN_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
@@ -105,7 +106,10 @@ class PatchMonCoordinator(DataUpdateCoordinator[PatchMonData]):
         )
         self.client = client
         self._host_groups: list[str] = list(entry.options.get(CONF_HOST_GROUPS, []))
-        self._group_names: dict[str, str] = {}
+        # Names stored with the filter, updated from the hosts of each answer.
+        self._group_names: dict[str, str] = dict(
+            entry.options.get(CONF_HOST_GROUP_NAMES, {})
+        )
         # Hosts whose details the next update reads in any case (refresh action).
         self._force_all_details = False
         self._force_details: set[str] = set()
