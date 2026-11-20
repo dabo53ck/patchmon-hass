@@ -6,6 +6,8 @@ follows SemVer, including pre-release identifiers such as `0.1.0-rc.1`.
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-20
+
 ### Added
 
 - Project skeleton, CI (hassfest, HACS, Ruff, mypy, pytest) and brand assets.
@@ -67,7 +69,13 @@ follows SemVer, including pre-release identifiers such as `0.1.0-rc.1`.
   own message in setup and options instead of "did not answer like a
   PatchMon server".
 - README: what **Skip** on the update entity does.
+- Setup and README name the right PatchMon menu for API tokens:
+  **Settings → API integrations → Scoped Credentials**. The README shows it
+  with screenshots.
 - The repair about filter groups without hosts names a deleted group by its
   name, also after a restart: the options now store the names of the chosen
   groups. The options form shows such a group by that name, too. Entries
   saved before keep showing the group ID until the options are saved again.
+
+[Unreleased]: https://github.com/dabo53ck/patchmon-hass/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/dabo53ck/patchmon-hass/releases/tag/v0.1.0

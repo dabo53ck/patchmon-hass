@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Conectar con PatchMon",
-        "description": "Crea en PatchMon un token de API propio para Home Assistant (Settings → Integrations → Scoped Credentials), solo con el permiso `host:get`.",
+        "description": "Crea en PatchMon un token de API propio para Home Assistant (Settings → API integrations → Scoped Credentials), solo con el permiso `host:get`.",
         "data": {
           "url": "Dirección del servidor",
           "token_key": "Clave del token",
