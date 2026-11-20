@@ -570,8 +570,11 @@ async def test_options_flow_deleted_group_keeps_name(
             CONF_OPTIONAL_ENTITIES: {},
         },
     )
+    await hass.async_block_till_done()
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert entry.options[CONF_HOST_GROUP_NAMES] == {"gone-group-id": "Old group"}
+    # Saving reloaded the entry; stop its coordinator.
+    assert await hass.config_entries.async_unload(entry.entry_id)
 
 
 async def _save_options(
