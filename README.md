@@ -1,9 +1,14 @@
 <p align="center">
-  <img src="custom_components/patchmon_hass/brand/logo.png" alt="patchmon-hass" height="96">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="custom_components/patchmon_hass/brand/dark_logo.png">
+    <img src="custom_components/patchmon_hass/brand/logo.png" alt="patchmon-hass" height="96">
+  </picture>
 </p>
 
 # PatchMon for Home Assistant
 
+[![Release](https://img.shields.io/github/v/release/dabo53ck/patchmon-hass?label=release)](https://github.com/dabo53ck/patchmon-hass/releases)
+[![HACS](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 [![Validate](https://github.com/dabo53ck/patchmon-hass/actions/workflows/validate.yml/badge.svg)](https://github.com/dabo53ck/patchmon-hass/actions/workflows/validate.yml)
 [![Tests](https://github.com/dabo53ck/patchmon-hass/actions/workflows/tests.yml/badge.svg)](https://github.com/dabo53ck/patchmon-hass/actions/workflows/tests.yml)
 
@@ -11,8 +16,6 @@ An unofficial, **read-only** Home Assistant integration for
 [PatchMon](https://github.com/PatchMon/PatchMon): see the patch status of every
 host PatchMon monitors (pending and security updates, required restarts,
 agent check-ins) in Home Assistant.
-
-> **Work in progress.** This is an early development version towards v0.1.0.
 
 This project is not affiliated with or endorsed by the PatchMon project.
 
@@ -31,20 +34,31 @@ anything, and it never asks for more than `host:get`.
 
 Create a dedicated token for Home Assistant, so you can revoke it on its own:
 
-1. In PatchMon, open **Settings → Integrations → Scoped Credentials**.
-2. Create a new token and give it only the **`host:get`** permission.
-   Never grant `host:delete`.
-3. Optional: restrict the token to the IP address of your Home Assistant.
-4. Copy the token key and secret. PatchMon shows the secret only once.
+1. In PatchMon, open **Settings → API integrations → Scoped Credentials** and
+   click **New Credential**.
+
+   ![Scoped Credentials in the PatchMon settings](docs/token-list.png)
+
+2. Give the token a name and tick only **GET** under **Host Permissions**
+   (`host:get`). Never tick DELETE or any other permission.
+3. Optional: under **Allowed IP Addresses**, enter the IP address of your
+   Home Assistant.
+4. Click **Create Token** and copy the token key and secret. PatchMon shows
+   the secret only once.
+
+   ![New token with only the GET permission](docs/token-create.png)
 
 ## Installation
+
+[![Open your Home Assistant instance and open this repository in HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=dabo53ck&repository=patchmon-hass&category=integration)
 
 Until the integration is in the HACS default store, add it as a custom
 repository:
 
-1. HACS → three-dot menu → **Custom repositories**.
-2. Repository `https://github.com/dabo53ck/patchmon-hass`, type **Integration**.
-3. Install **PatchMon**, then restart Home Assistant.
+1. Click the button above, or in HACS open the three-dot menu →
+   **Custom repositories** and add `https://github.com/dabo53ck/patchmon-hass`
+   as type **Integration**.
+2. Install **PatchMon**, then restart Home Assistant.
 
 ## Setup
 
@@ -238,8 +252,8 @@ sequence:
 1. **Settings → Devices & services → PatchMon** → three-dot menu →
    **Delete**. This removes all devices and entities of that server.
 2. Optional: uninstall **PatchMon** in HACS and restart Home Assistant.
-3. Delete the API token in PatchMon (**Settings → Integrations → Scoped
-   Credentials**).
+3. Delete the API token in PatchMon (**Settings → API integrations →
+   Scoped Credentials**).
 
 ## License
 

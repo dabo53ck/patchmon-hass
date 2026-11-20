@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Mit PatchMon verbinden",
-        "description": "Lege in PatchMon ein eigenes API-Token für Home Assistant an (Settings → Integrations → Scoped Credentials), nur mit der Berechtigung `host:get`.",
+        "description": "Lege in PatchMon ein eigenes API-Token für Home Assistant an (Settings → API integrations → Scoped Credentials), nur mit der Berechtigung `host:get`.",
         "data": {
           "url": "Serveradresse",
           "token_key": "Token-Key",

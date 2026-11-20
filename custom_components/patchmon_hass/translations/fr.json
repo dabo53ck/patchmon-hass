@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Se connecter à PatchMon",
-        "description": "Créez dans PatchMon un jeton d'API dédié à Home Assistant (Settings → Integrations → Scoped Credentials), avec uniquement l'autorisation `host:get`.",
+        "description": "Créez dans PatchMon un jeton d'API dédié à Home Assistant (Settings → API integrations → Scoped Credentials), avec uniquement l'autorisation `host:get`.",
         "data": {
           "url": "Adresse du serveur",
           "token_key": "Clé du jeton",
