@@ -47,6 +47,7 @@ from .api import (
 )
 from .const import (
     CONF_AREA,
+    CONF_HOST_GROUP_NAMES,
     CONF_HOST_GROUPS,
     CONF_OPTIONAL_ENTITIES,
     CONF_SCAN_INTERVAL,
@@ -323,15 +324,30 @@ def _async_apply_enable_option(
 class PatchMonOptionsFlow(OptionsFlowWithReload):
     """Polling interval, host group filter, area and optional entities."""
 
+    def __init__(self) -> None:
+        """Start without known group names; the form fills them in."""
+        super().__init__()
+        # Group ID -> name, as shown in the form.
+        self._group_names: dict[str, str] = {}
+
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Show and store the options; the entry reloads afterwards."""
         if user_input is not None:
-            options = {
+            selected: list[str] = user_input.get(CONF_HOST_GROUPS, [])
+            options: dict[str, Any] = {
                 CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL]),
-                CONF_HOST_GROUPS: user_input.get(CONF_HOST_GROUPS, []),
+                CONF_HOST_GROUPS: selected,
             }
+            # Keep the names: once a group has no hosts, PatchMon no longer
+            # tells them, and messages would show only the ID.
+            if names := {
+                gid: name
+                for gid in selected
+                if (name := self._group_names.get(gid, gid)) != gid
+            }:
+                options[CONF_HOST_GROUP_NAMES] = names
             if area := user_input.get(CONF_AREA):
                 options[CONF_AREA] = area
             for option, enabled in _switches(user_input).items():
@@ -355,9 +371,13 @@ class PatchMonOptionsFlow(OptionsFlowWithReload):
                 for group in host.host_groups:
                     groups[group.id] = group.name
         # Keep selected groups that no longer exist selectable, so saving the
-        # form does not fail on them.
+        # form does not fail on them; show them by their stored name.
+        stored: dict[str, str] = self.config_entry.options.get(
+            CONF_HOST_GROUP_NAMES, {}
+        )
         for group_id in current:
-            groups.setdefault(group_id, group_id)
+            groups.setdefault(group_id, stored.get(group_id, group_id))
+        self._group_names = groups
 
         schema = vol.Schema(
             {

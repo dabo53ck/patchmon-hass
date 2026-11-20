@@ -20,6 +20,7 @@ from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClien
 from custom_components.patchmon_hass.api import PatchMonSSLError
 from custom_components.patchmon_hass.const import (
     CONF_AREA,
+    CONF_HOST_GROUP_NAMES,
     CONF_HOST_GROUPS,
     CONF_OPTIONAL_ENTITIES,
     CONF_SCAN_INTERVAL,
@@ -491,6 +492,8 @@ async def test_options_flow(
     assert mock_config_entry.options == {
         CONF_SCAN_INTERVAL: 10,
         CONF_HOST_GROUPS: ["00000000-0000-4000-8000-b00000000001"],
+        # Stored for messages once the group has no hosts any more.
+        CONF_HOST_GROUP_NAMES: {"00000000-0000-4000-8000-b00000000001": "auto-updates"},
         CONF_AREA: area.id,
         **dict.fromkeys(ENABLE_OPTIONS, False),
         "enable_running_kernel": True,
@@ -533,6 +536,45 @@ async def test_options_flow_server_unreachable(
         CONF_HOST_GROUPS: ["gone-group-id"],
         **dict.fromkeys(ENABLE_OPTIONS, False),
     }
+
+
+async def test_options_flow_deleted_group_keeps_name(
+    hass: HomeAssistant,
+    mock_hosts: AiohttpClientMocker,
+) -> None:
+    """A chosen group that has no hosts any more shows and keeps its name."""
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=URL,
+        data=dict(ENTRY_DATA),
+        options={
+            CONF_SCAN_INTERVAL: 5,
+            CONF_HOST_GROUPS: ["gone-group-id"],
+            CONF_HOST_GROUP_NAMES: {"gone-group-id": "Old group"},
+        },
+    )
+    entry.add_to_hass(hass)
+
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+
+    selector = result["data_schema"].schema[CONF_HOST_GROUPS]
+    assert {"value": "gone-group-id", "label": "Old group"} in selector.config[
+        "options"
+    ]
+
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"],
+        {
+            CONF_SCAN_INTERVAL: 5,
+            CONF_HOST_GROUPS: ["gone-group-id"],
+            CONF_OPTIONAL_ENTITIES: {},
+        },
+    )
+    await hass.async_block_till_done()
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert entry.options[CONF_HOST_GROUP_NAMES] == {"gone-group-id": "Old group"}
+    # Saving reloaded the entry; stop its coordinator.
+    assert await hass.config_entries.async_unload(entry.entry_id)
 
 
 async def _save_options(

@@ -17,7 +17,11 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
 
 from custom_components.patchmon_hass.api import Host
-from custom_components.patchmon_hass.const import CONF_HOST_GROUPS, DOMAIN
+from custom_components.patchmon_hass.const import (
+    CONF_HOST_GROUP_NAMES,
+    CONF_HOST_GROUPS,
+    DOMAIN,
+)
 from custom_components.patchmon_hass.coordinator import (
     ISSUE_GROUPS_WITHOUT_HOSTS,
     ISSUE_UNSUPPORTED,
@@ -295,6 +299,42 @@ async def test_filter_group_without_hosts(
     assert not issue_registry.async_get_issue(
         DOMAIN, f"{ISSUE_GROUPS_WITHOUT_HOSTS}_{entry.entry_id}"
     )
+
+
+async def test_filter_group_without_hosts_stored_name(
+    hass: HomeAssistant,
+    issue_registry: ir.IssueRegistry,
+    aioclient_mock: AiohttpClientMocker,
+) -> None:
+    """After a restart the repair names a gone group by its stored name."""
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        title="PatchMon (patchmon.example)",
+        unique_id=URL,
+        data=dict(ENTRY_DATA),
+        options={
+            CONF_HOST_GROUPS: [GROUP_AUTO, GROUP_GONE],
+            CONF_HOST_GROUP_NAMES: {GROUP_AUTO: "auto", GROUP_GONE: "Old group"},
+        },
+    )
+    hosts = load_fixture("hosts.json")
+    _remock(
+        aioclient_mock,
+        {
+            "hosts": [
+                h for h in hosts["hosts"] if h["host_groups"][0]["id"] == GROUP_AUTO
+            ]
+        },
+    )
+
+    await _setup(hass, entry)
+
+    issue = issue_registry.async_get_issue(
+        DOMAIN, f"{ISSUE_GROUPS_WITHOUT_HOSTS}_{entry.entry_id}"
+    )
+    assert issue is not None
+    assert issue.translation_placeholders is not None
+    assert issue.translation_placeholders["groups"] == "Old group"
 
 
 async def test_suddenly_empty_list_is_incomplete(

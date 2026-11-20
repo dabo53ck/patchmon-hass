@@ -12,6 +12,9 @@ CONF_TOKEN_SECRET: Final = "token_secret"
 # Options
 CONF_SCAN_INTERVAL: Final = "scan_interval"
 CONF_HOST_GROUPS: Final = "host_groups"
+# Names of the filter groups when they were chosen, for messages about
+# groups that have no hosts any more (their name is not in the host list).
+CONF_HOST_GROUP_NAMES: Final = "host_group_names"
 # Area for devices created from now on (area ID); existing devices keep theirs.
 CONF_AREA: Final = "area"
 # Section of the options form with one switch per optional entity.

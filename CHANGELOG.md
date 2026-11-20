@@ -67,3 +67,7 @@ pre-release identifiers included (`0.1.0-rc.1`, …).
   own message in setup and options instead of "did not answer like a
   PatchMon server".
 - README: what **Skip** on the update entity does.
+- The repair about filter groups without hosts names a deleted group by its
+  name, also after a restart: the options now store the names of the chosen
+  groups. The options form shows such a group by that name, too. Entries
+  saved before keep showing the group ID until the options are saved again.
