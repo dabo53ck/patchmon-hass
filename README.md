@@ -66,9 +66,11 @@ under **Configure** on the integration entry. The four entities that are
 disabled by default (updates, running kernel, installed kernel, installed
 packages) each have a switch there: switching it enables or disables that
 entity on every host, and new hosts get it as the switch says. Single
-entities can still be switched by hand afterwards. If the token is changed or expires, Home Assistant
-asks for a new one; **Reconfigure** changes the address or token without
-losing anything (leave the secret empty to keep the current one).
+entities can still be switched by hand afterwards.
+
+If the token is changed or expires, Home Assistant asks for a new one.
+**Reconfigure** changes the address, the token or the certificate check
+without losing anything (leave the secret empty to keep the current one).
 
 Each PatchMon server can be added once. Setup recognises the same server
 under a second address (IP and name, LAN and reverse proxy) by its hosts and
@@ -81,8 +83,10 @@ The PatchMon server is a device of its own; every host is a device linked to
 it, with a link to the host page in PatchMon. Hosts added in PatchMon appear by
 themselves, hosts deleted in PatchMon are removed together with their entities.
 Only the host list decides that a host is gone: if it is suddenly empty (also
-right after a restart), nothing is removed. A host device you delete yourself
-gets its entities back when PatchMon lists the host again.
+right after a restart), nothing is removed. Home Assistant lets you delete a
+host device yourself only while PatchMon does not list that host (or while the
+entry is not loaded); the server device cannot be deleted. A deleted host
+device gets its entities back when PatchMon lists the host again.
 
 ### Per host
 
@@ -114,6 +118,7 @@ labels instead of versions:
 | Situation | Installed version | Latest version |
 | --- | --- | --- |
 | No pending updates | `current` | `current` |
+| One pending update | `current` | `1 update` |
 | Pending updates | `current` | `16 updates` |
 | Pending updates, some for security | `current` | `16 updates (1 security)` |
 
@@ -138,14 +143,19 @@ All actions only read; none of them changes anything in PatchMon.
 | Action | What it does |
 | --- | --- |
 | `patchmon_hass.get_hosts` | Returns the hosts with their patch status as of the last update, without asking PatchMon. Optional filters: PatchMon server, update status, restart required, reporting. |
-| `patchmon_hass.get_packages` | Reads the packages of one host from PatchMon and returns them, security updates first. Options: only with updates (default on), only security updates, limit (default 50), include descriptions (default off, makes the answer much longer). |
+| `patchmon_hass.get_packages` | Reads the packages of one host from PatchMon and returns them, security updates first. Options: only with updates (default on), only security updates, limit (default 50, at most 1000), include descriptions (default off, makes the answer much longer). |
 | `patchmon_hass.refresh` | Reads the host list and the host details from PatchMon now, for all hosts or the selected devices. It does **not** make the agents report: values only change after their next check-in. |
 
-`get_hosts` returns for each host the name it has in Home Assistant (your own
-name if you renamed the device), PatchMon's name as `patchmon_name`, the device
-ID, the server, the operating system, update status, pending and security
-updates, whether a restart is required and why, the reporting state, the last
-check-in and the agent version.
+`get_hosts` returns `count` and a list `hosts`. Each host has the name it has
+in Home Assistant (your own name if you renamed the device), PatchMon's name as
+`patchmon_name`, the device ID, the server, the operating system, update
+status, pending and security updates, whether a restart is required and why,
+the reporting state, the last check-in and the agent version.
+
+`get_packages` returns the host's `name` and `device_id`, `total` (packages
+matching the options), `truncated` (more than the limit) and a list
+`packages`, each with `name`, `current_version`, `available_version`,
+`needs_update`, `security_update` and, if asked for, `description`.
 
 ## How data is updated
 
@@ -206,12 +216,13 @@ sequence:
   restricted, allows the IP address of Home Assistant.
 - **Diagnostics:** the integration entry and every device offer **Download
   diagnostics**. The server address, the token, host names, IP addresses and
-  machine IDs are removed from the file.
+  machine IDs are removed from the file. Host group names and PatchMon's
+  restart reason text stay in it.
 - **Debug logging:** enable it on the integration entry, or add
   `custom_components.patchmon_hass: debug` under `logger:` → `logs:` in
   `configuration.yaml`. The log then shows every request to PatchMon (path,
   HTTP status, duration), how many hosts were listed, which hosts had their
-  details read again and why (no details yet, reported again, older than six
+  details read again and why (no details yet, reported again, older than 6
   hours, refresh action), and which devices were added or removed. Host names
   appear in it. The integration's own messages never contain the server
   address or the token, but lines from Home Assistant itself show the entry
@@ -219,11 +230,6 @@ sequence:
 
 ## Known limitations
 
-- Read-only: no updates can be installed or approved from Home Assistant.
-- Values are only as fresh as the last agent report; `refresh` cannot change
-  that.
-- PatchMon has no version number for a whole host, so the update entity shows
-  labels instead of versions.
 - Only PatchMon 2.x is supported (tested with 2.1.8).
 - No push yet: changes arrive with the next poll.
 

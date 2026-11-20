@@ -1,7 +1,7 @@
 # Brand assets
 
-The mark: a house (Home Assistant) holding a "Pac" shape whose eye is cut
-out in the house colour, a nod to the PatchMon logo, in Home Assistant blue.
+The mark: a house (Home Assistant) holding a "Pac" shape with a dark eye, a nod
+to the PatchMon logo, in Home Assistant blue.
 It is an original drawing, not the PatchMon logo itself.
 
 | Light | Dark | |
@@ -10,7 +10,8 @@ It is an original drawing, not the PatchMon logo itself.
 | `logo.png` / `logo@2x.png` | `dark_logo.png` / `dark_logo@2x.png` | Wordmark ("patchmon-hass" + "Your servers' updates in Home Assistant") |
 
 Colours: house `#1B2B45` (dark variant `#33507A`, so it stays visible on dark
-backgrounds), Pac `#18BCF2`, eye `#1B2B45` (both variants).
+backgrounds), Pac `#18BCF2`, eye `#1B2B45` in both variants (in the dark variant
+darker than the house).
 
 Each PNG has a matching `*.svg` source. Home Assistant loads these directly
 from this folder (no `home-assistant/brands` PR needed) and picks the `dark_*`

@@ -85,12 +85,12 @@
       "init": {
         "title": "PatchMon-Optionen",
         "data": {
-          "scan_interval": "Abfrage-Intervall",
+          "scan_interval": "Abfrageintervall",
           "host_groups": "Hostgruppen",
           "area": "Bereich"
         },
         "data_description": {
-          "scan_interval": "Wie oft Home Assistant die Host-Liste aus PatchMon liest. Die Agenten melden dadurch nicht häufiger.",
+          "scan_interval": "Wie oft Home Assistant die Hostliste aus PatchMon liest. Die Agenten melden dadurch nicht häufiger.",
           "host_groups": "Nur Hosts aus diesen Gruppen einbeziehen. Leer lassen für alle Hosts.",
           "area": "Neue Hosts und der PatchMon-Server kommen beim Anlegen in diesen Bereich. Später von Hand verschobene Geräte bleiben, wo sie sind."
         },
@@ -310,7 +310,7 @@
     },
     "refresh": {
       "name": "Aktualisieren",
-      "description": "Liest die Host-Liste und die Host-Details jetzt aus PatchMon. Die Agenten werden nicht zum Melden aufgefordert: Werte ändern sich erst nach ihrer nächsten Meldung.",
+      "description": "Liest die Hostliste und die Hostdetails jetzt aus PatchMon. Die Agenten werden nicht zum Melden aufgefordert: Werte ändern sich erst nach ihrer nächsten Meldung.",
       "fields": {
         "device_id": {
           "name": "Geräte",
