@@ -7,7 +7,7 @@ It is an original drawing, not the PatchMon logo itself.
 | Light | Dark | |
 | --- | --- | --- |
 | `icon.png` (256) / `icon@2x.png` (512) | `dark_icon.png` / `dark_icon@2x.png` | Square app icon |
-| `logo.png` / `logo@2x.png` | `dark_logo.png` / `dark_logo@2x.png` | Wordmark ("patchmon-hass" + "Your servers' updates in Home Assistant") |
+| `logo.png` / `logo@2x.png` | `dark_logo.png` / `dark_logo@2x.png` | Wordmark ("patchmon-hass" + "Your homelab's updates in Home Assistant") |
 
 Colours: house `#1B2B45` (dark variant `#33507A`, so it stays visible on dark
 backgrounds), Pac `#18BCF2`, eye `#1B2B45` in both variants (in the dark variant
