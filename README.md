@@ -8,7 +8,7 @@
 # PatchMon for Home Assistant
 
 [![Release](https://img.shields.io/github/v/release/dabo53ck/patchmon-hass?label=release)](https://github.com/dabo53ck/patchmon-hass/releases)
-[![HACS](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
+[![HACS](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
 [![Validate](https://github.com/dabo53ck/patchmon-hass/actions/workflows/validate.yml/badge.svg)](https://github.com/dabo53ck/patchmon-hass/actions/workflows/validate.yml)
 [![Tests](https://github.com/dabo53ck/patchmon-hass/actions/workflows/tests.yml/badge.svg)](https://github.com/dabo53ck/patchmon-hass/actions/workflows/tests.yml)
 
@@ -52,12 +52,7 @@ Create a dedicated token for Home Assistant, so you can revoke it on its own:
 
 [![Open your Home Assistant instance and open this repository in HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=dabo53ck&repository=patchmon-hass&category=integration)
 
-Until the integration is in the HACS default store, add it as a custom
-repository:
-
-1. Click the button above, or in HACS open the three-dot menu →
-   **Custom repositories** and add `https://github.com/dabo53ck/patchmon-hass`
-   as type **Integration**.
+1. Click the button above, or search for **PatchMon** in HACS.
 2. Install **PatchMon**, then restart Home Assistant.
 
 ## Setup
