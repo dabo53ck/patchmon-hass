@@ -17,7 +17,11 @@ An unofficial, **read-only** Home Assistant integration for
 host PatchMon monitors (pending and security updates, required restarts,
 agent check-ins) in Home Assistant.
 
-This project is not affiliated with or endorsed by the PatchMon project.
+> [!NOTE]
+> **Not affiliated** with or endorsed by the PatchMon project.
+>
+> This integration was written with [Claude](https://claude.ai) (AI-assisted)
+> and is reviewed and tested by the maintainer on a live Home Assistant instance.
 
 ## Read-only by design
 
